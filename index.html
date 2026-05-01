@@ -182,20 +182,20 @@
             });
         }
 
-        function filterByCategory(tab, category) {
-            currentFilters[tab] = category;
-            const buttons = document.querySelectorAll(`#${tab}-quick-filters .cat-btn`);
-            buttons.forEach(btn => {
-                let btnText = btn.innerText;
-                if (tab === 'media') btnText = btnText.replace('書', '書籍');
-                if (tab === 'selflove') {
-                    if(btnText === '服飾') btnText = '服飾包包';
-                    if(btnText === '玩具') btnText = '玩具公仔';
-                }
-                btn.classList.toggle('active', btnText === category);
-            });
-            renderData(tab);
-        }
+      function filterByCategory(tab, category) {
+    currentFilters[tab] = category;
+    const buttons = document.querySelectorAll(`#${tab}-quick-filters .cat-btn`);
+    
+    buttons.forEach(btn => {
+        let btnText = btn.innerText;
+        // 修正：閱聽分頁的「書」對應資料庫中的「書籍」
+        if (tab === 'media' && btnText === '書') btnText = '書籍';
+        
+        // 狀態切換：按鈕文字若等於當前分類，則變色
+        btn.classList.toggle('active', btnText === category);
+    });
+    renderData(tab);
+}
 
         function showTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
