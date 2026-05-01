@@ -133,12 +133,34 @@
 
         <!-- 餘裕 -->
         <div id="finance" class="tab-content">
-            <section class="input-area">
-                <input type="text" id="bank-name" placeholder="銀行或帳戶名稱">
-                <input type="number" id="bank-amount" placeholder="目前金額">
-                <input type="date" id="bank-date">
-                <button class="add-btn" onclick="addData('finance')">紀錄留存</button>
+             <section class="input-area">
+                <select id="finance-type">
+                    <option value="中國信託">中國信託</option>
+                    <option value="永豐銀行">永豐銀行</option>
+                    <option value="台新銀行">新銀行</option>
+                    <option value="玉山銀行">玉山銀行</option>
+                    <option value="LINE BANK">LINE BANK</option>
+                    <option value="第一銀行">第一銀行</option>
+                    <option value="國泰世華">國泰世華</option>
+                    <option value="富邦銀行">富邦銀行</option>
+                    <option value="合作金庫">合作金庫</option>
+                </select>
+                <input type="text" id="finance-title" placeholder="標題名稱">
+                <input type="date" id="finance-date">
+                <button class="add-btn" onclick="addData('media')">記下一筆</button>
             </section>
+            <div class="category-quick-filter" id="finance-quick-filters">
+                <button class="cat-btn active" onclick="filterByCategory('finance', '全部')">全部</button>
+                <button class="cat-btn" onclick="filterByCategory('finance', '中國信託')">中國信託</button>
+                <button class="cat-btn" onclick="filterByCategory('finance', '永豐銀行')">永豐銀行</button>
+                <button class="cat-btn" onclick="filterByCategory('finance', '台新銀行')">台新銀行</button>
+                <button class="cat-btn" onclick="filterByCategory('finance', '玉山銀行')">玉山銀行</button>
+                <button class="cat-btn" onclick="filterByCategory('finance', 'LINE BANK')">LINE BANK</button>
+                <button class="cat-btn" onclick="filterByCategory('finance', '第一銀行')">第一銀行</button>
+                <button class="cat-btn" onclick="filterByCategory('finance', '國泰世華')">國泰世華</button>
+                <button class="cat-btn" onclick="filterByCategory('finance', '富邦銀行')">富邦銀行</button>
+                <button class="cat-btn" onclick="filterByCategory('finance', '合作金庫')">合作金庫</button>
+            </div>
             <div class="filter-area" id="filter-finance"></div>
             <div id="finance-list"></div>
         </div>
