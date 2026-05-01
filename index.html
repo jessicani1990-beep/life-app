@@ -139,18 +139,27 @@
             });
         }
 
-        function initFilters() {
-            tabs.forEach(tab => {
-                const area = document.getElementById(`filter-${tab}`);
-                const startYear = 2026;
-                let html = `<select id="f-${tab}-year" class="filter-select" onchange="renderData('${tab}')"><option value="">年份</option>`;
-                for (let i = startYear; i >= 2020; i--) html += `<option value="${i}">${i}年</option>`;
-                html += `</select><select id="f-${tab}-month" class="filter-select" onchange="renderData('${tab}')"><option value="">月份</option>`;
-                for (let i = 1; i <= 12; i++) html += `<option value="${i.toString().padStart(2, '0')}">${i}月</option>`;
-                html += `</select><input type="text" id="f-${tab}-search" class="filter-input" placeholder="關鍵字搜尋..." oninput="renderData('${tab}')">`;
-                area.innerHTML = html;
-            });
+       function initFilters() {
+    tabs.forEach(tab => {
+        const area = document.getElementById(`filter-${tab}`);
+        
+        // --- 修改處：改為自動獲取目前年份 ---
+        const currentYear = new Date().getFullYear(); 
+        const endYear = 2020; // 歷史資料最舊到哪一年
+        
+        let html = `<select id="f-${tab}-year" class="filter-select" onchange="renderData('${tab}')"><option value="">年份</option>`;
+        
+        // 從「今年」開始往後倒數到 2020 年
+        for (let i = currentYear; i >= endYear; i--) {
+            html += `<option value="${i}">${i}年</option>`;
         }
+        
+        html += `</select><select id="f-${tab}-month" class="filter-select" onchange="renderData('${tab}')"><option value="">月份</option>`;
+        for (let i = 1; i <= 12; i++) html += `<option value="${i.toString().padStart(2, '0')}">${i}月</option>`;
+        html += `</select><input type="text" id="f-${tab}-search" class="filter-input" placeholder="關鍵字搜尋..." oninput="renderData('${tab}')">`;
+        area.innerHTML = html;
+    });
+}
 
         function showTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
