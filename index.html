@@ -222,9 +222,9 @@
         }
 
         function addData(type) {
-            let data = JSON.parse(localStorage.getItem(type) || '[]');
-            let entry = { id: Date.now() };
-            const today = getTodayString();
+    let data = JSON.parse(localStorage.getItem(type) || '[]');
+    let entry = { id: Date.now() };
+    const today = getTodayString();
 
             if (type === 'media') {
                 entry.category = document.getElementById('media-type').value;
@@ -259,10 +259,12 @@
             }
 
             data.unshift(entry);
-            localStorage.setItem(type, JSON.stringify(data));
-            resetDates();
-            renderData(type);
-        }
+    localStorage.setItem(type, JSON.stringify(data));
+    resetDates();
+            initFilters(); 
+    
+    renderData(type);
+}
 
         function deleteData(type, id) {
             if(!confirm('確定要移除這項紀錄嗎？')) return;
