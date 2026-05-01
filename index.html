@@ -167,21 +167,37 @@
             });
         }
 
-        function initFilters() {
-            tabs.forEach(tab => {
-                const area = document.getElementById(`filter-${tab}`);
-                const currentYear = new Date().getFullYear();
-                const startYear = 2026 > currentYear ? 2026 : currentYear;
-                
-                let html = `<select id="f-${tab}-year" class="filter-select" onchange="renderData('${tab}')"><option value="">年份</option>`;
-                for (let i = startYear; i >= 2020; i--) html += `<option value="${i}">${i}年</option>`;
-                html += `</select><select id="f-${tab}-month" class="filter-select" onchange="renderData('${tab}')"><option value="">月份</option>`;
-                for (let i = 1; i <= 12; i++) html += `<option value="${i.toString().padStart(2, '0')}">${i}月</option>`;
-                html += `</select><input type="text" id="f-${tab}-search" class="filter-input" placeholder="關鍵字搜尋..." oninput="renderData('${tab}')">`;
-                area.innerHTML = html;
-            });
-        }
+       function initFilters() {
+    tabs.forEach(tab => {
+        const area = document.getElementById(`filter-${tab}`);
+        const data = JSON.parse(localStorage.getItem(tab) || '[]');
+        
+        // 1. 取得系統今年年份
+        const sysYear = new Date().getFullYear();
+        
+        // 2. 取得資料庫中出現過的最大年份 (例如您輸入了 2027)
+        let maxDataYear = sysYear;
+        data.forEach(item => {
+            const itemDate = (tab === 'selflove') ? item.buyDate : item.date;
+            if (itemDate) {
+                const y = parseInt(itemDate.split('-')[0]);
+                if (y > maxDataYear) maxDataYear = y;
+            }
+        });
 
+        let html = `<select id="f-${tab}-year" class="filter-select" onchange="renderData('${tab}')"><option value="">年份</option>`;
+        
+        // 從「資料或系統的最大年份」倒數到 2020
+        for (let i = maxDataYear; i >= 2020; i--) {
+            html += `<option value="${i}">${i}年</option>`;
+        }
+        
+        html += `</select><select id="f-${tab}-month" class="filter-select" onchange="renderData('${tab}')"><option value="">月份</option>`;
+        for (let i = 1; i <= 12; i++) html += `<option value="${i.toString().padStart(2, '0')}">${i}月</option>`;
+        html += `</select><input type="text" id="f-${tab}-search" class="filter-input" placeholder="關鍵字搜尋..." oninput="renderData('${tab}')">`;
+        area.innerHTML = html;
+    });
+}
       function filterByCategory(tab, category) {
     currentFilters[tab] = category;
     const buttons = document.querySelectorAll(`#${tab}-quick-filters .cat-btn`);
