@@ -31,6 +31,11 @@
 
         section.input-area { background: var(--card-bg); padding: 20px; border-radius: 2px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); margin-bottom: 20px; border: 1px solid var(--border-color); }
         .filter-area { margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color); }
+        
+        .category-quick-filter { display: flex; gap: 5px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; -webkit-overflow-scrolling: touch; }
+        .category-quick-filter::-webkit-scrollbar { display: none; }
+        .cat-btn { font-size: 0.75rem; padding: 4px 12px; border: 1px solid var(--border-color); border-radius: 20px; background: white; color: var(--text-secondary); cursor: pointer; white-space: nowrap; transition: 0.2s; }
+        .cat-btn.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
 
         .tab-content { display: none; animation: fadeIn 0.4s; }
         .tab-content.active { display: block; }
@@ -48,7 +53,6 @@
         .item-info h4 { margin: 0; font-size: 1rem; font-weight: 400; }
         .item-info p { margin: 0; font-size: 0.8rem; color: var(--text-secondary); white-space: pre-wrap; }
         .tag { font-size: 0.7rem; padding: 2px 6px; border: 1px solid var(--border-color); border-radius: 10px; margin-right: 5px; color: var(--accent-color); }
-        .status-msg { font-size: 0.75rem; font-weight: bold; margin-left: 5px; }
         .delete-link { font-size: 0.8rem; color: #d1d1d1; cursor: pointer; padding: 5px; }
 
         .empty-state { text-align: center; color: var(--text-secondary); margin-top: 30px; font-size: 0.85rem; }
@@ -69,6 +73,7 @@
             <button onclick="showTab('notes')" id="btn-notes">隨手記記</button>
         </nav>
 
+        <!-- 閱聽 -->
         <div id="media" class="tab-content active">
             <section class="input-area">
                 <select id="media-type">
@@ -82,21 +87,48 @@
                 <input type="date" id="media-date">
                 <button class="add-btn" onclick="addData('media')">記下一筆</button>
             </section>
+            <div class="category-quick-filter" id="media-quick-filters">
+                <button class="cat-btn active" onclick="filterByCategory('media', '全部')">全部</button>
+                <button class="cat-btn" onclick="filterByCategory('media', '書籍')">書</button>
+                <button class="cat-btn" onclick="filterByCategory('media', '影集')">影集</button>
+                <button class="cat-btn" onclick="filterByCategory('media', '電影')">電影</button>
+                <button class="cat-btn" onclick="filterByCategory('media', '展覽')">展覽</button>
+                <button class="cat-btn" onclick="filterByCategory('media', '遊戲')">遊戲</button>
+            </div>
             <div class="filter-area" id="filter-media"></div>
             <div id="media-list"></div>
         </div>
 
+        <!-- 對自己好 -->
         <div id="selflove" class="tab-content">
             <section class="input-area">
+                <select id="selflove-type">
+                    <option value="化妝品">化妝品</option>
+                    <option value="保養品">保養品</option>
+                    <option value="吃">吃</option>
+                    <option value="服飾包包">服飾包包</option>
+                    <option value="玩具公仔">玩具公仔</option>
+                    <option value="其他">其他</option>
+                </select>
                 <input type="text" id="selflove-name" placeholder="產品或犒賞名稱">
+                <input type="number" id="selflove-price" placeholder="金額">
                 <input type="date" id="selflove-buy-date" title="購入日期">
-                <input type="date" id="selflove-expiry-date" title="效期截止">
+                <input type="date" id="selflove-expiry-date" title="效期截止 (可不填)">
                 <button class="add-btn" onclick="addData('selflove')">留存美好</button>
             </section>
+            <div class="category-quick-filter" id="selflove-quick-filters">
+                <button class="cat-btn active" onclick="filterByCategory('selflove', '全部')">全部</button>
+                <button class="cat-btn" onclick="filterByCategory('selflove', '化妝品')">化妝品</button>
+                <button class="cat-btn" onclick="filterByCategory('selflove', '保養品')">保養品</button>
+                <button class="cat-btn" onclick="filterByCategory('selflove', '吃')">吃</button>
+                <button class="cat-btn" onclick="filterByCategory('selflove', '服飾包包')">服飾</button>
+                <button class="cat-btn" onclick="filterByCategory('selflove', '玩具公仔')">玩具</button>
+            </div>
             <div class="filter-area" id="filter-selflove"></div>
             <div id="selflove-list"></div>
         </div>
 
+        <!-- 餘裕 -->
         <div id="finance" class="tab-content">
             <section class="input-area">
                 <input type="text" id="bank-name" placeholder="銀行或帳戶名稱">
@@ -108,6 +140,7 @@
             <div id="finance-list"></div>
         </div>
 
+        <!-- 隨手記記 -->
         <div id="notes" class="tab-content">
             <section class="input-area">
                 <input type="text" id="note-title" placeholder="記點什麼標題...">
@@ -122,44 +155,46 @@
 
     <script>
         const tabs = ['media', 'selflove', 'finance', 'notes'];
+        let currentFilters = { media: '全部', selflove: '全部' };
         
-        // 獲取今天日期的字串 (YYYY-MM-DD)
-        function getTodayString() {
-            return new Date().toISOString().split('T')[0];
-        }
+        function getTodayString() { return new Date().toISOString().split('T')[0]; }
 
-        // 重設所有日期欄位為今天
         function resetDates() {
             const today = getTodayString();
             document.querySelectorAll('input[type="date"]').forEach(el => {
-                // 如果是效期截止，可以選擇不預填，或同樣預填今天
-                if (el.id !== 'selflove-expiry-date') {
-                    el.value = today;
-                }
+                if (el.id !== 'selflove-expiry-date') el.value = today;
             });
         }
 
-       function initFilters() {
-    tabs.forEach(tab => {
-        const area = document.getElementById(`filter-${tab}`);
-        
-        // --- 修改處：改為自動獲取目前年份 ---
-        const currentYear = new Date().getFullYear(); 
-        const endYear = 2020; // 歷史資料最舊到哪一年
-        
-        let html = `<select id="f-${tab}-year" class="filter-select" onchange="renderData('${tab}')"><option value="">年份</option>`;
-        
-        // 從「今年」開始往後倒數到 2020 年
-        for (let i = currentYear; i >= endYear; i--) {
-            html += `<option value="${i}">${i}年</option>`;
+        function initFilters() {
+            tabs.forEach(tab => {
+                const area = document.getElementById(`filter-${tab}`);
+                const currentYear = new Date().getFullYear();
+                const startYear = 2026 > currentYear ? 2026 : currentYear;
+                
+                let html = `<select id="f-${tab}-year" class="filter-select" onchange="renderData('${tab}')"><option value="">年份</option>`;
+                for (let i = startYear; i >= 2020; i--) html += `<option value="${i}">${i}年</option>`;
+                html += `</select><select id="f-${tab}-month" class="filter-select" onchange="renderData('${tab}')"><option value="">月份</option>`;
+                for (let i = 1; i <= 12; i++) html += `<option value="${i.toString().padStart(2, '0')}">${i}月</option>`;
+                html += `</select><input type="text" id="f-${tab}-search" class="filter-input" placeholder="關鍵字搜尋..." oninput="renderData('${tab}')">`;
+                area.innerHTML = html;
+            });
         }
-        
-        html += `</select><select id="f-${tab}-month" class="filter-select" onchange="renderData('${tab}')"><option value="">月份</option>`;
-        for (let i = 1; i <= 12; i++) html += `<option value="${i.toString().padStart(2, '0')}">${i}月</option>`;
-        html += `</select><input type="text" id="f-${tab}-search" class="filter-input" placeholder="關鍵字搜尋..." oninput="renderData('${tab}')">`;
-        area.innerHTML = html;
-    });
-}
+
+        function filterByCategory(tab, category) {
+            currentFilters[tab] = category;
+            const buttons = document.querySelectorAll(`#${tab}-quick-filters .cat-btn`);
+            buttons.forEach(btn => {
+                let btnText = btn.innerText;
+                if (tab === 'media') btnText = btnText.replace('書', '書籍');
+                if (tab === 'selflove') {
+                    if(btnText === '服飾') btnText = '服飾包包';
+                    if(btnText === '玩具') btnText = '玩具公仔';
+                }
+                btn.classList.toggle('active', btnText === category);
+            });
+            renderData(tab);
+        }
 
         function showTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -181,11 +216,14 @@
                 if(!entry.title) return;
                 document.getElementById('media-title').value = '';
             } else if (type === 'selflove') {
+                entry.category = document.getElementById('selflove-type').value;
                 entry.name = document.getElementById('selflove-name').value;
+                entry.price = document.getElementById('selflove-price').value;
                 entry.buyDate = document.getElementById('selflove-buy-date').value || today;
                 entry.expiryDate = document.getElementById('selflove-expiry-date').value;
                 if(!entry.name) return;
                 document.getElementById('selflove-name').value = '';
+                document.getElementById('selflove-price').value = '';
                 document.getElementById('selflove-expiry-date').value = '';
             } else if (type === 'finance') {
                 entry.bank = document.getElementById('bank-name').value;
@@ -205,7 +243,7 @@
 
             data.unshift(entry);
             localStorage.setItem(type, JSON.stringify(data));
-            resetDates(); // 新增完後重新把日期設回今天
+            resetDates();
             renderData(type);
         }
 
@@ -228,14 +266,19 @@
                 const matchYear = fYear ? dateKey.startsWith(fYear) : true;
                 const matchMonth = fMonth ? dateKey.split('-')[1] === fMonth : true;
                 
+                let matchCategory = true;
+                if ((type === 'media' || type === 'selflove') && currentFilters[type] !== '全部') {
+                    matchCategory = (i.category === currentFilters[type]);
+                }
+                
                 let nameKey = "";
                 if(type === 'media') nameKey = (i.title + i.category);
-                else if(type === 'selflove') nameKey = i.name;
+                else if(type === 'selflove') nameKey = (i.name + i.category);
                 else if(type === 'finance') nameKey = i.bank;
                 else if(type === 'notes') nameKey = (i.title + i.content);
                 
                 const matchSearch = fSearch ? nameKey.toLowerCase().includes(fSearch) : true;
-                return matchYear && matchMonth && matchSearch;
+                return matchYear && matchMonth && matchSearch && matchCategory;
             });
 
             if (data.length === 0) {
@@ -257,22 +300,20 @@
                         if (diffDays < 0) status = '<span class="status-msg" style="color:var(--alert-red)">已過期</span>';
                         else if (diffDays <= 30) status = '<span class="status-msg" style="color:var(--warn-yellow)">即將到期</span>';
                     }
-                    html += `<h4>${i.name}${status}</h4><p>購入：${i.buyDate} / 效期：${i.expiryDate || '無效期'}</p>`;
+                    html += `<h4><span class="tag">${i.category}</span>${i.name}${status}</h4>`;
+                    html += `<p>金額：$${Number(i.price || 0).toLocaleString()} / 購入：${i.buyDate}</p>`;
+                    if(i.expiryDate) html += `<p style="font-size:0.75rem; color:var(--text-secondary)">效期：${i.expiryDate}</p>`;
                 } else if (type === 'finance') {
                     html += `<h4>${i.bank}</h4><p>$${Number(i.amount).toLocaleString()} — ${i.date}</p>`;
                 } else if (type === 'notes') {
-                    html += `<h4>${i.title || '無標題'}</h4><p>${i.content}</p><p style="font-size:0.7rem; margin-top:5px; color:var(--text-secondary)">${i.date}</p>`;
+                    html += `<h4>${i.title || '無標題'}</h4><p>${i.content}</p><p style="font-size:0.7rem; color:var(--text-secondary)">${i.date}</p>`;
                 }
                 html += `</div><span class="delete-link" onclick="deleteData('${type}', ${i.id})">移除</span></div>`;
             });
             container.innerHTML = html;
         }
 
-        window.onload = () => { 
-            resetDates();
-            initFilters(); 
-            renderData('media'); 
-        };
+        window.onload = () => { resetDates(); initFilters(); renderData('media'); };
     </script>
 </body>
 </html>
