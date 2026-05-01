@@ -33,13 +33,12 @@
         .filter-area { margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color); }
         
         .category-quick-filter { 
-    display: flex; 
-    flex-wrap: wrap; /* 關鍵：允許折行 */
-    gap: 10px 8px;   /* 上下間距 10px，左右間距 8px */
-    margin-bottom: 15px; 
-    padding-bottom: 5px; 
-    /* 移除橫向滾動相關設定 */
-}
+            display: flex; 
+            flex-wrap: wrap;
+            gap: 10px 8px;
+            margin-bottom: 15px; 
+            padding-bottom: 5px; 
+        }
         .category-quick-filter::-webkit-scrollbar { display: none; }
         .cat-btn { font-size: 0.75rem; padding: 4px 12px; border: 1px solid var(--border-color); border-radius: 20px; background: white; color: var(--text-secondary); cursor: pointer; white-space: nowrap; transition: 0.2s; }
         .cat-btn.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
@@ -63,6 +62,124 @@
         .delete-link { font-size: 0.8rem; color: #d1d1d1; cursor: pointer; padding: 5px; }
 
         .empty-state { text-align: center; color: var(--text-secondary); margin-top: 30px; font-size: 0.85rem; }
+
+        .date-field { margin-bottom: 10px; }
+        .date-label { display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 2px; letter-spacing: 0.5px; }
+        .date-field input { margin-bottom: 0; }
+
+        /* ── 備份分頁專用樣式 ── */
+        .backup-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 2px;
+            padding: 24px 20px;
+            margin-bottom: 16px;
+        }
+        .backup-section h3 {
+            margin: 0 0 6px 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--text-primary);
+        }
+        .backup-section p {
+            margin: 0 0 16px 0;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+        .backup-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            border-radius: 2px;
+            transition: 0.2s;
+            box-sizing: border-box;
+        }
+        .backup-btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+        }
+        .backup-btn-primary:active { opacity: 0.8; }
+        .backup-btn-outline {
+            background: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+        }
+        .backup-btn-outline:active { background: #f0f0ec; }
+        .backup-btn-danger {
+            background: transparent;
+            color: var(--alert-red);
+            border: 1px solid var(--alert-red);
+            margin-top: 8px;
+        }
+        .backup-btn-danger:active { background: #fdf0f0; }
+
+        /* 隱藏的 file input */
+        #restore-file-input { display: none; }
+
+        /* 拖曳上傳區 */
+        .drop-zone {
+            border: 1.5px dashed var(--border-color);
+            border-radius: 2px;
+            padding: 28px 16px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 12px;
+        }
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: var(--accent-color);
+            background: #f4f3ee;
+            color: var(--accent-color);
+        }
+        .drop-zone .drop-icon { font-size: 1.8rem; display: block; margin-bottom: 8px; }
+
+        /* Toast 提示 */
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #434343;
+            color: white;
+            padding: 10px 22px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 9999;
+            white-space: nowrap;
+        }
+        #toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* 備份統計 */
+        .backup-stats {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .stat-chip {
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            color: var(--text-secondary);
+            background: white;
+        }
+        .stat-chip span { color: var(--accent-color); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -91,17 +208,15 @@
                     <option value="展覽">展覽</option>
                     <option value="遊戲">遊戲</option>
                 </select>
-               <!-- 閱聽分頁的 input-area -->
-<input type="text" id="media-title" placeholder="標題名稱">
-<!-- 增加以下評分選單 -->
-<select id="media-rating">
-    <option value="5">♥♥♥♥♥ </option>
-    <option value="4">♥♥♥♥ </option>
-    <option value="3">♥♥♥ </option>
-    <option value="2">♥♥ </option>
-    <option value="1">♥ </option>
-</select>
-<input type="date" id="media-date">
+                <input type="text" id="media-title" placeholder="標題名稱">
+                <select id="media-rating">
+                    <option value="5">♥♥♥♥♥ </option>
+                    <option value="4">♥♥♥♥ </option>
+                    <option value="3">♥♥♥ </option>
+                    <option value="2">♥♥ </option>
+                    <option value="1">♥ </option>
+                </select>
+                <input type="date" id="media-date">
                 <button class="add-btn" onclick="addData('media')">記下一筆</button>
             </section>
             <div class="category-quick-filter" id="media-quick-filters">
@@ -130,20 +245,26 @@
                 </select>
                 <input type="text" id="selflove-name" placeholder="產品或犒賞名稱">
                 <input type="number" id="selflove-price" placeholder="金額">
-                <input type="date" id="selflove-buy-date" title="購入日期">
-                <input type="date" id="selflove-expiry-date" title="效期截止 (可不填)">
+                <div class="date-field">
+                    <label class="date-label">購買日期</label>
+                    <input type="date" id="selflove-buy-date">
+                </div>
+                <div class="date-field">
+                    <label class="date-label">到期日期 <span style="color:var(--text-secondary);font-size:0.75rem;">（非必填）</span></label>
+                    <input type="date" id="selflove-expiry-date">
+                </div>
                 <button class="add-btn" onclick="addData('selflove')">留存美好</button>
             </section>
             <div class="category-quick-filter" id="selflove-quick-filters">
-    <button class="cat-btn active" onclick="filterByCategory('selflove', '全部')">全部</button>
-    <button class="cat-btn" onclick="filterByCategory('selflove', '化妝品')">化妝品</button>
-    <button class="cat-btn" onclick="filterByCategory('selflove', '保養品')">保養品</button>
-    <button class="cat-btn" onclick="filterByCategory('selflove', '吃')">吃</button>
-    <button class="cat-btn" onclick="filterByCategory('selflove', '服飾包包')">服飾包包</button>
-    <button class="cat-btn" onclick="filterByCategory('selflove', '玩具公仔')">玩具公仔</button>
-    <button class="cat-btn" onclick="filterByCategory('selflove', '旅行')">旅行</button>            
-    <button class="cat-btn" onclick="filterByCategory('selflove', '其他')">其他</button>
-</div>
+                <button class="cat-btn active" onclick="filterByCategory('selflove', '全部')">全部</button>
+                <button class="cat-btn" onclick="filterByCategory('selflove', '化妝品')">化妝品</button>
+                <button class="cat-btn" onclick="filterByCategory('selflove', '保養品')">保養品</button>
+                <button class="cat-btn" onclick="filterByCategory('selflove', '吃')">吃</button>
+                <button class="cat-btn" onclick="filterByCategory('selflove', '服飾包包')">服飾包包</button>
+                <button class="cat-btn" onclick="filterByCategory('selflove', '玩具公仔')">玩具公仔</button>
+                <button class="cat-btn" onclick="filterByCategory('selflove', '旅行')">旅行</button>            
+                <button class="cat-btn" onclick="filterByCategory('selflove', '其他')">其他</button>
+            </div>
             <div class="filter-area" id="filter-selflove"></div>
             <div id="selflove-list"></div>
         </div>
@@ -154,7 +275,7 @@
                 <select id="finance-type">
                     <option value="中國信託">中國信託</option>
                     <option value="永豐銀行">永豐銀行</option>
-                    <option value="台新銀行">新銀行</option>
+                    <option value="台新銀行">台新銀行</option>
                     <option value="玉山銀行">玉山銀行</option>
                     <option value="LINE BANK">LINE BANK</option>
                     <option value="第一銀行">第一銀行</option>
@@ -164,7 +285,7 @@
                 </select>
                 <input type="text" id="finance-title" placeholder="結餘">
                 <input type="date" id="finance-date">
-                <button class="add-btn" onclick="addData('media')">記下一筆</button>
+                <button class="add-btn" onclick="addData('finance')">記下一筆</button>
             </section>
             <div class="category-quick-filter" id="finance-quick-filters">
                 <button class="cat-btn active" onclick="filterByCategory('finance', '全部')">全部</button>
@@ -193,13 +314,65 @@
             <div class="filter-area" id="filter-notes"></div>
             <div id="notes-list"></div>
         </div>
+
+        <!-- 備份 -->
+        <div id="settings" class="tab-content">
+
+            <!-- 目前資料統計 -->
+            <div class="backup-section">
+                <h3>目前資料</h3>
+                <p>存放在這台裝置的碎片數量。</p>
+                <div class="backup-stats" id="backup-stats"></div>
+            </div>
+
+            <!-- 下載備份 -->
+            <div class="backup-section">
+                <h3>下載備份</h3>
+                <p>將所有紀錄匯出成 JSON 檔案，可保存至相簿、雲端硬碟或任何你信任的地方。</p>
+                <button class="backup-btn backup-btn-primary" onclick="downloadBackup()">下載備份檔案</button>
+            </div>
+
+            <!-- 還原備份 -->
+            <div class="backup-section">
+                <h3>還原備份</h3>
+                <p>上傳先前下載的備份 JSON 檔案。<br>
+                   ⚠️ 請注意：<b>合併模式</b>會保留現有資料並加入備份中的新資料；<b>覆蓋模式</b>會清除現有資料並完全以備份取代。</p>
+
+                <input type="file" id="restore-file-input" accept=".json" onchange="handleRestoreFile(event)">
+
+                <div class="drop-zone" id="drop-zone"
+                     onclick="document.getElementById('restore-file-input').click()"
+                     ondragover="handleDragOver(event)"
+                     ondragleave="handleDragLeave(event)"
+                     ondrop="handleDrop(event)">
+                    <span class="drop-icon">📂</span>
+                    點此選取 JSON 備份檔，或將檔案拖曳到這裡
+                </div>
+
+                <button class="backup-btn backup-btn-outline" onclick="triggerRestore('merge')">合併還原（保留現有資料）</button>
+                <button class="backup-btn backup-btn-danger" onclick="triggerRestore('overwrite')">覆蓋還原（取代現有資料）</button>
+            </div>
+
+        </div>
     </div>
+
+    <!-- Toast -->
+    <div id="toast"></div>
 
     <script>
         const tabs = ['media', 'selflove', 'finance', 'notes'];
         let currentFilters = { media: '全部', selflove: '全部' };
-        
+        let pendingRestoreData = null;   // 已讀取但尚未確認的備份
+        let pendingRestoreMode = null;
+
         function getTodayString() { return new Date().toISOString().split('T')[0]; }
+
+        function showToast(msg, duration = 2500) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), duration);
+        }
 
         function resetDates() {
             const today = getTodayString();
@@ -208,70 +381,65 @@
             });
         }
 
-       function initFilters() {
-    tabs.forEach(tab => {
-        const area = document.getElementById(`filter-${tab}`);
-        const data = JSON.parse(localStorage.getItem(tab) || '[]');
-        
-        // 1. 取得系統今年年份
-        const sysYear = new Date().getFullYear();
-        
-        // 2. 取得資料庫中出現過的最大年份 (例如您輸入了 2027)
-        let maxDataYear = sysYear;
-        data.forEach(item => {
-            const itemDate = (tab === 'selflove') ? item.buyDate : item.date;
-            if (itemDate) {
-                const y = parseInt(itemDate.split('-')[0]);
-                if (y > maxDataYear) maxDataYear = y;
-            }
-        });
+        function initFilters() {
+            tabs.forEach(tab => {
+                const area = document.getElementById(`filter-${tab}`);
+                const data = JSON.parse(localStorage.getItem(tab) || '[]');
+                const sysYear = new Date().getFullYear();
+                let maxDataYear = sysYear;
+                data.forEach(item => {
+                    const itemDate = (tab === 'selflove') ? item.buyDate : item.date;
+                    if (itemDate) {
+                        const y = parseInt(itemDate.split('-')[0]);
+                        if (y > maxDataYear) maxDataYear = y;
+                    }
+                });
 
-        let html = `<select id="f-${tab}-year" class="filter-select" onchange="renderData('${tab}')"><option value="">年份</option>`;
-        
-        // 從「資料或系統的最大年份」倒數到 2020
-        for (let i = maxDataYear; i >= 2020; i--) {
-            html += `<option value="${i}">${i}年</option>`;
+                let html = `<select id="f-${tab}-year" class="filter-select" onchange="renderData('${tab}')"><option value="">年份</option>`;
+                for (let i = maxDataYear; i >= 2020; i--) {
+                    html += `<option value="${i}">${i}年</option>`;
+                }
+                html += `</select><select id="f-${tab}-month" class="filter-select" onchange="renderData('${tab}')"><option value="">月份</option>`;
+                for (let i = 1; i <= 12; i++) html += `<option value="${i.toString().padStart(2, '0')}">${i}月</option>`;
+                html += `</select><input type="text" id="f-${tab}-search" class="filter-input" placeholder="關鍵字搜尋..." oninput="renderData('${tab}')">`;
+                area.innerHTML = html;
+            });
         }
-        
-        html += `</select><select id="f-${tab}-month" class="filter-select" onchange="renderData('${tab}')"><option value="">月份</option>`;
-        for (let i = 1; i <= 12; i++) html += `<option value="${i.toString().padStart(2, '0')}">${i}月</option>`;
-        html += `</select><input type="text" id="f-${tab}-search" class="filter-input" placeholder="關鍵字搜尋..." oninput="renderData('${tab}')">`;
-        area.innerHTML = html;
-    });
-}
-      function filterByCategory(tab, category) {
-    currentFilters[tab] = category;
-    const buttons = document.querySelectorAll(`#${tab}-quick-filters .cat-btn`);
-    
-    buttons.forEach(btn => {
-        let btnText = btn.innerText;
-        // 修正：閱聽分頁的「書」對應資料庫中的「書籍」
-        if (tab === 'media' && btnText === '書') btnText = '書籍';
-        
-        // 狀態切換：按鈕文字若等於當前分類，則變色
-        btn.classList.toggle('active', btnText === category);
-    });
-    renderData(tab);
-}
+
+        function filterByCategory(tab, category) {
+            currentFilters[tab] = category;
+            const buttons = document.querySelectorAll(`#${tab}-quick-filters .cat-btn`);
+            buttons.forEach(btn => {
+                let btnText = btn.innerText;
+                if (tab === 'media' && btnText === '書') btnText = '書籍';
+                btn.classList.toggle('active', btnText === category);
+            });
+            renderData(tab);
+        }
 
         function showTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             document.getElementById('btn-' + tabId).classList.add('active');
-            renderData(tabId);
+            if (tabId === 'settings') {
+                renderBackupStats();
+            } else {
+                renderData(tabId);
+            }
         }
 
         function addData(type) {
-    let data = JSON.parse(localStorage.getItem(type) || '[]');
-    let entry = { id: Date.now() };
-    const today = getTodayString();
+            let data = JSON.parse(localStorage.getItem(type) || '[]');
+            let entry = { id: Date.now() };
+            const today = getTodayString();
 
             if (type === 'media') {
                 entry.category = document.getElementById('media-type').value;
                 entry.title = document.getElementById('media-title').value;
+                entry.rating = document.getElementById('media-rating').value;
                 entry.date = document.getElementById('media-date').value || today;
-                if(!entry.title) return;
+                if (!entry.title) return;
                 document.getElementById('media-title').value = '';
             } else if (type === 'selflove') {
                 entry.category = document.getElementById('selflove-type').value;
@@ -279,36 +447,34 @@
                 entry.price = document.getElementById('selflove-price').value;
                 entry.buyDate = document.getElementById('selflove-buy-date').value || today;
                 entry.expiryDate = document.getElementById('selflove-expiry-date').value;
-                if(!entry.name) return;
+                if (!entry.name) return;
                 document.getElementById('selflove-name').value = '';
                 document.getElementById('selflove-price').value = '';
                 document.getElementById('selflove-expiry-date').value = '';
             } else if (type === 'finance') {
-                entry.bank = document.getElementById('bank-name').value;
-                entry.amount = document.getElementById('bank-amount').value;
-                entry.date = document.getElementById('bank-date').value || today;
-                if(!entry.bank) return;
-                document.getElementById('bank-name').value = '';
-                document.getElementById('bank-amount').value = '';
+                entry.category = document.getElementById('finance-type').value;
+                entry.title = document.getElementById('finance-title').value;
+                entry.date = document.getElementById('finance-date').value || today;
+                if (!entry.title) return;
+                document.getElementById('finance-title').value = '';
             } else if (type === 'notes') {
                 entry.title = document.getElementById('note-title').value;
                 entry.content = document.getElementById('note-content').value;
                 entry.date = document.getElementById('note-date').value || today;
-                if(!entry.title && !entry.content) return;
+                if (!entry.title && !entry.content) return;
                 document.getElementById('note-title').value = '';
                 document.getElementById('note-content').value = '';
             }
 
             data.unshift(entry);
-    localStorage.setItem(type, JSON.stringify(data));
-    resetDates();
-            initFilters(); 
-    
-    renderData(type);
-}
+            localStorage.setItem(type, JSON.stringify(data));
+            resetDates();
+            initFilters();
+            renderData(type);
+        }
 
         function deleteData(type, id) {
-            if(!confirm('確定要移除這項紀錄嗎？')) return;
+            if (!confirm('確定要移除這項紀錄嗎？')) return;
             let data = JSON.parse(localStorage.getItem(type)).filter(item => item.id !== id);
             localStorage.setItem(type, JSON.stringify(data));
             renderData(type);
@@ -323,20 +489,20 @@
 
             data = data.filter(i => {
                 const dateKey = (type === 'selflove') ? i.buyDate : i.date;
-                const matchYear = fYear ? dateKey.startsWith(fYear) : true;
-                const matchMonth = fMonth ? dateKey.split('-')[1] === fMonth : true;
-                
+                const matchYear = fYear ? (dateKey || '').startsWith(fYear) : true;
+                const matchMonth = fMonth ? (dateKey || '').split('-')[1] === fMonth : true;
+
                 let matchCategory = true;
                 if ((type === 'media' || type === 'selflove') && currentFilters[type] !== '全部') {
                     matchCategory = (i.category === currentFilters[type]);
                 }
-                
+
                 let nameKey = "";
-                if(type === 'media') nameKey = (i.title + i.category);
-                else if(type === 'selflove') nameKey = (i.name + i.category);
-                else if(type === 'finance') nameKey = i.bank;
-                else if(type === 'notes') nameKey = (i.title + i.content);
-                
+                if (type === 'media') nameKey = (i.title + i.category);
+                else if (type === 'selflove') nameKey = (i.name + i.category);
+                else if (type === 'finance') nameKey = (i.category || '') + (i.title || '');
+                else if (type === 'notes') nameKey = (i.title + i.content);
+
                 const matchSearch = fSearch ? nameKey.toLowerCase().includes(fSearch) : true;
                 return matchYear && matchMonth && matchSearch && matchCategory;
             });
@@ -362,15 +528,143 @@
                     }
                     html += `<h4><span class="tag">${i.category}</span>${i.name}${status}</h4>`;
                     html += `<p>金額：$${Number(i.price || 0).toLocaleString()} / 購入：${i.buyDate}</p>`;
-                    if(i.expiryDate) html += `<p style="font-size:0.75rem; color:var(--text-secondary)">效期：${i.expiryDate}</p>`;
+                    if (i.expiryDate) html += `<p style="font-size:0.75rem; color:var(--text-secondary)">效期：${i.expiryDate}</p>`;
                 } else if (type === 'finance') {
-                    html += `<h4>${i.bank}</h4><p>$${Number(i.amount).toLocaleString()} — ${i.date}</p>`;
+                    html += `<h4><span class="tag">${i.category || ''}</span>${i.title || ''}</h4><p>${i.date}</p>`;
                 } else if (type === 'notes') {
                     html += `<h4>${i.title || '無標題'}</h4><p>${i.content}</p><p style="font-size:0.7rem; color:var(--text-secondary)">${i.date}</p>`;
                 }
                 html += `</div><span class="delete-link" onclick="deleteData('${type}', ${i.id})">移除</span></div>`;
             });
             container.innerHTML = html;
+        }
+
+        /* ══════════════════════════════════
+           備份功能
+        ══════════════════════════════════ */
+
+        function renderBackupStats() {
+            const labels = { media: '閱聽', selflove: '對自己好', finance: '餘裕', notes: '隨手記記' };
+            const container = document.getElementById('backup-stats');
+            let html = '';
+            tabs.forEach(t => {
+                const count = JSON.parse(localStorage.getItem(t) || '[]').length;
+                html += `<div class="stat-chip">${labels[t]} <span>${count}</span> 筆</div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function downloadBackup() {
+            const backup = {
+                exportedAt: new Date().toISOString(),
+                version: 1,
+                data: {}
+            };
+            tabs.forEach(t => {
+                backup.data[t] = JSON.parse(localStorage.getItem(t) || '[]');
+            });
+
+            const json = JSON.stringify(backup, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const dateStr = new Date().toISOString().split('T')[0];
+            a.href = url;
+            a.download = `life-fragments-backup-${dateStr}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('✓ 備份檔案已下載');
+        }
+
+        // 讀取檔案並暫存
+        function readBackupFile(file) {
+            return new Promise((resolve, reject) => {
+                if (!file || !file.name.endsWith('.json')) {
+                    reject('請選擇 .json 備份檔案');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = e => {
+                    try {
+                        const parsed = JSON.parse(e.target.result);
+                        if (!parsed.data) throw new Error('格式不符');
+                        resolve(parsed);
+                    } catch {
+                        reject('檔案格式不正確，請確認是否為生活碎片備份檔。');
+                    }
+                };
+                reader.onerror = () => reject('讀取檔案失敗');
+                reader.readAsText(file);
+            });
+        }
+
+        async function handleRestoreFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            try {
+                pendingRestoreData = await readBackupFile(file);
+                showToast(`✓ 已讀取備份（${new Date(pendingRestoreData.exportedAt).toLocaleDateString('zh-TW')}），請點選還原方式`);
+            } catch (err) {
+                showToast('⚠ ' + err, 3500);
+                pendingRestoreData = null;
+            }
+            // 清空 input 以便下次重選
+            event.target.value = '';
+        }
+
+        function triggerRestore(mode) {
+            if (!pendingRestoreData) {
+                showToast('請先選取備份 JSON 檔案', 2500);
+                document.getElementById('restore-file-input').click();
+                pendingRestoreMode = mode;
+                return;
+            }
+            applyRestore(pendingRestoreData, mode);
+        }
+
+        function applyRestore(backup, mode) {
+            const modeLabel = mode === 'merge' ? '合併' : '覆蓋';
+            if (!confirm(`確定要${modeLabel}還原嗎？`)) return;
+
+            tabs.forEach(t => {
+                const incoming = backup.data[t] || [];
+                if (mode === 'overwrite') {
+                    localStorage.setItem(t, JSON.stringify(incoming));
+                } else {
+                    // 合併：以 id 去重
+                    const existing = JSON.parse(localStorage.getItem(t) || '[]');
+                    const existingIds = new Set(existing.map(x => x.id));
+                    const merged = [...existing, ...incoming.filter(x => !existingIds.has(x.id))];
+                    merged.sort((a, b) => b.id - a.id);
+                    localStorage.setItem(t, JSON.stringify(merged));
+                }
+            });
+
+            pendingRestoreData = null;
+            initFilters();
+            renderBackupStats();
+            showToast(`✓ ${modeLabel}還原完成！`, 3000);
+        }
+
+        // 拖曳處理
+        function handleDragOver(e) {
+            e.preventDefault();
+            document.getElementById('drop-zone').classList.add('drag-over');
+        }
+        function handleDragLeave(e) {
+            document.getElementById('drop-zone').classList.remove('drag-over');
+        }
+        async function handleDrop(e) {
+            e.preventDefault();
+            document.getElementById('drop-zone').classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (!file) return;
+            try {
+                pendingRestoreData = await readBackupFile(file);
+                showToast(`✓ 已讀取備份（${new Date(pendingRestoreData.exportedAt).toLocaleDateString('zh-TW')}），請點選還原方式`);
+            } catch (err) {
+                showToast('⚠ ' + err, 3500);
+            }
         }
 
         window.onload = () => { resetDates(); initFilters(); renderData('media'); };
