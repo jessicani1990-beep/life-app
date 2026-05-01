@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生活碎片 | Life Fragments</title>
+    <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f9f7f2;
+            --accent-color: #7d8471;
+            --text-primary: #434343;
+            --text-secondary: #8c8c8c;
+            --card-bg: #ffffff;
+            --border-color: #e0ddd5;
+            --alert-red: #c66b6b;
+            --warn-yellow: #d4a373;
+        }
+
+        body { font-family: 'Noto Serif TC', serif; background-color: var(--bg-color); color: var(--text-primary); margin: 0; line-height: 1.6; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 500px; padding: 40px 20px; }
+        header { text-align: center; margin-bottom: 30px; }
+        header h1 { font-weight: 700; letter-spacing: 2px; font-size: 1.5rem; margin-bottom: 5px; }
+        header p { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+
+        nav { display: flex; justify-content: space-around; margin-bottom: 25px; border-bottom: 1px solid var(--border-color); overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+        nav::-webkit-scrollbar { display: none; }
+        nav button { border: none; background: none; padding: 10px 15px; font-family: inherit; color: var(--text-secondary); cursor: pointer; font-size: 0.95rem; flex-shrink: 0; }
+        nav button.active { color: var(--accent-color); border-bottom: 2px solid var(--accent-color); font-weight: bold; }
+
+        section.input-area { background: var(--card-bg); padding: 20px; border-radius: 2px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); margin-bottom: 20px; border: 1px solid var(--border-color); }
+        .filter-area { margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color); }
+
+        .tab-content { display: none; animation: fadeIn 0.4s; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        input, select, textarea { padding: 10px 0; border: none; border-bottom: 1px solid var(--border-color); font-family: inherit; background: transparent; outline: none; color: var(--text-primary); width: 100%; margin-bottom: 10px; border-radius: 0; -webkit-appearance: none; }
+        textarea { height: 60px; resize: none; border-bottom: 1px solid var(--border-color); }
+        .filter-input { font-size: 0.85rem; flex: 2; min-width: 150px; margin-bottom: 0; }
+        .filter-select { font-size: 0.85rem; flex: 1; margin-bottom: 0; }
+
+        button.add-btn { background-color: var(--accent-color); color: white; border: none; width: 100%; padding: 12px; letter-spacing: 2px; cursor: pointer; font-family: inherit; transition: 0.2s; }
+        button.add-btn:active { opacity: 0.8; }
+
+        .item-card { border-bottom: 1px solid var(--border-color); padding: 15px 5px; display: flex; justify-content: space-between; align-items: center; }
+        .item-info h4 { margin: 0; font-size: 1rem; font-weight: 400; }
+        .item-info p { margin: 0; font-size: 0.8rem; color: var(--text-secondary); white-space: pre-wrap; }
+        .tag { font-size: 0.7rem; padding: 2px 6px; border: 1px solid var(--border-color); border-radius: 10px; margin-right: 5px; color: var(--accent-color); }
+        .status-msg { font-size: 0.75rem; font-weight: bold; margin-left: 5px; }
+        .delete-link { font-size: 0.8rem; color: #d1d1d1; cursor: pointer; padding: 5px; }
+
+        .empty-state { text-align: center; color: var(--text-secondary); margin-top: 30px; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>生活碎片</h1>
+            <p>Life Fragments Archive</p>
+        </header>
+
+        <nav>
+            <button onclick="showTab('media')" id="btn-media" class="active">閱聽</button>
+            <button onclick="showTab('selflove')" id="btn-selflove">對自己好</button>
+            <button onclick="showTab('finance')" id="btn-finance">餘裕</button>
+            <button onclick="showTab('notes')" id="btn-notes">隨手記記</button>
+        </nav>
+
+        <div id="media" class="tab-content active">
+            <section class="input-area">
+                <select id="media-type">
+                    <option value="書籍">書籍</option>
+                    <option value="影集">影集</option>
+                    <option value="電影">電影</option>
+                    <option value="展覽">展覽</option>
+                    <option value="遊戲">遊戲</option>
+                </select>
+                <input type="text" id="media-title" placeholder="標題名稱">
+                <input type="date" id="media-date">
+                <button class="add-btn" onclick="addData('media')">記下一筆</button>
+            </section>
+            <div class="filter-area" id="filter-media"></div>
+            <div id="media-list"></div>
+        </div>
+
+        <div id="selflove" class="tab-content">
+            <section class="input-area">
+                <input type="text" id="selflove-name" placeholder="產品或犒賞名稱">
+                <input type="date" id="selflove-buy-date" title="購入日期">
+                <input type="date" id="selflove-expiry-date" title="效期截止">
+                <button class="add-btn" onclick="addData('selflove')">留存美好</button>
+            </section>
+            <div class="filter-area" id="filter-selflove"></div>
+            <div id="selflove-list"></div>
+        </div>
+
+        <div id="finance" class="tab-content">
+            <section class="input-area">
+                <input type="text" id="bank-name" placeholder="銀行或帳戶名稱">
+                <input type="number" id="bank-amount" placeholder="目前金額">
+                <input type="date" id="bank-date">
+                <button class="add-btn" onclick="addData('finance')">紀錄留存</button>
+            </section>
+            <div class="filter-area" id="filter-finance"></div>
+            <div id="finance-list"></div>
+        </div>
+
+        <div id="notes" class="tab-content">
+            <section class="input-area">
+                <input type="text" id="note-title" placeholder="記點什麼標題...">
+                <textarea id="note-content" placeholder="細節內容..."></textarea>
+                <input type="date" id="note-date">
+                <button class="add-btn" onclick="addData('notes')">封存瞬間</button>
+            </section>
+            <div class="filter-area" id="filter-notes"></div>
+            <div id="notes-list"></div>
+        </div>
+    </div>
+
+    <script>
+        const tabs = ['media', 'selflove', 'finance', 'notes'];
+        
+        // 獲取今天日期的字串 (YYYY-MM-DD)
+        function getTodayString() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        // 重設所有日期欄位為今天
+        function resetDates() {
+            const today = getTodayString();
+            document.querySelectorAll('input[type="date"]').forEach(el => {
+                // 如果是效期截止，可以選擇不預填，或同樣預填今天
+                if (el.id !== 'selflove-expiry-date') {
+                    el.value = today;
+                }
+            });
+        }
+
+        function initFilters() {
+            tabs.forEach(tab => {
+                const area = document.getElementById(`filter-${tab}`);
+                const startYear = 2026;
+                let html = `<select id="f-${tab}-year" class="filter-select" onchange="renderData('${tab}')"><option value="">年份</option>`;
+                for (let i = startYear; i >= 2020; i--) html += `<option value="${i}">${i}年</option>`;
+                html += `</select><select id="f-${tab}-month" class="filter-select" onchange="renderData('${tab}')"><option value="">月份</option>`;
+                for (let i = 1; i <= 12; i++) html += `<option value="${i.toString().padStart(2, '0')}">${i}月</option>`;
+                html += `</select><input type="text" id="f-${tab}-search" class="filter-input" placeholder="關鍵字搜尋..." oninput="renderData('${tab}')">`;
+                area.innerHTML = html;
+            });
+        }
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            document.getElementById('btn-' + tabId).classList.add('active');
+            renderData(tabId);
+        }
+
+        function addData(type) {
+            let data = JSON.parse(localStorage.getItem(type) || '[]');
+            let entry = { id: Date.now() };
+            const today = getTodayString();
+
+            if (type === 'media') {
+                entry.category = document.getElementById('media-type').value;
+                entry.title = document.getElementById('media-title').value;
+                entry.date = document.getElementById('media-date').value || today;
+                if(!entry.title) return;
+                document.getElementById('media-title').value = '';
+            } else if (type === 'selflove') {
+                entry.name = document.getElementById('selflove-name').value;
+                entry.buyDate = document.getElementById('selflove-buy-date').value || today;
+                entry.expiryDate = document.getElementById('selflove-expiry-date').value;
+                if(!entry.name) return;
+                document.getElementById('selflove-name').value = '';
+                document.getElementById('selflove-expiry-date').value = '';
+            } else if (type === 'finance') {
+                entry.bank = document.getElementById('bank-name').value;
+                entry.amount = document.getElementById('bank-amount').value;
+                entry.date = document.getElementById('bank-date').value || today;
+                if(!entry.bank) return;
+                document.getElementById('bank-name').value = '';
+                document.getElementById('bank-amount').value = '';
+            } else if (type === 'notes') {
+                entry.title = document.getElementById('note-title').value;
+                entry.content = document.getElementById('note-content').value;
+                entry.date = document.getElementById('note-date').value || today;
+                if(!entry.title && !entry.content) return;
+                document.getElementById('note-title').value = '';
+                document.getElementById('note-content').value = '';
+            }
+
+            data.unshift(entry);
+            localStorage.setItem(type, JSON.stringify(data));
+            resetDates(); // 新增完後重新把日期設回今天
+            renderData(type);
+        }
+
+        function deleteData(type, id) {
+            if(!confirm('確定要移除這項紀錄嗎？')) return;
+            let data = JSON.parse(localStorage.getItem(type)).filter(item => item.id !== id);
+            localStorage.setItem(type, JSON.stringify(data));
+            renderData(type);
+        }
+
+        function renderData(type) {
+            const container = document.getElementById(type + '-list');
+            let data = JSON.parse(localStorage.getItem(type) || '[]');
+            const fYear = document.getElementById(`f-${type}-year`).value;
+            const fMonth = document.getElementById(`f-${type}-month`).value;
+            const fSearch = document.getElementById(`f-${type}-search`).value.toLowerCase();
+
+            data = data.filter(i => {
+                const dateKey = (type === 'selflove') ? i.buyDate : i.date;
+                const matchYear = fYear ? dateKey.startsWith(fYear) : true;
+                const matchMonth = fMonth ? dateKey.split('-')[1] === fMonth : true;
+                
+                let nameKey = "";
+                if(type === 'media') nameKey = (i.title + i.category);
+                else if(type === 'selflove') nameKey = i.name;
+                else if(type === 'finance') nameKey = i.bank;
+                else if(type === 'notes') nameKey = (i.title + i.content);
+                
+                const matchSearch = fSearch ? nameKey.toLowerCase().includes(fSearch) : true;
+                return matchYear && matchMonth && matchSearch;
+            });
+
+            if (data.length === 0) {
+                container.innerHTML = '<div class="empty-state">尚未發現碎片。</div>';
+                return;
+            }
+
+            let html = '';
+            const today = new Date();
+            data.forEach(i => {
+                html += `<div class="item-card"><div class="item-info">`;
+                if (type === 'media') {
+                    html += `<h4><span class="tag">${i.category}</span>${i.title}</h4><p>${i.date} 紀錄</p>`;
+                } else if (type === 'selflove') {
+                    let status = '';
+                    if (i.expiryDate) {
+                        const exp = new Date(i.expiryDate);
+                        const diffDays = (exp - today) / (1000 * 60 * 60 * 24);
+                        if (diffDays < 0) status = '<span class="status-msg" style="color:var(--alert-red)">已過期</span>';
+                        else if (diffDays <= 30) status = '<span class="status-msg" style="color:var(--warn-yellow)">即將到期</span>';
+                    }
+                    html += `<h4>${i.name}${status}</h4><p>購入：${i.buyDate} / 效期：${i.expiryDate || '無效期'}</p>`;
+                } else if (type === 'finance') {
+                    html += `<h4>${i.bank}</h4><p>$${Number(i.amount).toLocaleString()} — ${i.date}</p>`;
+                } else if (type === 'notes') {
+                    html += `<h4>${i.title || '無標題'}</h4><p>${i.content}</p><p style="font-size:0.7rem; margin-top:5px; color:var(--text-secondary)">${i.date}</p>`;
+                }
+                html += `</div><span class="delete-link" onclick="deleteData('${type}', ${i.id})">移除</span></div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        window.onload = () => { 
+            resetDates();
+            initFilters(); 
+            renderData('media'); 
+        };
+    </script>
+</body>
+</html>
