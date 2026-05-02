@@ -194,6 +194,7 @@
             <button onclick="showTab('media')" id="btn-media" class="active">閱聽</button>
             <button onclick="showTab('selflove')" id="btn-selflove">對自己好</button>
             <button onclick="showTab('finance')" id="btn-finance">餘裕</button>
+            <button onclick="showTab('period')" id="btn-period">生理變化</button>
             <button onclick="showTab('notes')" id="btn-notes">隨手記記</button>
             <button onclick="showTab('settings')" id="btn-settings">備份</button>
         </nav>
@@ -302,7 +303,26 @@
             <div class="filter-area" id="filter-finance"></div>
             <div id="finance-list"></div>
         </div>
+<!-- 生理期 -->
+<div id="period" class="tab-content">
+    <section class="input-area">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <span style="font-size: 0.9rem; font-weight: 700; letter-spacing: 1px;">本次起始日期</span>
+            <span class="tag" style="margin:0;">Cycle Care</span>
+        </div>
+        <input type="date" id="period-date">
+        <button class="add-btn" onclick="addData('period')">封存紀錄</button>
+    </section>
 
+    <!-- 預測卡片 -->
+    <div id="period-prediction" style="background: var(--card-bg); padding: 20px; border: 1px solid var(--border-color); margin-bottom: 20px; text-align: center; border-radius: 2px;">
+        <p style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;">Next Cycle Estimate</p>
+        <h2 id="next-period-date" style="margin: 0; color: var(--accent-color); font-weight: 400; font-size: 1.5rem; letter-spacing: 1px;">-- / --</h2>
+    </div>
+
+    <div class="filter-area" id="filter-period"></div>
+    <div id="period-list"></div>
+</div>
         <!-- 隨手記記 -->
         <div id="notes" class="tab-content">
             <section class="input-area">
@@ -360,7 +380,7 @@
     <div id="toast"></div>
 
     <script>
-        const tabs = ['media', 'selflove', 'finance', 'notes'];
+        const tabs = ['media', 'selflove', 'finance', 'period','notes']; // 加入 period
         let currentFilters = { media: '全部', selflove: '全部' };
         let pendingRestoreData = null;   // 已讀取但尚未確認的備份
         let pendingRestoreMode = null;
@@ -464,6 +484,15 @@
                 if (!entry.title && !entry.content) return;
                 document.getElementById('note-title').value = '';
                 document.getElementById('note-content').value = '';
+                } else if (type === 'period') {
+    entry.date = document.getElementById('period-date').value || today;
+    // 防止重複紀錄同一天
+    const existing = JSON.parse(localStorage.getItem('period') || '[]');
+    if (existing.some(d => d.date === entry.date)) {
+        showToast('⚠ 這天已經紀錄過囉');
+        return;
+    }
+}
             }
 
             data.unshift(entry);
