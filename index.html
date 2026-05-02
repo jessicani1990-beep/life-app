@@ -447,6 +447,27 @@
             } else {
                 renderData(tabId);
             }
+            if (type === 'period') {
+    data.sort((a, b) => new Date(b.date) - new Date(a.date));
+    const nextDisplay = document.getElementById('next-period-date');
+    if (data.length > 0) {
+        const lastDate = new Date(data[0].date);
+        lastDate.setDate(lastDate.getDate() + 28); // 預設週期 28 天
+        nextDisplay.innerText = lastDate.toISOString().split('T')[0];
+    } else {
+        nextDisplay.innerText = "Waiting for data";
+    }
+
+    let html = '';
+    data.forEach(i => {
+        html += `<div class="item-card"><div class="item-info">
+            <h4><span class="tag">起始日</span>生理期紀錄</h4>
+            <p style="margin-top:5px;">${i.date} 碎片已封存</p>
+        </div><span class="delete-link" onclick="deleteData('period', ${i.id})">移除</span></div>`;
+    });
+    container.innerHTML = html || '<div class="empty-state">尚未發現生理期碎片。</div>';
+    return;
+}
         }
 
         function addData(type) {
