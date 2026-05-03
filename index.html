@@ -108,10 +108,10 @@
         .cal-title { font-size: 0.9rem; font-weight: 700; letter-spacing: 1px; }
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
         .cal-day-name { text-align: center; font-size: 0.65rem; color: var(--text-secondary); padding: 4px 0; }
-        .cal-day { text-align: center; font-size: 0.75rem; padding: 6px 2px; cursor: default; border-radius: 50%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; width: 28px; margin: 0 auto; }
-        .cal-day.period-day { background: var(--period-light); color: var(--period-red); font-weight: 700; border-radius: 50%; }
-        .cal-day.symptom-day { border: 1.5px solid var(--warn-yellow); }
-        .cal-day.today { border: 1.5px solid var(--accent-color); }
+        .cal-day { text-align: center; font-size: 0.75rem; cursor: default; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 28px; height: 28px; margin: 0 auto; position: relative; }
+        .cal-day.period-day { background: var(--period-light); color: var(--period-red); font-weight: 700; }
+        .cal-day.symptom-day::after { content: ''; display: block; width: 4px; height: 4px; border-radius: 50%; background: var(--warn-yellow); position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); }
+        .cal-day.today { outline: 1.5px solid var(--accent-color); outline-offset: 1px; }
         .cal-day.predicted { background: #f0f3ee; color: var(--accent-color); font-style: italic; }
         .cal-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; font-size: 0.7rem; color: var(--text-secondary); }
         .cal-legend-item { display: flex; align-items: center; gap: 5px; }
@@ -249,9 +249,9 @@
                 <div class="cal-grid" id="cal-grid"></div>
                 <div class="cal-legend">
                     <div class="cal-legend-item"><div class="legend-dot" style="background:var(--period-light);border:1px solid var(--period-red);"></div>生理期</div>
-                    <div class="cal-legend-item"><div class="legend-dot" style="border:1.5px solid var(--warn-yellow);"></div>症狀</div>
+                    <div class="cal-legend-item"><div class="legend-dot" style="background:var(--warn-yellow);width:6px;height:6px;"></div>症狀</div>
                     <div class="cal-legend-item"><div class="legend-dot" style="background:#f0f3ee;border:1px solid var(--accent-color);"></div>預測</div>
-                    <div class="cal-legend-item"><div class="legend-dot" style="border:1.5px solid var(--accent-color);"></div>今天</div>
+                    <div class="cal-legend-item"><div class="legend-dot" style="outline:1.5px solid var(--accent-color);outline-offset:1px;"></div>今天</div>
                 </div>
             </div>
 
@@ -272,6 +272,7 @@
                     <button class="symptom-check-btn" onclick="toggleSymptom(this,'頭痛')">頭痛</button>
                     <button class="symptom-check-btn" onclick="toggleSymptom(this,'點狀出血')">點狀出血</button>
                     <button class="symptom-check-btn" onclick="toggleSymptom(this,'腹部疼痛')">腹部疼痛</button>
+                    <button class="symptom-check-btn" onclick="toggleSymptom(this,'痘痘')">痘痘</button>
                 </div>
                 <button class="add-btn" onclick="addSymptom()">記錄症狀</button>
             </section>
@@ -285,6 +286,7 @@
                 <button class="cat-btn" onclick="filterPeriodSymptom('頭痛')">頭痛</button>
                 <button class="cat-btn" onclick="filterPeriodSymptom('點狀出血')">點狀出血</button>
                 <button class="cat-btn" onclick="filterPeriodSymptom('腹部疼痛')">腹部疼痛</button>
+                <button class="cat-btn" onclick="filterPeriodSymptom('痘痘')">痘痘</button>
             </div>
             <div id="period-list"></div>
         </div>
