@@ -254,23 +254,32 @@
                 </div>
             </div>
 
-            <!-- 新增紀錄 -->
+            <!-- 月經紀錄 -->
             <section class="input-area">
+                <div style="font-size:0.8rem;color:var(--text-secondary);letter-spacing:1px;margin-bottom:12px;">月經紀錄</div>
                 <div class="date-field"><label class="date-label">開始日期</label><input type="date" id="period-start"></div>
                 <div class="date-field"><label class="date-label">結束日期 <span style="color:var(--text-secondary);font-size:0.75rem;">（非必填，可之後補）</span></label><input type="date" id="period-end"></div>
-                <div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:8px;">症狀紀錄（可複選）</div>
+                <button class="add-btn" onclick="addPeriod()">記下這次月經</button>
+            </section>
+
+            <!-- 症狀紀錄（獨立） -->
+            <section class="input-area">
+                <div style="font-size:0.8rem;color:var(--text-secondary);letter-spacing:1px;margin-bottom:12px;">症狀紀錄</div>
+                <div class="date-field"><label class="date-label">日期</label><input type="date" id="symptom-date"></div>
                 <div class="symptom-checks" id="symptom-checks">
                     <button class="symptom-check-btn" onclick="toggleSymptom(this,'胸部脹痛')">胸部脹痛</button>
                     <button class="symptom-check-btn" onclick="toggleSymptom(this,'頭痛')">頭痛</button>
                     <button class="symptom-check-btn" onclick="toggleSymptom(this,'點狀出血')">點狀出血</button>
                     <button class="symptom-check-btn" onclick="toggleSymptom(this,'腹部疼痛')">腹部疼痛</button>
                 </div>
-                <button class="add-btn" onclick="addPeriod()">記下這次</button>
+                <button class="add-btn" onclick="addSymptom()">記錄症狀</button>
             </section>
 
-            <!-- 篩選 -->
+            <!-- 清單篩選 -->
+            <div style="font-size:0.75rem;color:var(--text-secondary);letter-spacing:1px;margin-bottom:8px;">依症狀篩選紀錄</div>
             <div class="category-quick-filter" id="period-symptom-filters">
                 <button class="cat-btn active" onclick="filterPeriodSymptom('全部')">全部</button>
+                <button class="cat-btn" onclick="filterPeriodSymptom('月經')">月經</button>
                 <button class="cat-btn" onclick="filterPeriodSymptom('胸部脹痛')">胸部脹痛</button>
                 <button class="cat-btn" onclick="filterPeriodSymptom('頭痛')">頭痛</button>
                 <button class="cat-btn" onclick="filterPeriodSymptom('點狀出血')">點狀出血</button>
@@ -343,7 +352,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 const tabs = ['media', 'selflove', 'finance', 'notes'];
-const allStoreKeys = ['media', 'selflove', 'finance', 'notes', 'period', 'weight'];
+const allStoreKeys = ['media', 'selflove', 'finance', 'notes', 'period', 'symptom', 'weight'];
 let currentFilters = { media: '全部', selflove: '全部', finance: '全部' };
 let pendingRestoreData = null;
 let pendingRestoreMode = null;
@@ -568,24 +577,37 @@ function addPeriod() {
     const start = document.getElementById('period-start').value;
     if (!start) { showToast('請填寫開始日期'); return; }
     const end = document.getElementById('period-end').value;
-    const entry = { id: Date.now(), start, end, symptoms: [...selectedSymptoms] };
+    const entry = { id: Date.now(), start, end };
     let data = JSON.parse(localStorage.getItem('period') || '[]');
     data.unshift(entry);
     localStorage.setItem('period', JSON.stringify(data));
     document.getElementById('period-end').value = '';
+    resetDates();
+    renderPeriodData();
+    renderCalendar();
+    renderPeriodPredict();
+    showToast('月經已記錄');
+}
+
+function addSymptom() {
+    const date = document.getElementById('symptom-date').value || getTodayString();
+    if (selectedSymptoms.length === 0) { showToast('請至少選擇一個症狀'); return; }
+    const entry = { id: Date.now(), date, symptoms: [...selectedSymptoms] };
+    let data = JSON.parse(localStorage.getItem('symptom') || '[]');
+    data.unshift(entry);
+    localStorage.setItem('symptom', JSON.stringify(data));
     selectedSymptoms = [];
     document.querySelectorAll('.symptom-check-btn').forEach(b => b.classList.remove('selected'));
     resetDates();
     renderPeriodData();
     renderCalendar();
-    renderPeriodPredict();
-    showToast('已記錄');
+    showToast('症狀已記錄');
 }
 
-function deletePeriod(id) {
+function deletePeriod(type, id) {
     if (!confirm('確定要移除？')) return;
-    let data = JSON.parse(localStorage.getItem('period') || '[]').filter(i => i.id !== id);
-    localStorage.setItem('period', JSON.stringify(data));
+    let data = JSON.parse(localStorage.getItem(type) || '[]').filter(i => i.id !== id);
+    localStorage.setItem(type, JSON.stringify(data));
     renderPeriodData();
     renderCalendar();
     renderPeriodPredict();
@@ -600,20 +622,40 @@ function filterPeriodSymptom(sym) {
 }
 
 function renderPeriodData() {
-    let data = JSON.parse(localStorage.getItem('period') || '[]');
-    if (currentPeriodSymptomFilter !== '全部') {
-        data = data.filter(i => i.symptoms && i.symptoms.includes(currentPeriodSymptomFilter));
+    const periodData = JSON.parse(localStorage.getItem('period') || '[]');
+    const symptomData = JSON.parse(localStorage.getItem('symptom') || '[]');
+
+    // Build unified list with type tag
+    let combined = [
+        ...periodData.map(i => ({ ...i, _type: 'period', _sortDate: i.start })),
+        ...symptomData.map(i => ({ ...i, _type: 'symptom', _sortDate: i.date }))
+    ].sort((a, b) => b._sortDate.localeCompare(a._sortDate));
+
+    const f = currentPeriodSymptomFilter;
+    if (f !== '全部') {
+        combined = combined.filter(i => {
+            if (f === '月經') return i._type === 'period';
+            return i._type === 'symptom' && i.symptoms && i.symptoms.includes(f);
+        });
     }
+
     const container = document.getElementById('period-list');
-    if (data.length === 0) { container.innerHTML = '<div class="empty-state">尚無生理期紀錄。</div>'; return; }
+    if (combined.length === 0) { container.innerHTML = '<div class="empty-state">尚無紀錄。</div>'; return; }
     let html = '';
-    data.forEach(i => {
-        const dur = i.end ? Math.round((new Date(i.end) - new Date(i.start)) / 86400000) + 1 : '?';
-        const syms = i.symptoms && i.symptoms.length ? i.symptoms.map(s => `<span class="tag">${s}</span>`).join('') : '';
-        html += `<div class="item-card"><div class="item-info">
-            <h4>${i.start}${i.end ? ' → ' + i.end : ' → 記錄中'}</h4>
-            <p>${i.end ? dur + ' 天' : '尚未結束'} ${syms ? ' · ' + syms : ''}</p>
-        </div><span class="delete-link" onclick="deletePeriod(${i.id})">移除</span></div>`;
+    combined.forEach(i => {
+        if (i._type === 'period') {
+            const dur = i.end ? Math.round((new Date(i.end) - new Date(i.start)) / 86400000) + 1 : null;
+            html += `<div class="item-card"><div class="item-info">
+                <h4><span class="tag" style="color:var(--period-red);border-color:var(--period-red);">月經</span>${i.start}${i.end ? ' → ' + i.end : ' → 記錄中'}</h4>
+                <p>${dur ? dur + ' 天' : '尚未結束'}</p>
+            </div><span class="delete-link" onclick="deletePeriod('period', ${i.id})">移除</span></div>`;
+        } else {
+            const syms = i.symptoms.map(s => `<span class="tag">${s}</span>`).join('');
+            html += `<div class="item-card"><div class="item-info">
+                <h4>${syms}</h4>
+                <p>${i.date}</p>
+            </div><span class="delete-link" onclick="deletePeriod('symptom', ${i.id})">移除</span></div>`;
+        }
     });
     container.innerHTML = html;
 }
@@ -684,6 +726,7 @@ function renderCalendar() {
     const stats = getPeriodStats();
 
     // Build sets of marked dates
+    const symptomData = JSON.parse(localStorage.getItem('symptom') || '[]');
     const periodDays = new Set();
     const symptomDays = new Set();
     periodData.forEach(entry => {
@@ -693,10 +736,9 @@ function renderCalendar() {
         for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
             periodDays.add(d.toISOString().split('T')[0]);
         }
-        if (entry.symptoms && entry.symptoms.length) {
-            const sd = entry.start;
-            symptomDays.add(sd);
-        }
+    });
+    symptomData.forEach(entry => {
+        if (entry.date) symptomDays.add(entry.date);
     });
 
     // Predicted days
@@ -820,7 +862,7 @@ function renderWeightChart() {
 
 /* ══ 備份 ══ */
 function renderBackupStats() {
-    const labels = { media: '閱聽', selflove: '對自己好', finance: '餘裕', notes: '隨手記記', period: '生理期', weight: '體重' };
+    const labels = { media: '閱聽', selflove: '對自己好', finance: '餘裕', notes: '隨手記記', period: '生理期', symptom: '症狀', weight: '體重' };
     const container = document.getElementById('backup-stats');
     let html = '';
     allStoreKeys.forEach(t => {
