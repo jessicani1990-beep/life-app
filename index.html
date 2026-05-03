@@ -20,7 +20,8 @@
             --period-light: #f7e8e8;
         }
 
-        body { font-family: 'Noto Serif TC', serif; background-color: var(--bg-color); color: var(--text-primary); margin: 0; line-height: 1.6; display: flex; justify-content: center; }
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'Noto Serif TC', serif; background-color: var(--bg-color); color: var(--text-primary); margin: 0; line-height: 1.6; display: flex; justify-content: center; overflow-x: hidden; }
         .container { width: 100%; max-width: 500px; padding: 40px 20px; }
         header { text-align: center; margin-bottom: 30px; }
         header h1 { font-weight: 700; letter-spacing: 2px; font-size: 1.5rem; margin-bottom: 5px; }
