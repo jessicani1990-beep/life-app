@@ -20,8 +20,7 @@
             --period-light: #f7e8e8;
         }
 
-        *, *::before, *::after { box-sizing: border-box; }
-        body { font-family: 'Noto Serif TC', serif; background-color: var(--bg-color); color: var(--text-primary); margin: 0; line-height: 1.6; display: flex; justify-content: center; overflow-x: hidden; }
+        body { font-family: 'Noto Serif TC', serif; background-color: var(--bg-color); color: var(--text-primary); margin: 0; line-height: 1.6; display: flex; justify-content: center; }
         .container { width: 100%; max-width: 500px; padding: 40px 20px; }
         header { text-align: center; margin-bottom: 30px; }
         header h1 { font-weight: 700; letter-spacing: 2px; font-size: 1.5rem; margin-bottom: 5px; }
@@ -108,10 +107,10 @@
         .cal-title { font-size: 0.9rem; font-weight: 700; letter-spacing: 1px; }
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
         .cal-day-name { text-align: center; font-size: 0.65rem; color: var(--text-secondary); padding: 4px 0; }
-        .cal-day { text-align: center; font-size: 0.75rem; cursor: default; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 28px; height: 28px; margin: 0 auto; position: relative; }
-        .cal-day.period-day { background: var(--period-light); color: var(--period-red); font-weight: 700; }
-        .cal-day.symptom-day::after { content: ''; display: block; width: 4px; height: 4px; border-radius: 50%; background: var(--warn-yellow); position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); }
-        .cal-day.today { outline: 1.5px solid var(--accent-color); outline-offset: 1px; }
+        .cal-day { text-align: center; font-size: 0.75rem; padding: 6px 2px; cursor: default; border-radius: 50%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; width: 28px; margin: 0 auto; }
+        .cal-day.period-day { background: var(--period-light); color: var(--period-red); font-weight: 700; border-radius: 50%; }
+        .cal-day.symptom-day { border: 1.5px solid var(--warn-yellow); }
+        .cal-day.today { border: 1.5px solid var(--accent-color); }
         .cal-day.predicted { background: #f0f3ee; color: var(--accent-color); font-style: italic; }
         .cal-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; font-size: 0.7rem; color: var(--text-secondary); }
         .cal-legend-item { display: flex; align-items: center; gap: 5px; }
@@ -249,9 +248,9 @@
                 <div class="cal-grid" id="cal-grid"></div>
                 <div class="cal-legend">
                     <div class="cal-legend-item"><div class="legend-dot" style="background:var(--period-light);border:1px solid var(--period-red);"></div>生理期</div>
-                    <div class="cal-legend-item"><div class="legend-dot" style="background:var(--warn-yellow);width:6px;height:6px;"></div>症狀</div>
+                    <div class="cal-legend-item"><div class="legend-dot" style="border:1.5px solid var(--warn-yellow);"></div>症狀</div>
                     <div class="cal-legend-item"><div class="legend-dot" style="background:#f0f3ee;border:1px solid var(--accent-color);"></div>預測</div>
-                    <div class="cal-legend-item"><div class="legend-dot" style="outline:1.5px solid var(--accent-color);outline-offset:1px;"></div>今天</div>
+                    <div class="cal-legend-item"><div class="legend-dot" style="border:1.5px solid var(--accent-color);"></div>今天</div>
                 </div>
             </div>
 
@@ -272,7 +271,6 @@
                     <button class="symptom-check-btn" onclick="toggleSymptom(this,'頭痛')">頭痛</button>
                     <button class="symptom-check-btn" onclick="toggleSymptom(this,'點狀出血')">點狀出血</button>
                     <button class="symptom-check-btn" onclick="toggleSymptom(this,'腹部疼痛')">腹部疼痛</button>
-                    <button class="symptom-check-btn" onclick="toggleSymptom(this,'痘痘')">痘痘</button>
                 </div>
                 <button class="add-btn" onclick="addSymptom()">記錄症狀</button>
             </section>
@@ -286,7 +284,6 @@
                 <button class="cat-btn" onclick="filterPeriodSymptom('頭痛')">頭痛</button>
                 <button class="cat-btn" onclick="filterPeriodSymptom('點狀出血')">點狀出血</button>
                 <button class="cat-btn" onclick="filterPeriodSymptom('腹部疼痛')">腹部疼痛</button>
-                <button class="cat-btn" onclick="filterPeriodSymptom('痘痘')">痘痘</button>
             </div>
             <div id="period-list"></div>
         </div>
@@ -383,12 +380,6 @@ function resetDates() {
 function initFilters() {
     tabs.forEach(tab => {
         const area = document.getElementById(`filter-${tab}`);
-        // 先存下當前使用者選的值，避免被 innerHTML 清空
-        const prevRating = document.getElementById(`f-media-rating`)?.value || "";
-        const prevYear = document.getElementById(`f-${tab}-year`)?.value || "";
-        const prevMonth = document.getElementById(`f-${tab}-month`)?.value || "";
-        const prevSearch = document.getElementById(`f-${tab}-search`)?.value || "";
-
         const data = JSON.parse(localStorage.getItem(tab) || '[]');
         const sysYear = new Date().getFullYear();
         let maxDataYear = sysYear;
@@ -399,36 +390,15 @@ function initFilters() {
                 if (y > maxDataYear) maxDataYear = y;
             }
         });
-
         let html = `<select id="f-${tab}-year" class="filter-select" onchange="renderData('${tab}')"><option value="">年份</option>`;
         for (let i = maxDataYear; i >= 2020; i--) html += `<option value="${i}">${i}年</option>`;
         html += `</select><select id="f-${tab}-month" class="filter-select" onchange="renderData('${tab}')"><option value="">月份</option>`;
         for (let i = 1; i <= 12; i++) html += `<option value="${i.toString().padStart(2,'0')}">${i}月</option>`;
-        html += `</select>`;
-
-        // 核心修正：加入愛心篩選
-        if (tab === 'media') {
-            html += `
-            <select id="f-media-rating" class="filter-select" onchange="renderData('media')">
-                <option value="">評分</option>
-                <option value="5">♥♥♥♥♥</option>
-                <option value="4">♥♥♥♥</option>
-                <option value="3">♥♥♥</option>
-                <option value="2">♥♥</option>
-                <option value="1">♥</option>
-            </select>`;
-        }
-
-        html += `<input type="text" id="f-${tab}-search" class="filter-input" placeholder="關鍵字搜尋..." oninput="renderData('${tab}')">`;
+        html += `</select><input type="text" id="f-${tab}-search" class="filter-input" placeholder="關鍵字搜尋..." oninput="renderData('${tab}')">`;
         area.innerHTML = html;
-
-        // 還原剛才選的值
-        if (prevYear) document.getElementById(`f-${tab}-year`).value = prevYear;
-        if (prevMonth) document.getElementById(`f-${tab}-month`).value = prevMonth;
-        if (prevSearch) document.getElementById(`f-${tab}-search`).value = prevSearch;
-        if (tab === 'media' && prevRating) document.getElementById(`f-media-rating`).value = prevRating;
     });
 }
+
 function filterByCategory(tab, category) {
     currentFilters[tab] = category;
     const buttons = document.querySelectorAll(`#${tab}-quick-filters .cat-btn`);
@@ -513,35 +483,29 @@ function deleteData(type, id) {
 function renderData(type) {
     const container = document.getElementById(type + '-list');
     let data = JSON.parse(localStorage.getItem(type) || '[]');
-    
-    // 取得各個篩選器的值
     const fYear = document.getElementById(`f-${type}-year`).value;
     const fMonth = document.getElementById(`f-${type}-month`).value;
     const fSearch = document.getElementById(`f-${type}-search`).value.toLowerCase();
-    
-    // 核心修正：明確抓取評分值
-    let fRating = "";
-    if (type === 'media') {
-        const ratingEl = document.getElementById('f-media-rating');
-        if (ratingEl) fRating = ratingEl.value;
-    }
 
     data = data.filter(i => {
         const dateKey = (type === 'selflove') ? i.buyDate : i.date;
         const matchYear = fYear ? (dateKey || '').startsWith(fYear) : true;
         const matchMonth = fMonth ? (dateKey || '').split('-')[1] === fMonth : true;
-        const matchSearch = fSearch ? (JSON.stringify(i).toLowerCase().includes(fSearch)) : true;
-        
-        // 類別篩選 (原本的邏輯)
-        let matchCategory = (currentFilters[type] === '全部' || i.category === currentFilters[type]);
-        
-        // 評分篩選：比對資料中的 rating 欄位是否等於下拉選單的值
-        const matchRating = fRating ? (String(i.rating) === fRating) : true;
-
-        return matchYear && matchMonth && matchSearch && matchCategory && matchRating;
+        let matchCategory = true;
+        if ((type === 'media' || type === 'selflove') && currentFilters[type] !== '全部') {
+            matchCategory = (i.category === currentFilters[type]);
+        }
+        if (type === 'finance' && currentFilters[type] !== '全部') {
+            matchCategory = (i.category || '').includes(currentFilters[type]);
+        }
+        let nameKey = '';
+        if (type === 'media') nameKey = (i.title + i.category);
+        else if (type === 'selflove') nameKey = (i.name + i.category);
+        else if (type === 'finance') nameKey = (i.category || '') + (i.title || '');
+        else if (type === 'notes') nameKey = (i.title + i.content);
+        const matchSearch = fSearch ? nameKey.toLowerCase().includes(fSearch) : true;
+        return matchYear && matchMonth && matchSearch && matchCategory;
     });
-
-    // ... 後續渲染 HTML 的程式碼保持不變
 
     if (data.length === 0) { container.innerHTML = '<div class="empty-state">尚未發現碎片。</div>'; return; }
     let html = '';
@@ -995,3 +959,4 @@ window.onload = () => {
 </script>
 </body>
 </html>
+
