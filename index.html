@@ -506,7 +506,7 @@ function renderData(type) {
             matchCategory = (i.category || '').includes(currentFilters[type]);
         }
         let nameKey = '';
-        if (type === 'media') nameKey = (i.title + i.category);
+        if (type === 'media') nameKey = (i.title + i.category + '♥'.repeat(i.rating));
         else if (type === 'selflove') nameKey = (i.name + i.category);
         else if (type === 'finance') nameKey = (i.category || '') + (i.title || '');
         else if (type === 'notes') nameKey = (i.title + i.content);
