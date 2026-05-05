@@ -519,8 +519,15 @@ function renderData(type) {
     const today = new Date();
     data.forEach(i => {
         html += `<div class="item-card"><div class="item-info">`;
-        if (type === 'media') {
-            html += `<h4><span class="tag">${i.category}</span>${i.title}</h4><p>${i.date} 紀錄</p>`;
+       if (type === 'media') {
+        // 1. 將評分數字轉為愛心符號
+        const hearts = '♥'.repeat(parseInt(i.rating) || 0); 
+        
+        // 2. 在 HTML 中加入 hearts 顯示
+        html += `<h4><span class="tag">${i.category}</span>${i.title}</h4>
+                 <p style="color: var(--accent-color); font-size: 0.9rem; margin: 4px 0;">${hearts}</p>
+                 <p>${i.date} 紀錄</p>`;
+    }
         } else if (type === 'selflove') {
             let status = '';
             if (i.expiryDate) {
