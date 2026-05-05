@@ -1,4 +1,4 @@
-const CACHE_NAME = 'life-fragments-v4';
+const CACHE_NAME = 'life-fragments-v5';
 const ASSETS = [
   'index.html',
   'manifest.json',
