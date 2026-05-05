@@ -397,11 +397,28 @@ function initFilters() {
                 if (y > maxDataYear) maxDataYear = y;
             }
         });
+
+        // 建立年份與月份選單
         let html = `<select id="f-${tab}-year" class="filter-select" onchange="renderData('${tab}')"><option value="">年份</option>`;
         for (let i = maxDataYear; i >= 2020; i--) html += `<option value="${i}">${i}年</option>`;
         html += `</select><select id="f-${tab}-month" class="filter-select" onchange="renderData('${tab}')"><option value="">月份</option>`;
         for (let i = 1; i <= 12; i++) html += `<option value="${i.toString().padStart(2,'0')}">${i}月</option>`;
-        html += `</select><input type="text" id="f-${tab}-search" class="filter-input" placeholder="關鍵字搜尋..." oninput="renderData('${tab}')">`;
+        html += `</select>`;
+
+        // 【新增：閱聽頁面專用的愛心篩選】
+        if (tab === 'media') {
+            html += `
+            <select id="f-media-rating" class="filter-select" onchange="renderData('media')">
+                <option value="">評分</option>
+                <option value="5">♥♥♥♥♥</option>
+                <option value="4">♥♥♥♥</option>
+                <option value="3">♥♥♥</option>
+                <option value="2">♥♥</option>
+                <option value="1">♥</option>
+            </select>`;
+        }
+
+        html += `<input type="text" id="f-${tab}-search" class="filter-input" placeholder="關鍵字搜尋..." oninput="renderData('${tab}')">`;
         area.innerHTML = html;
     });
 }
