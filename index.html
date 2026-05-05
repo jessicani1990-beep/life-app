@@ -393,11 +393,27 @@ function initFilters() {
                 if (y > maxDataYear) maxDataYear = y;
             }
         });
+
         let html = `<select id="f-${tab}-year" class="filter-select" onchange="renderData('${tab}')"><option value="">年份</option>`;
         for (let i = maxDataYear; i >= 2020; i--) html += `<option value="${i}">${i}年</option>`;
         html += `</select><select id="f-${tab}-month" class="filter-select" onchange="renderData('${tab}')"><option value="">月份</option>`;
         for (let i = 1; i <= 12; i++) html += `<option value="${i.toString().padStart(2,'0')}">${i}月</option>`;
-        html += `</select><input type="text" id="f-${tab}-search" class="filter-input" placeholder="關鍵字搜尋..." oninput="renderData('${tab}')">`;
+        html += `</select>`;
+
+        // ── 這裡加入愛心篩選 ──
+        if (tab === 'media') {
+            html += `
+            <select id="f-media-rating" class="filter-select" onchange="renderData('media')">
+                <option value="">評分</option>
+                <option value="5">♥♥♥♥♥</option>
+                <option value="4">♥♥♥♥</option>
+                <option value="3">♥♥♥</option>
+                <option value="2">♥♥</option>
+                <option value="1">♥</option>
+            </select>`;
+        }
+
+        html += `<input type="text" id="f-${tab}-search" class="filter-input" placeholder="關鍵字搜尋..." oninput="renderData('${tab}')">`;
         area.innerHTML = html;
     });
 }
@@ -489,11 +505,18 @@ function renderData(type) {
     const fYear = document.getElementById(`f-${type}-year`).value;
     const fMonth = document.getElementById(`f-${type}-month`).value;
     const fSearch = document.getElementById(`f-${type}-search`).value.toLowerCase();
+    
+    // 取得評分篩選值 (僅 media 頁面有效)
+    const fRating = (type === 'media') ? document.getElementById('f-media-rating').value : "";
 
     data = data.filter(i => {
         const dateKey = (type === 'selflove') ? i.buyDate : i.date;
         const matchYear = fYear ? (dateKey || '').startsWith(fYear) : true;
         const matchMonth = fMonth ? (dateKey || '').split('-')[1] === fMonth : true;
+        
+        // 評分篩選邏輯
+        const matchRating = fRating ? (i.rating === fRating) : true;
+
         let matchCategory = true;
         if ((type === 'media' || type === 'selflove') && currentFilters[type] !== '全部') {
             matchCategory = (i.category === currentFilters[type]);
@@ -501,14 +524,20 @@ function renderData(type) {
         if (type === 'finance' && currentFilters[type] !== '全部') {
             matchCategory = (i.category || '').includes(currentFilters[type]);
         }
+
         let nameKey = '';
         if (type === 'media') nameKey = (i.title + i.category);
         else if (type === 'selflove') nameKey = (i.name + i.category);
         else if (type === 'finance') nameKey = (i.category || '') + (i.title || '');
         else if (type === 'notes') nameKey = (i.title + i.content);
+        
         const matchSearch = fSearch ? nameKey.toLowerCase().includes(fSearch) : true;
-        return matchYear && matchMonth && matchSearch && matchCategory;
+
+        // 最終回傳包含評分的過濾結果
+        return matchYear && matchMonth && matchSearch && matchCategory && matchRating;
     });
+
+    // ... 後續渲染 HTML 的程式碼保持不變
 
     if (data.length === 0) { container.innerHTML = '<div class="empty-state">尚未發現碎片。</div>'; return; }
     let html = '';
