@@ -168,13 +168,6 @@
             <button class="cat-btn" onclick="filterByCategory('media', '電影')">電影</button>
             <button class="cat-btn" onclick="filterByCategory('media', '展覽')">展覽</button>
             <button class="cat-btn" onclick="filterByCategory('media', '遊戲')">遊戲</button>
-        </section>
-        <div class="category-quick-filter" id="media-rating-quick-filters">
-            <button class="cat-btn" onclick="filterByCategory('media-rating', '5')">♥♥♥♥♥</button>
-            <button class="cat-btn" onclick="filterByCategory('media-rating', '4')">♥♥♥♥</button>
-            <button class="cat-btn" onclick="filterByCategory('media-rating', '3')">♥♥♥</button>
-            <button class="cat-btn" onclick="filterByCategory('media-rating', '2')">♥♥</button>
-            <button class="cat-btn" onclick="filterByCategory('media-rating', '1')">♥1</button>
         </div>
         <div class="filter-area" id="filter-media"></div>
         <div id="media-list"></div>
@@ -397,28 +390,11 @@ function initFilters() {
                 if (y > maxDataYear) maxDataYear = y;
             }
         });
-
-        // 建立年份與月份選單
         let html = `<select id="f-${tab}-year" class="filter-select" onchange="renderData('${tab}')"><option value="">年份</option>`;
         for (let i = maxDataYear; i >= 2020; i--) html += `<option value="${i}">${i}年</option>`;
         html += `</select><select id="f-${tab}-month" class="filter-select" onchange="renderData('${tab}')"><option value="">月份</option>`;
         for (let i = 1; i <= 12; i++) html += `<option value="${i.toString().padStart(2,'0')}">${i}月</option>`;
-        html += `</select>`;
-
-        // 【新增：閱聽頁面專用的愛心篩選】
-        if (tab === 'media') {
-            html += `
-            <select id="f-media-rating" class="filter-select" onchange="renderData('media')">
-                <option value="">評分</option>
-                <option value="5">♥♥♥♥♥</option>
-                <option value="4">♥♥♥♥</option>
-                <option value="3">♥♥♥</option>
-                <option value="2">♥♥</option>
-                <option value="1">♥</option>
-            </select>`;
-        }
-
-        html += `<input type="text" id="f-${tab}-search" class="filter-input" placeholder="關鍵字搜尋..." oninput="renderData('${tab}')">`;
+        html += `</select><input type="text" id="f-${tab}-search" class="filter-input" placeholder="關鍵字搜尋..." oninput="renderData('${tab}')">`;
         area.innerHTML = html;
     });
 }
@@ -507,62 +483,58 @@ function deleteData(type, id) {
 function renderData(type) {
     const container = document.getElementById(type + '-list');
     let data = JSON.parse(localStorage.getItem(type) || '[]');
-    
-    // 取得篩選器數值
     const fYear = document.getElementById(`f-${type}-year`).value;
     const fMonth = document.getElementById(`f-${type}-month`).value;
     const fSearch = document.getElementById(`f-${type}-search`).value.toLowerCase();
-    
-    // 取得愛心篩選值 (僅 media 頁面)
-    const ratingEl = document.getElementById('f-media-rating');
-    const fRating = (type === 'media' && ratingEl) ? ratingEl.value : "";
 
     data = data.filter(i => {
         const dateKey = (type === 'selflove') ? i.buyDate : i.date;
         const matchYear = fYear ? (dateKey || '').startsWith(fYear) : true;
         const matchMonth = fMonth ? (dateKey || '').split('-')[1] === fMonth : true;
-        
-        // 類別篩選
         let matchCategory = true;
         if ((type === 'media' || type === 'selflove') && currentFilters[type] !== '全部') {
             matchCategory = (i.category === currentFilters[type]);
         }
-        
-        // 【新增：愛心篩選邏輯】
-        const matchRating = fRating ? (String(i.rating) === fRating) : true;
-
-        // 關鍵字搜尋
-        let nameKey = "";
+        if (type === 'finance' && currentFilters[type] !== '全部') {
+            matchCategory = (i.category || '').includes(currentFilters[type]);
+        }
+        let nameKey = '';
         if (type === 'media') nameKey = (i.title + i.category);
         else if (type === 'selflove') nameKey = (i.name + i.category);
+        else if (type === 'finance') nameKey = (i.category || '') + (i.title || '');
         else if (type === 'notes') nameKey = (i.title + i.content);
         const matchSearch = fSearch ? nameKey.toLowerCase().includes(fSearch) : true;
-
-        return matchYear && matchMonth && matchSearch && matchCategory && matchRating;
+        return matchYear && matchMonth && matchSearch && matchCategory;
     });
 
     if (data.length === 0) { container.innerHTML = '<div class="empty-state">尚未發現碎片。</div>'; return; }
-    
     let html = '';
+    const today = new Date();
     data.forEach(i => {
         html += `<div class="item-card"><div class="item-info">`;
         if (type === 'media') {
-            // 【修正：讓下方紀錄顯示愛心】
-            const hearts = '♥'.repeat(parseInt(i.rating) || 0);
-            html += `<h4><span class="tag">${i.category}</span>${i.title}</h4>
-                     <p style="color:var(--accent-color); font-size:0.85rem; margin:2px 0;">${hearts}</p>
-                     <p>${i.date} 紀錄</p>`;
+            html += `<h4><span class="tag">${i.category}</span>${i.title}</h4><p>${i.date} 紀錄</p>`;
         } else if (type === 'selflove') {
-            // ... 您原本 selflove 的邏輯 ...
-            html += `<h4><span class="tag">${i.category}</span>${i.name}</h4><p>${i.price ? 'NT$ ' + i.price : ''}</p><p>${i.buyDate} 購買</p>`;
-        } else {
-            // ... notes 或其他 ...
-            html += `<h4>${i.title || '無標題'}</h4><p>${i.date} 紀錄</p>`;
+            let status = '';
+            if (i.expiryDate) {
+                const exp = new Date(i.expiryDate);
+                const diffDays = (exp - today) / (1000 * 60 * 60 * 24);
+                if (diffDays < 0) status = '<span style="color:var(--alert-red)">已過期</span>';
+                else if (diffDays <= 30) status = '<span style="color:var(--warn-yellow)">即將到期</span>';
+            }
+            html += `<h4><span class="tag">${i.category}</span>${i.name}${status}</h4>`;
+            html += `<p>金額：$${Number(i.price || 0).toLocaleString()} / 購入：${i.buyDate}</p>`;
+            if (i.expiryDate) html += `<p style="font-size:0.75rem;color:var(--text-secondary)">效期：${i.expiryDate}</p>`;
+        } else if (type === 'finance') {
+            html += `<h4><span class="tag">${i.category || ''}</span>${i.title || ''}</h4><p>${i.date}</p>`;
+        } else if (type === 'notes') {
+            html += `<h4>${i.title || '無標題'}</h4><p>${i.content}</p><p style="font-size:0.7rem;color:var(--text-secondary)">${i.date}</p>`;
         }
         html += `</div><span class="delete-link" onclick="deleteData('${type}', ${i.id})">移除</span></div>`;
     });
     container.innerHTML = html;
 }
+
 /* ══ 餘裕總覽 ══ */
 function renderFinanceOverview() {
     const data = JSON.parse(localStorage.getItem('finance') || '[]');
