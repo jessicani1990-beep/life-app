@@ -35,14 +35,14 @@
         .filter-area { margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color); }
 
         .category-quick-filter { display: flex; flex-wrap: wrap; gap: 10px 8px; margin-bottom: 15px; padding-bottom: 5px; }
-        .cat-btn { font-size: 0.75rem; padding: 4px 12px; border: 1px solid var(--border-color); border-radius: 20px; background: white; color: var(--text-secondary); cursor: pointer; white-space: nowrap; }
+        .cat-btn { font-size: 0.75rem; padding: 4px 12px; border: 1px solid var(--border-color); border-radius: 20px; background: white; color: var(--text-secondary); cursor: pointer; white-space: nowrap; transition: 0.2s; }
         .cat-btn.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
 
         .tab-content { display: none; animation: fadeIn 0.4s; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        input, select, textarea { padding: 10px 0; border: none; border-bottom: 1px solid var(--border-color); font-family: inherit; background: transparent; outline: none; color: var(--text-primary); }
+        input, select, textarea { padding: 10px 0; border: none; border-bottom: 1px solid var(--border-color); font-family: inherit; background: transparent; outline: none; color: var(--text-primary); width: 100%; margin-bottom: 10px; border-radius: 0; -webkit-appearance: none; }
         textarea { height: 60px; resize: none; }
         .filter-input { font-size: 0.85rem; flex: 2; min-width: 150px; margin-bottom: 0; }
         .filter-select { font-size: 0.85rem; flex: 1; margin-bottom: 0; }
@@ -74,10 +74,10 @@
         .backup-btn-danger { background: transparent; color: var(--alert-red); border: 1px solid var(--alert-red); margin-top: 8px; }
         .backup-btn-danger:active { background: #fdf0f0; }
         #restore-file-input { display: none; }
-        .drop-zone { border: 1.5px dashed var(--border-color); border-radius: 2px; padding: 28px 16px; text-align: center; color: var(--text-secondary); font-size: 0.82rem; cursor: pointer; transition: 0.2s; }
+        .drop-zone { border: 1.5px dashed var(--border-color); border-radius: 2px; padding: 28px 16px; text-align: center; color: var(--text-secondary); font-size: 0.82rem; cursor: pointer; transition: 0.2s; margin-bottom: 12px; }
         .drop-zone:hover, .drop-zone.drag-over { border-color: var(--accent-color); background: #f4f3ee; color: var(--accent-color); }
         .drop-zone .drop-icon { font-size: 1.8rem; display: block; margin-bottom: 8px; }
-        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: #434343; color: white; padding: 10px 22px; border-radius: 20px; font-size: 0.85rem; opacity: 0; transition: 0.3s; }
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: #434343; color: white; padding: 10px 22px; border-radius: 20px; font-size: 0.85rem; opacity: 0; pointer-events: none; transition: opacity 0.3s, transform 0.3s; z-index: 9999; white-space: nowrap; }
         #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
         .backup-stats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
         .stat-chip { font-size: 0.75rem; padding: 4px 12px; border: 1px solid var(--border-color); border-radius: 20px; color: var(--text-secondary); background: white; }
@@ -107,7 +107,7 @@
         .cal-title { font-size: 0.9rem; font-weight: 700; letter-spacing: 1px; }
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
         .cal-day-name { text-align: center; font-size: 0.65rem; color: var(--text-secondary); padding: 4px 0; }
-        .cal-day { text-align: center; font-size: 0.75rem; padding: 6px 2px; cursor: default; border-radius: 50%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
+        .cal-day { text-align: center; font-size: 0.75rem; padding: 6px 2px; cursor: default; border-radius: 50%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; width: 28px; margin: 0 auto; }
         .cal-day.period-day { background: var(--period-light); color: var(--period-red); font-weight: 700; border-radius: 50%; }
         .cal-day.symptom-day { border: 1.5px solid var(--warn-yellow); }
         .cal-day.today { border: 1.5px solid var(--accent-color); }
@@ -155,7 +155,7 @@
     <!-- 閱聽 -->
     <div id="media" class="tab-content active">
         <section class="input-area">
-            <select id="media-type"><option value="書籍">書籍</option><option value="影集">影集</option><option value="電影">電影</option><option value="展覽">展覽</option><option value="遊戲">遊戲</option><option value="其他">其他</option></select>
+            <select id="media-type"><option value="書籍">書籍</option><option value="影集">影集</option><option value="電影">電影</option><option value="展覽">展覽</option><option value="遊戲">遊戲</option></select>
             <input type="text" id="media-title" placeholder="標題名稱">
             <select id="media-rating"><option value="5">♥♥♥♥♥</option><option value="4">♥♥♥♥</option><option value="3">♥♥♥</option><option value="2">♥♥</option><option value="1">♥</option></select>
             <input type="date" id="media-date">
@@ -168,6 +168,11 @@
             <button class="cat-btn" onclick="filterByCategory('media', '電影')">電影</button>
             <button class="cat-btn" onclick="filterByCategory('media', '展覽')">展覽</button>
             <button class="cat-btn" onclick="filterByCategory('media', '遊戲')">遊戲</button>
+            <button class="cat-btn" onclick="filterByCategory('media-rating', '5')">♥♥♥♥♥</button>
+            <button class="cat-btn" onclick="filterByCategory('media-rating', '4')">♥♥♥♥</button>
+            <button class="cat-btn" onclick="filterByCategory('media-rating', '3')">♥♥♥</button>
+            <button class="cat-btn" onclick="filterByCategory('media-rating', '2')">♥♥</button>
+            <button class="cat-btn" onclick="filterByCategory('media-rating', '1')">♥1</button>
         </div>
         <div class="filter-area" id="filter-media"></div>
         <div id="media-list"></div>
@@ -212,15 +217,15 @@
         </section>
         <div class="category-quick-filter" id="finance-quick-filters">
             <button class="cat-btn active" onclick="filterByCategory('finance', '全部')">全部</button>
-            <button class="cat-btn" onclick="filterByCategory('finance', '中國信託')">中信</button>
-            <button class="cat-btn" onclick="filterByCategory('finance', '永豐銀行')">永豐</button>
-            <button class="cat-btn" onclick="filterByCategory('finance', '台新銀行')">台新</button>
-            <button class="cat-btn" onclick="filterByCategory('finance', '玉山銀行')">玉山</button>
-            <button class="cat-btn" onclick="filterByCategory('finance', 'LINE BANK')">LINE</button>
-            <button class="cat-btn" onclick="filterByCategory('finance', '第一銀行')">一銀</button>
-            <button class="cat-btn" onclick="filterByCategory('finance', '國泰世華')">國泰</button>
-            <button class="cat-btn" onclick="filterByCategory('finance', '富邦銀行')">富邦</button>
-            <button class="cat-btn" onclick="filterByCategory('finance', '合作金庫')">合庫</button>
+            <button class="cat-btn" onclick="filterByCategory('finance', '中信')">中信</button>
+            <button class="cat-btn" onclick="filterByCategory('finance', '永豐')">永豐</button>
+            <button class="cat-btn" onclick="filterByCategory('finance', '台新')">台新</button>
+            <button class="cat-btn" onclick="filterByCategory('finance', '玉山')">玉山</button>
+            <button class="cat-btn" onclick="filterByCategory('finance', 'LINE')">LINE</button>
+            <button class="cat-btn" onclick="filterByCategory('finance', '一銀')">一銀</button>
+            <button class="cat-btn" onclick="filterByCategory('finance', '國泰')">國泰</button>
+            <button class="cat-btn" onclick="filterByCategory('finance', '富邦')">富邦</button>
+            <button class="cat-btn" onclick="filterByCategory('finance', '合庫')">合庫</button>
         </div>
         <div class="filter-area" id="filter-finance"></div>
         <div id="finance-list"></div>
@@ -404,7 +409,8 @@ function filterByCategory(tab, category) {
     const buttons = document.querySelectorAll(`#${tab}-quick-filters .cat-btn`);
     buttons.forEach(btn => {
         let btnText = btn.innerText;
-        btn.classList.toggle('active', btnText === category || (tab === 'media' && btnText === '書' && category === '書籍'));
+        if (tab === 'media' && btnText === '書') btnText = '書籍';
+        btn.classList.toggle('active', btnText === category);
     });
     renderData(tab);
 }
@@ -495,7 +501,7 @@ function renderData(type) {
             matchCategory = (i.category === currentFilters[type]);
         }
         if (type === 'finance' && currentFilters[type] !== '全部') {
-            matchCategory = (i.category === currentFilters[type]);
+            matchCategory = (i.category || '').includes(currentFilters[type]);
         }
         let nameKey = '';
         if (type === 'media') nameKey = (i.title + i.category);
@@ -512,8 +518,7 @@ function renderData(type) {
     data.forEach(i => {
         html += `<div class="item-card"><div class="item-info">`;
         if (type === 'media') {
-            const hearts = '♥'.repeat(parseInt(i.rating) || 1);
-            html += `<h4><span class="tag">${i.category}</span>${i.title}</h4><p>${hearts} | ${i.date} 紀錄</p>`;
+            html += `<h4><span class="tag">${i.category}</span>${i.title}</h4><p>${i.date} 紀錄</p>`;
         } else if (type === 'selflove') {
             let status = '';
             if (i.expiryDate) {
@@ -552,7 +557,7 @@ function renderFinanceOverview() {
     const total = banks.reduce((sum, b) => sum + parseFloat(b.title || 0), 0);
     let html = `<h3>各帳戶最新結餘</h3><div class="finance-total">$ ${total.toLocaleString('zh-TW', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</div>`;
     banks.sort((a, b) => parseFloat(b.title) - parseFloat(a.title)).forEach(b => {
-        html += `<div class="bank-row"><span class="bank-name">${b.category}</span><span class="bank-amount">$ ${parseFloat(b.title || 0).toLocaleString('zh-TW', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span></div>`;
+        html += `<div class="bank-row"><span class="bank-name">${b.category}</span><span class="bank-amount">$ ${parseFloat(b.title || 0).toLocaleString('zh-TW', {minimumFractionDigits: 0, maximumFractionDigits: 0})}<span style="font-size:0.7rem;color:var(--text-secondary);margin-left:6px;">${b.date}</span></span></div>`;
     });
     document.getElementById('finance-overview').innerHTML = html;
 }
@@ -959,3 +964,4 @@ window.onload = () => {
 </script>
 </body>
 </html>
+
