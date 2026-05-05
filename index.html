@@ -512,7 +512,7 @@ function renderData(type) {
     data.forEach(i => {
         html += `<div class="item-card"><div class="item-info">`;
         if (type === 'media') {
-            const hearts = '♥'.repeat(i.rating);
+            const hearts = '♥'.repeat(parseInt(i.rating) || 1);
             html += `<h4><span class="tag">${i.category}</span>${i.title}</h4><p>${hearts} | ${i.date} 紀錄</p>`;
         } else if (type === 'selflove') {
             let status = '';
