@@ -20,7 +20,8 @@
             --period-light: #f7e8e8;
         }
 
-        body { font-family: 'Noto Serif TC', serif; background-color: var(--bg-color); color: var(--text-primary); margin: 0; line-height: 1.6; display: flex; justify-content: center; }
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'Noto Serif TC', serif; background-color: var(--bg-color); color: var(--text-primary); margin: 0; line-height: 1.6; display: flex; justify-content: center; overflow-x: hidden; }
         .container { width: 100%; max-width: 500px; padding: 40px 20px; }
         header { text-align: center; margin-bottom: 30px; }
         header h1 { font-weight: 700; letter-spacing: 2px; font-size: 1.5rem; margin-bottom: 5px; }
@@ -31,10 +32,10 @@
         nav button { border: none; background: none; padding: 10px 12px; font-family: inherit; color: var(--text-secondary); cursor: pointer; font-size: 0.9rem; flex-shrink: 0; }
         nav button.active { color: var(--accent-color); border-bottom: 2px solid var(--accent-color); font-weight: bold; }
 
-        section.input-area { background: var(--card-bg); padding: 20px; border-radius: 2px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); margin-bottom: 20px; border: 1px solid var(--border-color); }
-        .filter-area { margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color); }
+        section.input-area { background: var(--card-bg); padding: 20px; border-radius: 2px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); margin-bottom: 16px; border: 1px solid var(--border-color); }
+        .filter-area { margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color); }
 
-        .category-quick-filter { display: flex; flex-wrap: wrap; gap: 10px 8px; margin-bottom: 15px; padding-bottom: 5px; }
+        .category-quick-filter { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
         .cat-btn { font-size: 0.75rem; padding: 4px 12px; border: 1px solid var(--border-color); border-radius: 20px; background: white; color: var(--text-secondary); cursor: pointer; white-space: nowrap; transition: 0.2s; }
         .cat-btn.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
 
@@ -47,7 +48,7 @@
         .filter-input { font-size: 0.85rem; flex: 2; min-width: 150px; margin-bottom: 0; }
         .filter-select { font-size: 0.85rem; flex: 1; margin-bottom: 0; }
 
-        button.add-btn { background-color: var(--accent-color); color: white; border: none; width: 100%; padding: 12px; letter-spacing: 2px; cursor: pointer; font-family: inherit; transition: 0.2s; }
+        button.add-btn { background-color: var(--accent-color); color: white; border: none; width: 100%; padding: 12px; letter-spacing: 2px; cursor: pointer; font-family: inherit; transition: 0.2s; margin-bottom: 0; }
         button.add-btn:active { opacity: 0.8; }
 
         .item-card { border-bottom: 1px solid var(--border-color); padding: 15px 5px; display: flex; justify-content: space-between; align-items: center; }
@@ -55,85 +56,98 @@
         .item-info p { margin: 0; font-size: 0.8rem; color: var(--text-secondary); white-space: pre-wrap; }
         .tag { font-size: 0.7rem; padding: 2px 6px; border: 1px solid var(--border-color); border-radius: 10px; margin-right: 5px; color: var(--accent-color); }
         .delete-link { font-size: 0.8rem; color: #d1d1d1; cursor: pointer; padding: 5px; flex-shrink: 0; }
-
         .empty-state { text-align: center; color: var(--text-secondary); margin-top: 30px; font-size: 0.85rem; }
 
         .date-field { margin-bottom: 10px; }
         .date-label { display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 2px; letter-spacing: 0.5px; }
         .date-field input { margin-bottom: 0; }
 
-        /* ── 備份分頁 ── */
+        .filter-group-label { font-size: 0.7rem; color: var(--text-secondary); letter-spacing: 1px; margin-bottom: 6px; }
+
+        /* 收合式表單 */
+        .add-toggle-btn { display: flex; align-items: center; gap: 8px; background: none; border: 1px dashed var(--border-color); width: 100%; padding: 11px 16px; font-family: inherit; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer; margin-bottom: 16px; letter-spacing: 1px; transition: 0.2s; }
+        .add-toggle-btn:hover { border-color: var(--accent-color); color: var(--accent-color); }
+        .add-toggle-btn.open { border-color: var(--accent-color); color: var(--accent-color); border-style: solid; background: #fafaf8; }
+        .toggle-icon { font-size: 1.1rem; line-height: 1; transition: transform 0.25s; display: inline-block; }
+        .add-toggle-btn.open .toggle-icon { transform: rotate(45deg); }
+        .collapsible-form { display: none; }
+        .collapsible-form.open { display: block; }
+
+        /* 效期提醒 */
+        .expiry-alert { background: #fdf6f0; border: 1px solid var(--warn-yellow); padding: 16px 20px; margin-bottom: 16px; }
+        .expiry-alert-title { font-size: 0.72rem; color: var(--warn-yellow); letter-spacing: 1.5px; margin-bottom: 10px; }
+        .expiry-item { border-bottom: 1px dashed #f0e0cc; padding: 9px 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .expiry-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .expiry-item-name { font-size: 0.88rem; flex: 1; }
+        .expiry-badge { font-size: 0.72rem; padding: 2px 9px; border-radius: 10px; white-space: nowrap; flex-shrink: 0; }
+        .badge-warn { background: #fef0e0; color: var(--warn-yellow); }
+        .badge-urgent { background: #fce8e8; color: var(--alert-red); }
+        .badge-expired { background: #f5e8e8; color: var(--alert-red); font-weight: bold; }
+
+        /* 備份 */
         .backup-section { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 2px; padding: 24px 20px; margin-bottom: 16px; }
-        .backup-section h3 { margin: 0 0 6px 0; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; color: var(--text-primary); }
+        .backup-section h3 { margin: 0 0 6px 0; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; }
         .backup-section p { margin: 0 0 16px 0; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.7; }
-        .backup-btn { display: block; width: 100%; padding: 12px; font-family: inherit; font-size: 0.9rem; letter-spacing: 2px; cursor: pointer; border-radius: 2px; transition: 0.2s; box-sizing: border-box; }
+        .backup-btn { display: block; width: 100%; padding: 12px; font-family: inherit; font-size: 0.9rem; letter-spacing: 2px; cursor: pointer; border-radius: 2px; transition: 0.2s; }
         .backup-btn-primary { background-color: var(--accent-color); color: white; border: none; }
-        .backup-btn-primary:active { opacity: 0.8; }
         .backup-btn-outline { background: transparent; color: var(--accent-color); border: 1px solid var(--accent-color); }
         .backup-btn-outline:active { background: #f0f0ec; }
         .backup-btn-danger { background: transparent; color: var(--alert-red); border: 1px solid var(--alert-red); margin-top: 8px; }
-        .backup-btn-danger:active { background: #fdf0f0; }
         #restore-file-input { display: none; }
         .drop-zone { border: 1.5px dashed var(--border-color); border-radius: 2px; padding: 28px 16px; text-align: center; color: var(--text-secondary); font-size: 0.82rem; cursor: pointer; transition: 0.2s; margin-bottom: 12px; }
         .drop-zone:hover, .drop-zone.drag-over { border-color: var(--accent-color); background: #f4f3ee; color: var(--accent-color); }
         .drop-zone .drop-icon { font-size: 1.8rem; display: block; margin-bottom: 8px; }
-        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: #434343; color: white; padding: 10px 22px; border-radius: 20px; font-size: 0.85rem; opacity: 0; pointer-events: none; transition: opacity 0.3s, transform 0.3s; z-index: 9999; white-space: nowrap; }
-        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
         .backup-stats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
         .stat-chip { font-size: 0.75rem; padding: 4px 12px; border: 1px solid var(--border-color); border-radius: 20px; color: var(--text-secondary); background: white; }
         .stat-chip span { color: var(--accent-color); font-weight: bold; }
 
-        /* ── 餘裕總覽 ── */
-        .finance-overview { background: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; margin-bottom: 20px; }
-        .finance-overview h3 { font-size: 0.85rem; color: var(--text-secondary); letter-spacing: 1px; margin: 0 0 15px 0; font-weight: 400; }
+        /* 餘裕總覽 */
+        .finance-overview { background: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; margin-bottom: 16px; }
+        .finance-overview h3 { font-size: 0.8rem; color: var(--text-secondary); letter-spacing: 1px; margin: 0 0 12px 0; font-weight: 400; }
         .finance-total { font-size: 1.6rem; font-weight: 700; color: var(--text-primary); margin-bottom: 15px; }
         .bank-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--border-color); font-size: 0.85rem; }
         .bank-row:last-child { border-bottom: none; }
         .bank-name { color: var(--text-secondary); }
-        .bank-amount { font-weight: 400; }
 
-        /* ── 生理變化分頁 ── */
-        .body-subtabs { display: flex; gap: 0; margin-bottom: 20px; border: 1px solid var(--border-color); overflow: hidden; }
+        /* 生理變化 */
+        .body-subtabs { display: flex; margin-bottom: 20px; border: 1px solid var(--border-color); overflow: hidden; }
         .body-subtab { flex: 1; padding: 10px; text-align: center; font-size: 0.85rem; background: white; border: none; font-family: inherit; color: var(--text-secondary); cursor: pointer; transition: 0.2s; }
         .body-subtab.active { background: var(--accent-color); color: white; }
-
         .body-subcontent { display: none; }
         .body-subcontent.active { display: block; }
 
-        /* 生理期月曆 */
-        .period-calendar { background: var(--card-bg); border: 1px solid var(--border-color); padding: 15px; margin-bottom: 20px; }
+        .period-calendar { background: var(--card-bg); border: 1px solid var(--border-color); padding: 15px; margin-bottom: 16px; }
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .cal-nav { background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--accent-color); padding: 5px 10px; width: auto; margin: 0; }
         .cal-title { font-size: 0.9rem; font-weight: 700; letter-spacing: 1px; }
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
         .cal-day-name { text-align: center; font-size: 0.65rem; color: var(--text-secondary); padding: 4px 0; }
-        .cal-day { text-align: center; font-size: 0.75rem; padding: 6px 2px; cursor: default; border-radius: 50%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; width: 28px; margin: 0 auto; }
-        .cal-day.period-day { background: var(--period-light); color: var(--period-red); font-weight: 700; border-radius: 50%; }
-        .cal-day.symptom-day { border: 1.5px solid var(--warn-yellow); }
-        .cal-day.today { border: 1.5px solid var(--accent-color); }
+        .cal-day { text-align: center; font-size: 0.75rem; cursor: default; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 28px; height: 28px; margin: 0 auto; position: relative; }
+        .cal-day.period-day { background: var(--period-light); color: var(--period-red); font-weight: 700; }
+        .cal-day.symptom-day::after { content: ''; display: block; width: 4px; height: 4px; border-radius: 50%; background: var(--warn-yellow); position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); }
+        .cal-day.today { outline: 1.5px solid var(--accent-color); outline-offset: 1px; }
         .cal-day.predicted { background: #f0f3ee; color: var(--accent-color); font-style: italic; }
         .cal-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; font-size: 0.7rem; color: var(--text-secondary); }
         .cal-legend-item { display: flex; align-items: center; gap: 5px; }
         .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
 
-        /* 生理期預測卡 */
-        .period-predict-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; margin-bottom: 20px; }
+        .period-predict-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; margin-bottom: 16px; }
         .predict-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--border-color); font-size: 0.85rem; }
         .predict-row:last-child { border-bottom: none; }
         .predict-label { color: var(--text-secondary); }
-        .predict-value { font-weight: 400; }
         .predict-countdown { font-size: 1.4rem; font-weight: 700; color: var(--period-red); }
 
-        /* 症狀勾選 */
         .symptom-checks { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
         .symptom-check-btn { font-size: 0.75rem; padding: 5px 12px; border: 1px solid var(--border-color); border-radius: 20px; background: white; color: var(--text-secondary); cursor: pointer; transition: 0.2s; }
         .symptom-check-btn.selected { background: var(--warn-yellow); color: white; border-color: var(--warn-yellow); }
 
-        /* 體重圖表 */
-        .weight-chart-wrap { background: var(--card-bg); border: 1px solid var(--border-color); padding: 15px; margin-bottom: 20px; }
+        .weight-chart-wrap { background: var(--card-bg); border: 1px solid var(--border-color); padding: 15px; margin-bottom: 16px; }
         .weight-stats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
         .weight-stat { font-size: 0.75rem; padding: 4px 12px; border: 1px solid var(--border-color); border-radius: 20px; color: var(--text-secondary); background: white; }
         .weight-stat span { color: var(--accent-color); font-weight: bold; }
+
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: #434343; color: white; padding: 10px 22px; border-radius: 20px; font-size: 0.85rem; opacity: 0; pointer-events: none; transition: opacity 0.3s, transform 0.3s; z-index: 9999; white-space: nowrap; }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body>
@@ -154,20 +168,35 @@
 
     <!-- 閱聽 -->
     <div id="media" class="tab-content active">
-        <section class="input-area">
-            <select id="media-type"><option value="書籍">書籍</option><option value="影集">影集</option><option value="電影">電影</option><option value="展覽">展覽</option><option value="遊戲">遊戲</option></select>
-            <input type="text" id="media-title" placeholder="標題名稱">
-            <select id="media-rating"><option value="5">♥♥♥♥♥</option><option value="4">♥♥♥♥</option><option value="3">♥♥♥</option><option value="2">♥♥</option><option value="1">♥</option></select>
-            <input type="date" id="media-date">
-            <button class="add-btn" onclick="addData('media')">記下一筆</button>
-        </section>
+        <button class="add-toggle-btn" id="toggle-media-form" onclick="toggleForm('media-form',this)">
+            <span class="toggle-icon">＋</span>新增紀錄
+        </button>
+        <div class="collapsible-form" id="media-form">
+            <section class="input-area">
+                <select id="media-type"><option value="書籍">書籍</option><option value="影集">影集</option><option value="電影">電影</option><option value="展覽">展覽</option><option value="遊戲">遊戲</option></select>
+                <input type="text" id="media-title" placeholder="標題名稱">
+                <select id="media-rating"><option value="5">♥♥♥♥♥</option><option value="4">♥♥♥♥</option><option value="3">♥♥♥</option><option value="2">♥♥</option><option value="1">♥</option></select>
+                <input type="date" id="media-date">
+                <button class="add-btn" onclick="addData('media')">記下一筆</button>
+            </section>
+        </div>
+        <div class="filter-group-label">類型</div>
         <div class="category-quick-filter" id="media-quick-filters">
-            <button class="cat-btn active" onclick="filterByCategory('media', '全部')">全部</button>
-            <button class="cat-btn" onclick="filterByCategory('media', '書籍')">書</button>
-            <button class="cat-btn" onclick="filterByCategory('media', '影集')">影集</button>
-            <button class="cat-btn" onclick="filterByCategory('media', '電影')">電影</button>
-            <button class="cat-btn" onclick="filterByCategory('media', '展覽')">展覽</button>
-            <button class="cat-btn" onclick="filterByCategory('media', '遊戲')">遊戲</button>
+            <button class="cat-btn active" onclick="filterByCategory('media','全部')">全部</button>
+            <button class="cat-btn" onclick="filterByCategory('media','書籍')">書</button>
+            <button class="cat-btn" onclick="filterByCategory('media','影集')">影集</button>
+            <button class="cat-btn" onclick="filterByCategory('media','電影')">電影</button>
+            <button class="cat-btn" onclick="filterByCategory('media','展覽')">展覽</button>
+            <button class="cat-btn" onclick="filterByCategory('media','遊戲')">遊戲</button>
+        </div>
+        <div class="filter-group-label">評分</div>
+        <div class="category-quick-filter" id="media-rating-filters">
+            <button class="cat-btn active" onclick="filterByRating('')">全部</button>
+            <button class="cat-btn" onclick="filterByRating('5')">♥♥♥♥♥</button>
+            <button class="cat-btn" onclick="filterByRating('4')">♥♥♥♥</button>
+            <button class="cat-btn" onclick="filterByRating('3')">♥♥♥</button>
+            <button class="cat-btn" onclick="filterByRating('2')">♥♥</button>
+            <button class="cat-btn" onclick="filterByRating('1')">♥</button>
         </div>
         <div class="filter-area" id="filter-media"></div>
         <div id="media-list"></div>
@@ -175,23 +204,29 @@
 
     <!-- 對自己好 -->
     <div id="selflove" class="tab-content">
-        <section class="input-area">
-            <select id="selflove-type"><option value="化妝品">化妝品</option><option value="保養品">保養品</option><option value="吃">吃</option><option value="服飾包包">服飾包包</option><option value="玩具公仔">玩具公仔</option><option value="旅行">旅行</option><option value="其他">其他</option></select>
-            <input type="text" id="selflove-name" placeholder="產品或犒賞名稱">
-            <input type="number" id="selflove-price" placeholder="金額">
-            <div class="date-field"><label class="date-label">購買日期</label><input type="date" id="selflove-buy-date"></div>
-            <div class="date-field"><label class="date-label">到期日期 <span style="color:var(--text-secondary);font-size:0.75rem;">（非必填）</span></label><input type="date" id="selflove-expiry-date"></div>
-            <button class="add-btn" onclick="addData('selflove')">留存美好</button>
-        </section>
+        <div class="expiry-alert" id="selflove-expiry-alert" style="display:none;"></div>
+        <button class="add-toggle-btn" id="toggle-selflove-form" onclick="toggleForm('selflove-form',this)">
+            <span class="toggle-icon">＋</span>新增品項
+        </button>
+        <div class="collapsible-form" id="selflove-form">
+            <section class="input-area">
+                <select id="selflove-type"><option value="化妝品">化妝品</option><option value="保養品">保養品</option><option value="吃">吃</option><option value="服飾包包">服飾包包</option><option value="玩具公仔">玩具公仔</option><option value="旅行">旅行</option><option value="其他">其他</option></select>
+                <input type="text" id="selflove-name" placeholder="產品或犒賞名稱">
+                <input type="number" id="selflove-price" placeholder="金額">
+                <div class="date-field"><label class="date-label">購買日期</label><input type="date" id="selflove-buy-date"></div>
+                <div class="date-field"><label class="date-label">到期日期 <span style="color:var(--text-secondary);font-size:0.75rem;">（非必填）</span></label><input type="date" id="selflove-expiry-date"></div>
+                <button class="add-btn" onclick="addData('selflove')">留存美好</button>
+            </section>
+        </div>
         <div class="category-quick-filter" id="selflove-quick-filters">
-            <button class="cat-btn active" onclick="filterByCategory('selflove', '全部')">全部</button>
-            <button class="cat-btn" onclick="filterByCategory('selflove', '化妝品')">化妝品</button>
-            <button class="cat-btn" onclick="filterByCategory('selflove', '保養品')">保養品</button>
-            <button class="cat-btn" onclick="filterByCategory('selflove', '吃')">吃</button>
-            <button class="cat-btn" onclick="filterByCategory('selflove', '服飾包包')">服飾包包</button>
-            <button class="cat-btn" onclick="filterByCategory('selflove', '玩具公仔')">玩具公仔</button>
-            <button class="cat-btn" onclick="filterByCategory('selflove', '旅行')">旅行</button>
-            <button class="cat-btn" onclick="filterByCategory('selflove', '其他')">其他</button>
+            <button class="cat-btn active" onclick="filterByCategory('selflove','全部')">全部</button>
+            <button class="cat-btn" onclick="filterByCategory('selflove','化妝品')">化妝品</button>
+            <button class="cat-btn" onclick="filterByCategory('selflove','保養品')">保養品</button>
+            <button class="cat-btn" onclick="filterByCategory('selflove','吃')">吃</button>
+            <button class="cat-btn" onclick="filterByCategory('selflove','服飾包包')">服飾包包</button>
+            <button class="cat-btn" onclick="filterByCategory('selflove','玩具公仔')">玩具公仔</button>
+            <button class="cat-btn" onclick="filterByCategory('selflove','旅行')">旅行</button>
+            <button class="cat-btn" onclick="filterByCategory('selflove','其他')">其他</button>
         </div>
         <div class="filter-area" id="filter-selflove"></div>
         <div id="selflove-list"></div>
@@ -200,27 +235,28 @@
     <!-- 餘裕 -->
     <div id="finance" class="tab-content">
         <div class="finance-overview" id="finance-overview"></div>
-        <section class="input-area">
-            <select id="finance-type">
-                <option value="中國信託">中國信託</option><option value="永豐銀行">永豐銀行</option><option value="台新銀行">台新銀行</option>
-                <option value="玉山銀行">玉山銀行</option><option value="LINE BANK">LINE BANK</option><option value="第一銀行">第一銀行</option>
-                <option value="國泰世華">國泰世華</option><option value="富邦銀行">富邦銀行</option><option value="合作金庫">合作金庫</option>
-            </select>
-            <input type="text" id="finance-title" placeholder="結餘金額">
-            <input type="date" id="finance-date">
-            <button class="add-btn" onclick="addData('finance')">記下一筆</button>
-        </section>
+        <button class="add-toggle-btn" id="toggle-finance-form" onclick="toggleForm('finance-form',this)">
+            <span class="toggle-icon">＋</span>新增結餘
+        </button>
+        <div class="collapsible-form" id="finance-form">
+            <section class="input-area">
+                <select id="finance-type"><option value="中國信託">中國信託</option><option value="永豐銀行">永豐銀行</option><option value="台新銀行">台新銀行</option><option value="玉山銀行">玉山銀行</option><option value="LINE BANK">LINE BANK</option><option value="第一銀行">第一銀行</option><option value="國泰世華">國泰世華</option><option value="富邦銀行">富邦銀行</option><option value="合作金庫">合作金庫</option></select>
+                <input type="text" id="finance-title" placeholder="結餘金額">
+                <input type="date" id="finance-date">
+                <button class="add-btn" onclick="addData('finance')">記下一筆</button>
+            </section>
+        </div>
         <div class="category-quick-filter" id="finance-quick-filters">
-            <button class="cat-btn active" onclick="filterByCategory('finance', '全部')">全部</button>
-            <button class="cat-btn" onclick="filterByCategory('finance', '中信')">中信</button>
-            <button class="cat-btn" onclick="filterByCategory('finance', '永豐')">永豐</button>
-            <button class="cat-btn" onclick="filterByCategory('finance', '台新')">台新</button>
-            <button class="cat-btn" onclick="filterByCategory('finance', '玉山')">玉山</button>
-            <button class="cat-btn" onclick="filterByCategory('finance', 'LINE')">LINE</button>
-            <button class="cat-btn" onclick="filterByCategory('finance', '一銀')">一銀</button>
-            <button class="cat-btn" onclick="filterByCategory('finance', '國泰')">國泰</button>
-            <button class="cat-btn" onclick="filterByCategory('finance', '富邦')">富邦</button>
-            <button class="cat-btn" onclick="filterByCategory('finance', '合庫')">合庫</button>
+            <button class="cat-btn active" onclick="filterByCategory('finance','全部')">全部</button>
+            <button class="cat-btn" onclick="filterByCategory('finance','中信')">中信</button>
+            <button class="cat-btn" onclick="filterByCategory('finance','永豐')">永豐</button>
+            <button class="cat-btn" onclick="filterByCategory('finance','台新')">台新</button>
+            <button class="cat-btn" onclick="filterByCategory('finance','玉山')">玉山</button>
+            <button class="cat-btn" onclick="filterByCategory('finance','LINE')">LINE</button>
+            <button class="cat-btn" onclick="filterByCategory('finance','一銀')">一銀</button>
+            <button class="cat-btn" onclick="filterByCategory('finance','國泰')">國泰</button>
+            <button class="cat-btn" onclick="filterByCategory('finance','富邦')">富邦</button>
+            <button class="cat-btn" onclick="filterByCategory('finance','合庫')">合庫</button>
         </div>
         <div class="filter-area" id="filter-finance"></div>
         <div id="finance-list"></div>
@@ -233,12 +269,8 @@
             <button class="body-subtab" onclick="showBodyTab('weight')" id="btn-weight">體重</button>
         </div>
 
-        <!-- 生理期子頁 -->
         <div id="body-period" class="body-subcontent active">
-            <!-- 預測卡 -->
             <div class="period-predict-card" id="period-predict"></div>
-
-            <!-- 月曆 -->
             <div class="period-calendar">
                 <div class="cal-header">
                     <button class="cal-nav" onclick="changeCalMonth(-1)">&#8249;</button>
@@ -248,35 +280,43 @@
                 <div class="cal-grid" id="cal-grid"></div>
                 <div class="cal-legend">
                     <div class="cal-legend-item"><div class="legend-dot" style="background:var(--period-light);border:1px solid var(--period-red);"></div>生理期</div>
-                    <div class="cal-legend-item"><div class="legend-dot" style="border:1.5px solid var(--warn-yellow);"></div>症狀</div>
+                    <div class="cal-legend-item"><div class="legend-dot" style="background:var(--warn-yellow);width:6px;height:6px;"></div>症狀</div>
                     <div class="cal-legend-item"><div class="legend-dot" style="background:#f0f3ee;border:1px solid var(--accent-color);"></div>預測</div>
-                    <div class="cal-legend-item"><div class="legend-dot" style="border:1.5px solid var(--accent-color);"></div>今天</div>
+                    <div class="cal-legend-item"><div class="legend-dot" style="outline:1.5px solid var(--accent-color);outline-offset:1px;"></div>今天</div>
                 </div>
             </div>
 
-            <!-- 月經紀錄 -->
-            <section class="input-area">
-                <div style="font-size:0.8rem;color:var(--text-secondary);letter-spacing:1px;margin-bottom:12px;">月經紀錄</div>
-                <div class="date-field"><label class="date-label">開始日期</label><input type="date" id="period-start"></div>
-                <div class="date-field"><label class="date-label">結束日期 <span style="color:var(--text-secondary);font-size:0.75rem;">（非必填，可之後補）</span></label><input type="date" id="period-end"></div>
-                <button class="add-btn" onclick="addPeriod()">記下這次月經</button>
-            </section>
+            <button class="add-toggle-btn" id="toggle-period-form" onclick="toggleForm('period-form',this)">
+                <span class="toggle-icon">＋</span>記錄月經
+            </button>
+            <div class="collapsible-form" id="period-form">
+                <section class="input-area">
+                    <div style="font-size:0.78rem;color:var(--text-secondary);letter-spacing:1px;margin-bottom:12px;">月經紀錄</div>
+                    <div class="date-field"><label class="date-label">開始日期</label><input type="date" id="period-start"></div>
+                    <div class="date-field"><label class="date-label">結束日期 <span style="font-size:0.72rem;">（非必填，可之後補）</span></label><input type="date" id="period-end"></div>
+                    <button class="add-btn" onclick="addPeriod()">記下這次月經</button>
+                </section>
+            </div>
 
-            <!-- 症狀紀錄（獨立） -->
-            <section class="input-area">
-                <div style="font-size:0.8rem;color:var(--text-secondary);letter-spacing:1px;margin-bottom:12px;">症狀紀錄</div>
-                <div class="date-field"><label class="date-label">日期</label><input type="date" id="symptom-date"></div>
-                <div class="symptom-checks" id="symptom-checks">
-                    <button class="symptom-check-btn" onclick="toggleSymptom(this,'胸部脹痛')">胸部脹痛</button>
-                    <button class="symptom-check-btn" onclick="toggleSymptom(this,'頭痛')">頭痛</button>
-                    <button class="symptom-check-btn" onclick="toggleSymptom(this,'點狀出血')">點狀出血</button>
-                    <button class="symptom-check-btn" onclick="toggleSymptom(this,'腹部疼痛')">腹部疼痛</button>
-                </div>
-                <button class="add-btn" onclick="addSymptom()">記錄症狀</button>
-            </section>
+            <button class="add-toggle-btn" id="toggle-symptom-form" onclick="toggleForm('symptom-form',this)">
+                <span class="toggle-icon">＋</span>記錄症狀
+            </button>
+            <div class="collapsible-form" id="symptom-form">
+                <section class="input-area">
+                    <div style="font-size:0.78rem;color:var(--text-secondary);letter-spacing:1px;margin-bottom:12px;">症狀紀錄</div>
+                    <div class="date-field"><label class="date-label">日期</label><input type="date" id="symptom-date"></div>
+                    <div class="symptom-checks">
+                        <button class="symptom-check-btn" onclick="toggleSymptom(this,'胸部脹痛')">胸部脹痛</button>
+                        <button class="symptom-check-btn" onclick="toggleSymptom(this,'頭痛')">頭痛</button>
+                        <button class="symptom-check-btn" onclick="toggleSymptom(this,'點狀出血')">點狀出血</button>
+                        <button class="symptom-check-btn" onclick="toggleSymptom(this,'腹部疼痛')">腹部疼痛</button>
+                        <button class="symptom-check-btn" onclick="toggleSymptom(this,'痘痘')">痘痘</button>
+                    </div>
+                    <button class="add-btn" onclick="addSymptom()">記錄症狀</button>
+                </section>
+            </div>
 
-            <!-- 清單篩選 -->
-            <div style="font-size:0.75rem;color:var(--text-secondary);letter-spacing:1px;margin-bottom:8px;">依症狀篩選紀錄</div>
+            <div class="filter-group-label" style="margin-top:4px;">篩選紀錄</div>
             <div class="category-quick-filter" id="period-symptom-filters">
                 <button class="cat-btn active" onclick="filterPeriodSymptom('全部')">全部</button>
                 <button class="cat-btn" onclick="filterPeriodSymptom('月經')">月經</button>
@@ -284,35 +324,45 @@
                 <button class="cat-btn" onclick="filterPeriodSymptom('頭痛')">頭痛</button>
                 <button class="cat-btn" onclick="filterPeriodSymptom('點狀出血')">點狀出血</button>
                 <button class="cat-btn" onclick="filterPeriodSymptom('腹部疼痛')">腹部疼痛</button>
+                <button class="cat-btn" onclick="filterPeriodSymptom('痘痘')">痘痘</button>
             </div>
             <div id="period-list"></div>
         </div>
 
-        <!-- 體重子頁 -->
         <div id="body-weight" class="body-subcontent">
             <div class="weight-chart-wrap">
                 <div class="weight-stats" id="weight-stats"></div>
                 <div style="position:relative;width:100%;height:200px;">
-                    <canvas id="weightChart" role="img" aria-label="體重趨勢折線圖">體重歷史紀錄圖表</canvas>
+                    <canvas id="weightChart" role="img" aria-label="體重趨勢折線圖"></canvas>
                 </div>
             </div>
-            <section class="input-area">
-                <input type="number" id="weight-value" placeholder="體重（公斤）" step="0.1">
-                <input type="date" id="weight-date">
-                <button class="add-btn" onclick="addWeight()">記錄體重</button>
-            </section>
+            <button class="add-toggle-btn" id="toggle-weight-form" onclick="toggleForm('weight-form',this)">
+                <span class="toggle-icon">＋</span>記錄體重
+            </button>
+            <div class="collapsible-form" id="weight-form">
+                <section class="input-area">
+                    <input type="number" id="weight-value" placeholder="體重（公斤）" step="0.1">
+                    <input type="date" id="weight-date">
+                    <button class="add-btn" onclick="addWeight()">記錄體重</button>
+                </section>
+            </div>
             <div id="weight-list"></div>
         </div>
     </div>
 
     <!-- 隨手記記 -->
     <div id="notes" class="tab-content">
-        <section class="input-area">
-            <input type="text" id="note-title" placeholder="記點什麼標題...">
-            <textarea id="note-content" placeholder="細節內容..."></textarea>
-            <input type="date" id="note-date">
-            <button class="add-btn" onclick="addData('notes')">封存瞬間</button>
-        </section>
+        <button class="add-toggle-btn" id="toggle-notes-form" onclick="toggleForm('notes-form',this)">
+            <span class="toggle-icon">＋</span>新增筆記
+        </button>
+        <div class="collapsible-form" id="notes-form">
+            <section class="input-area">
+                <input type="text" id="note-title" placeholder="記點什麼標題...">
+                <textarea id="note-content" placeholder="細節內容..."></textarea>
+                <input type="date" id="note-date">
+                <button class="add-btn" onclick="addData('notes')">封存瞬間</button>
+            </section>
+        </div>
         <div class="filter-area" id="filter-notes"></div>
         <div id="notes-list"></div>
     </div>
@@ -348,14 +398,13 @@
 </div>
 
 <div id="toast"></div>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 const tabs = ['media', 'selflove', 'finance', 'notes'];
 const allStoreKeys = ['media', 'selflove', 'finance', 'notes', 'period', 'symptom', 'weight'];
 let currentFilters = { media: '全部', selflove: '全部', finance: '全部' };
+let currentRatingFilter = '';
 let pendingRestoreData = null;
-let pendingRestoreMode = null;
 let calViewYear, calViewMonth;
 let selectedSymptoms = [];
 let currentPeriodSymptomFilter = '全部';
@@ -377,37 +426,58 @@ function resetDates() {
     });
 }
 
+function toggleForm(formId, btn) {
+    const form = document.getElementById(formId);
+    const isOpen = form.classList.contains('open');
+    form.classList.toggle('open', !isOpen);
+    btn.classList.toggle('open', !isOpen);
+}
+
+function closeForm(formId, btnId) {
+    document.getElementById(formId).classList.remove('open');
+    document.getElementById(btnId).classList.remove('open');
+}
+
 function initFilters() {
     tabs.forEach(tab => {
-        const area = document.getElementById(`filter-${tab}`);
+        const area = document.getElementById('filter-' + tab);
         const data = JSON.parse(localStorage.getItem(tab) || '[]');
         const sysYear = new Date().getFullYear();
-        let maxDataYear = sysYear;
+        let maxYear = sysYear;
         data.forEach(item => {
-            const itemDate = (tab === 'selflove') ? item.buyDate : item.date;
-            if (itemDate) {
-                const y = parseInt(itemDate.split('-')[0]);
-                if (y > maxDataYear) maxDataYear = y;
-            }
+            const d = tab === 'selflove' ? item.buyDate : item.date;
+            if (d) { const y = parseInt(d.split('-')[0]); if (y > maxYear) maxYear = y; }
         });
-        let html = `<select id="f-${tab}-year" class="filter-select" onchange="renderData('${tab}')"><option value="">年份</option>`;
-        for (let i = maxDataYear; i >= 2020; i--) html += `<option value="${i}">${i}年</option>`;
-        html += `</select><select id="f-${tab}-month" class="filter-select" onchange="renderData('${tab}')"><option value="">月份</option>`;
-        for (let i = 1; i <= 12; i++) html += `<option value="${i.toString().padStart(2,'0')}">${i}月</option>`;
-        html += `</select><input type="text" id="f-${tab}-search" class="filter-input" placeholder="關鍵字搜尋..." oninput="renderData('${tab}')">`;
+        let html = '<select id="f-' + tab + '-year" class="filter-select" onchange="renderData(\'' + tab + '\')"><option value="">年份</option>';
+        for (let i = maxYear; i >= 2020; i--) html += '<option value="' + i + '">' + i + '年</option>';
+        html += '</select><select id="f-' + tab + '-month" class="filter-select" onchange="renderData(\'' + tab + '\')"><option value="">月份</option>';
+        for (let i = 1; i <= 12; i++) html += '<option value="' + String(i).padStart(2,'0') + '">' + i + '月</option>';
+        html += '</select><input type="text" id="f-' + tab + '-search" class="filter-input" placeholder="關鍵字搜尋..." oninput="renderData(\'' + tab + '\')">';
         area.innerHTML = html;
     });
 }
 
 function filterByCategory(tab, category) {
     currentFilters[tab] = category;
-    const buttons = document.querySelectorAll(`#${tab}-quick-filters .cat-btn`);
-    buttons.forEach(btn => {
-        let btnText = btn.innerText;
-        if (tab === 'media' && btnText === '書') btnText = '書籍';
-        btn.classList.toggle('active', btnText === category);
+    document.querySelectorAll('#' + tab + '-quick-filters .cat-btn').forEach(btn => {
+        let t = btn.innerText;
+        if (tab === 'media' && t === '書') t = '書籍';
+        btn.classList.toggle('active', t === category);
     });
     renderData(tab);
+}
+
+function filterByRating(rating) {
+    currentRatingFilter = rating;
+    document.querySelectorAll('#media-rating-filters .cat-btn').forEach(btn => {
+        const btnText = btn.innerText.trim();
+        if (rating === '') {
+            btn.classList.toggle('active', btnText === '全部');
+        } else {
+            btn.classList.toggle('active', btnText === '♥'.repeat(parseInt(rating)));
+        }
+    });
+    renderData('media');
 }
 
 function showTab(tabId) {
@@ -415,18 +485,11 @@ function showTab(tabId) {
     document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
     document.getElementById('btn-' + tabId).classList.add('active');
-    if (tabId === 'settings') {
-        renderBackupStats();
-    } else if (tabId === 'body') {
-        renderPeriodData();
-        renderCalendar();
-        renderPeriodPredict();
-    } else if (tabId === 'finance') {
-        renderFinanceOverview();
-        renderData(tabId);
-    } else {
-        renderData(tabId);
-    }
+    if (tabId === 'settings') renderBackupStats();
+    else if (tabId === 'body') { renderPeriodData(); renderCalendar(); renderPeriodPredict(); }
+    else if (tabId === 'finance') { renderFinanceOverview(); renderData(tabId); }
+    else if (tabId === 'selflove') { renderExpiryAlert(); renderData(tabId); }
+    else renderData(tabId);
 }
 
 function addData(type) {
@@ -440,6 +503,7 @@ function addData(type) {
         entry.date = document.getElementById('media-date').value || today;
         if (!entry.title) return;
         document.getElementById('media-title').value = '';
+        closeForm('media-form', 'toggle-media-form');
     } else if (type === 'selflove') {
         entry.category = document.getElementById('selflove-type').value;
         entry.name = document.getElementById('selflove-name').value;
@@ -450,12 +514,14 @@ function addData(type) {
         document.getElementById('selflove-name').value = '';
         document.getElementById('selflove-price').value = '';
         document.getElementById('selflove-expiry-date').value = '';
+        closeForm('selflove-form', 'toggle-selflove-form');
     } else if (type === 'finance') {
         entry.category = document.getElementById('finance-type').value;
         entry.title = document.getElementById('finance-title').value;
         entry.date = document.getElementById('finance-date').value || today;
         if (!entry.title) return;
         document.getElementById('finance-title').value = '';
+        closeForm('finance-form', 'toggle-finance-form');
     } else if (type === 'notes') {
         entry.title = document.getElementById('note-title').value;
         entry.content = document.getElementById('note-content').value;
@@ -463,6 +529,7 @@ function addData(type) {
         if (!entry.title && !entry.content) return;
         document.getElementById('note-title').value = '';
         document.getElementById('note-content').value = '';
+        closeForm('notes-form', 'toggle-notes-form');
     }
     data.unshift(entry);
     localStorage.setItem(type, JSON.stringify(data));
@@ -470,6 +537,8 @@ function addData(type) {
     initFilters();
     renderData(type);
     if (type === 'finance') renderFinanceOverview();
+    if (type === 'selflove') renderExpiryAlert();
+    showToast('✓ 已記錄');
 }
 
 function deleteData(type, id) {
@@ -478,86 +547,103 @@ function deleteData(type, id) {
     localStorage.setItem(type, JSON.stringify(data));
     renderData(type);
     if (type === 'finance') renderFinanceOverview();
+    if (type === 'selflove') renderExpiryAlert();
 }
 
 function renderData(type) {
     const container = document.getElementById(type + '-list');
     let data = JSON.parse(localStorage.getItem(type) || '[]');
-    const fYear = document.getElementById(`f-${type}-year`).value;
-    const fMonth = document.getElementById(`f-${type}-month`).value;
-    const fSearch = document.getElementById(`f-${type}-search`).value.toLowerCase();
+    const fYear = document.getElementById('f-' + type + '-year').value;
+    const fMonth = document.getElementById('f-' + type + '-month').value;
+    const fSearch = document.getElementById('f-' + type + '-search').value.toLowerCase();
 
     data = data.filter(i => {
-        const dateKey = (type === 'selflove') ? i.buyDate : i.date;
+        const dateKey = type === 'selflove' ? i.buyDate : i.date;
         const matchYear = fYear ? (dateKey || '').startsWith(fYear) : true;
         const matchMonth = fMonth ? (dateKey || '').split('-')[1] === fMonth : true;
         let matchCategory = true;
-        if ((type === 'media' || type === 'selflove') && currentFilters[type] !== '全部') {
-            matchCategory = (i.category === currentFilters[type]);
-        }
-        if (type === 'finance' && currentFilters[type] !== '全部') {
-            matchCategory = (i.category || '').includes(currentFilters[type]);
-        }
+        if ((type === 'media' || type === 'selflove') && currentFilters[type] !== '全部') matchCategory = i.category === currentFilters[type];
+        if (type === 'finance' && currentFilters[type] !== '全部') matchCategory = (i.category || '').includes(currentFilters[type]);
+        let matchRating = true;
+        if (type === 'media' && currentRatingFilter !== '') matchRating = String(i.rating) === String(currentRatingFilter);
         let nameKey = '';
-        if (type === 'media') nameKey = (i.title + i.category);
-        else if (type === 'selflove') nameKey = (i.name + i.category);
+        if (type === 'media') nameKey = (i.title || '') + (i.category || '');
+        else if (type === 'selflove') nameKey = (i.name || '') + (i.category || '');
         else if (type === 'finance') nameKey = (i.category || '') + (i.title || '');
-        else if (type === 'notes') nameKey = (i.title + i.content);
+        else if (type === 'notes') nameKey = (i.title || '') + (i.content || '');
         const matchSearch = fSearch ? nameKey.toLowerCase().includes(fSearch) : true;
-        return matchYear && matchMonth && matchSearch && matchCategory;
+        return matchYear && matchMonth && matchSearch && matchCategory && matchRating;
     });
 
     if (data.length === 0) { container.innerHTML = '<div class="empty-state">尚未發現碎片。</div>'; return; }
-    let html = '';
     const today = new Date();
+    let html = '';
     data.forEach(i => {
-        html += `<div class="item-card"><div class="item-info">`;
+        html += '<div class="item-card"><div class="item-info">';
         if (type === 'media') {
-            html += `<h4><span class="tag">${i.category}</span>${i.title}</h4><p>${i.date} 紀錄</p>`;
+            const ratingNum = parseInt(i.rating || '0');
+            const hearts = ratingNum > 0 ? '♥'.repeat(ratingNum) : '';
+            html += '<h4><span class="tag">' + i.category + '</span>' + i.title + '</h4>';
+            if (hearts) html += '<p style="color:#c9856a;font-size:0.95rem;letter-spacing:3px;margin:2px 0;">' + hearts + '</p>';
+            html += '<p>' + i.date + ' 紀錄</p>';
         } else if (type === 'selflove') {
             let status = '';
             if (i.expiryDate) {
-                const exp = new Date(i.expiryDate);
-                const diffDays = (exp - today) / (1000 * 60 * 60 * 24);
-                if (diffDays < 0) status = '<span style="color:var(--alert-red)">已過期</span>';
-                else if (diffDays <= 30) status = '<span style="color:var(--warn-yellow)">即將到期</span>';
+                const diff = (new Date(i.expiryDate) - today) / 86400000;
+                if (diff < 0) status = ' <span style="color:var(--alert-red);font-size:0.75rem;">已過期</span>';
+                else if (diff <= 30) status = ' <span style="color:var(--warn-yellow);font-size:0.75rem;">即將到期</span>';
             }
-            html += `<h4><span class="tag">${i.category}</span>${i.name}${status}</h4>`;
-            html += `<p>金額：$${Number(i.price || 0).toLocaleString()} / 購入：${i.buyDate}</p>`;
-            if (i.expiryDate) html += `<p style="font-size:0.75rem;color:var(--text-secondary)">效期：${i.expiryDate}</p>`;
+            html += '<h4><span class="tag">' + i.category + '</span>' + i.name + status + '</h4>';
+            html += '<p>金額：$' + Number(i.price || 0).toLocaleString() + ' / 購入：' + i.buyDate + '</p>';
+            if (i.expiryDate) html += '<p style="font-size:0.75rem;color:var(--text-secondary)">效期：' + i.expiryDate + '</p>';
         } else if (type === 'finance') {
-            html += `<h4><span class="tag">${i.category || ''}</span>${i.title || ''}</h4><p>${i.date}</p>`;
+            html += '<h4><span class="tag">' + (i.category || '') + '</span>' + (i.title || '') + '</h4><p>' + i.date + '</p>';
         } else if (type === 'notes') {
-            html += `<h4>${i.title || '無標題'}</h4><p>${i.content}</p><p style="font-size:0.7rem;color:var(--text-secondary)">${i.date}</p>`;
+            html += '<h4>' + (i.title || '無標題') + '</h4><p>' + (i.content || '') + '</p><p style="font-size:0.7rem;color:var(--text-secondary)">' + i.date + '</p>';
         }
-        html += `</div><span class="delete-link" onclick="deleteData('${type}', ${i.id})">移除</span></div>`;
+        html += '</div><span class="delete-link" onclick="deleteData(\'' + type + '\',' + i.id + ')">移除</span></div>';
     });
     container.innerHTML = html;
 }
 
-/* ══ 餘裕總覽 ══ */
+function renderExpiryAlert() {
+    const data = JSON.parse(localStorage.getItem('selflove') || '[]');
+    const today = new Date(); today.setHours(0,0,0,0);
+    const el = document.getElementById('selflove-expiry-alert');
+    const expiring = data
+        .filter(i => i.expiryDate)
+        .map(i => ({ ...i, diff: Math.ceil((new Date(i.expiryDate) - today) / 86400000) }))
+        .filter(i => i.diff <= 30)
+        .sort((a, b) => a.diff - b.diff);
+    if (expiring.length === 0) { el.style.display = 'none'; return; }
+    el.style.display = 'block';
+    let html = '<div class="expiry-alert-title">⏰ 效期提醒 · ' + expiring.length + ' 項</div>';
+    expiring.forEach(i => {
+        let badge, label;
+        if (i.diff < 0) { badge = 'badge-expired'; label = '已過期'; }
+        else if (i.diff === 0) { badge = 'badge-urgent'; label = '今天到期'; }
+        else if (i.diff <= 7) { badge = 'badge-urgent'; label = '剩 ' + i.diff + ' 天'; }
+        else { badge = 'badge-warn'; label = '剩 ' + i.diff + ' 天'; }
+        html += '<div class="expiry-item"><span class="expiry-item-name"><span class="tag">' + i.category + '</span>' + i.name + '</span><span class="expiry-badge ' + badge + '">' + label + '</span></div>';
+    });
+    el.innerHTML = html;
+}
+
 function renderFinanceOverview() {
     const data = JSON.parse(localStorage.getItem('finance') || '[]');
     const latest = {};
-    data.forEach(item => {
-        if (!latest[item.category] || item.date > latest[item.category].date) {
-            latest[item.category] = item;
-        }
-    });
+    data.forEach(item => { if (!latest[item.category] || item.date > latest[item.category].date) latest[item.category] = item; });
     const banks = Object.values(latest);
-    if (banks.length === 0) {
-        document.getElementById('finance-overview').innerHTML = '<p style="font-size:0.8rem;color:var(--text-secondary);margin:0;">尚無任何帳戶紀錄。</p>';
-        return;
-    }
-    const total = banks.reduce((sum, b) => sum + parseFloat(b.title || 0), 0);
-    let html = `<h3>各帳戶最新結餘</h3><div class="finance-total">$ ${total.toLocaleString('zh-TW', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</div>`;
+    const el = document.getElementById('finance-overview');
+    if (banks.length === 0) { el.innerHTML = '<p style="font-size:0.8rem;color:var(--text-secondary);margin:0;">尚無任何帳戶紀錄。</p>'; return; }
+    const total = banks.reduce((s, b) => s + parseFloat(b.title || 0), 0);
+    let html = '<h3>各帳戶最新結餘</h3><div class="finance-total">$ ' + total.toLocaleString('zh-TW', {maximumFractionDigits:0}) + '</div>';
     banks.sort((a, b) => parseFloat(b.title) - parseFloat(a.title)).forEach(b => {
-        html += `<div class="bank-row"><span class="bank-name">${b.category}</span><span class="bank-amount">$ ${parseFloat(b.title || 0).toLocaleString('zh-TW', {minimumFractionDigits: 0, maximumFractionDigits: 0})}<span style="font-size:0.7rem;color:var(--text-secondary);margin-left:6px;">${b.date}</span></span></div>`;
+        html += '<div class="bank-row"><span class="bank-name">' + b.category + '</span><span>$ ' + parseFloat(b.title||0).toLocaleString('zh-TW',{maximumFractionDigits:0}) + ' <span style="font-size:0.7rem;color:var(--text-secondary);margin-left:4px;">' + b.date + '</span></span></div>';
     });
-    document.getElementById('finance-overview').innerHTML = html;
+    el.innerHTML = html;
 }
 
-/* ══ 生理期 ══ */
 function showBodyTab(tabId) {
     document.querySelectorAll('.body-subcontent').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.body-subtab').forEach(b => b.classList.remove('active'));
@@ -577,84 +663,62 @@ function addPeriod() {
     const start = document.getElementById('period-start').value;
     if (!start) { showToast('請填寫開始日期'); return; }
     const end = document.getElementById('period-end').value;
-    const entry = { id: Date.now(), start, end };
     let data = JSON.parse(localStorage.getItem('period') || '[]');
-    data.unshift(entry);
+    data.unshift({ id: Date.now(), start, end });
     localStorage.setItem('period', JSON.stringify(data));
     document.getElementById('period-end').value = '';
     resetDates();
-    renderPeriodData();
-    renderCalendar();
-    renderPeriodPredict();
-    showToast('月經已記錄');
+    closeForm('period-form', 'toggle-period-form');
+    renderPeriodData(); renderCalendar(); renderPeriodPredict();
+    showToast('✓ 月經已記錄');
 }
 
 function addSymptom() {
     const date = document.getElementById('symptom-date').value || getTodayString();
     if (selectedSymptoms.length === 0) { showToast('請至少選擇一個症狀'); return; }
-    const entry = { id: Date.now(), date, symptoms: [...selectedSymptoms] };
     let data = JSON.parse(localStorage.getItem('symptom') || '[]');
-    data.unshift(entry);
+    data.unshift({ id: Date.now(), date, symptoms: [...selectedSymptoms] });
     localStorage.setItem('symptom', JSON.stringify(data));
     selectedSymptoms = [];
     document.querySelectorAll('.symptom-check-btn').forEach(b => b.classList.remove('selected'));
     resetDates();
-    renderPeriodData();
-    renderCalendar();
-    showToast('症狀已記錄');
+    closeForm('symptom-form', 'toggle-symptom-form');
+    renderPeriodData(); renderCalendar();
+    showToast('✓ 症狀已記錄');
 }
 
 function deletePeriod(type, id) {
     if (!confirm('確定要移除？')) return;
     let data = JSON.parse(localStorage.getItem(type) || '[]').filter(i => i.id !== id);
     localStorage.setItem(type, JSON.stringify(data));
-    renderPeriodData();
-    renderCalendar();
-    renderPeriodPredict();
+    renderPeriodData(); renderCalendar(); renderPeriodPredict();
 }
 
 function filterPeriodSymptom(sym) {
     currentPeriodSymptomFilter = sym;
-    document.querySelectorAll('#period-symptom-filters .cat-btn').forEach(b => {
-        b.classList.toggle('active', b.innerText === sym);
-    });
+    document.querySelectorAll('#period-symptom-filters .cat-btn').forEach(b => b.classList.toggle('active', b.innerText === sym));
     renderPeriodData();
 }
 
 function renderPeriodData() {
     const periodData = JSON.parse(localStorage.getItem('period') || '[]');
     const symptomData = JSON.parse(localStorage.getItem('symptom') || '[]');
-
-    // Build unified list with type tag
     let combined = [
         ...periodData.map(i => ({ ...i, _type: 'period', _sortDate: i.start })),
         ...symptomData.map(i => ({ ...i, _type: 'symptom', _sortDate: i.date }))
     ].sort((a, b) => b._sortDate.localeCompare(a._sortDate));
-
     const f = currentPeriodSymptomFilter;
-    if (f !== '全部') {
-        combined = combined.filter(i => {
-            if (f === '月經') return i._type === 'period';
-            return i._type === 'symptom' && i.symptoms && i.symptoms.includes(f);
-        });
-    }
-
+    if (f !== '全部') combined = combined.filter(i => f === '月經' ? i._type === 'period' : i._type === 'symptom' && i.symptoms && i.symptoms.includes(f));
     const container = document.getElementById('period-list');
     if (combined.length === 0) { container.innerHTML = '<div class="empty-state">尚無紀錄。</div>'; return; }
     let html = '';
     combined.forEach(i => {
         if (i._type === 'period') {
             const dur = i.end ? Math.round((new Date(i.end) - new Date(i.start)) / 86400000) + 1 : null;
-            html += `<div class="item-card"><div class="item-info">
-                <h4><span class="tag" style="color:var(--period-red);border-color:var(--period-red);">月經</span>${i.start}${i.end ? ' → ' + i.end : ' → 記錄中'}</h4>
-                <p>${dur ? dur + ' 天' : '尚未結束'}</p>
-            </div><span class="delete-link" onclick="deletePeriod('period', ${i.id})">移除</span></div>`;
+            html += '<div class="item-card"><div class="item-info"><h4><span class="tag" style="color:var(--period-red);border-color:var(--period-red);">月經</span>' + i.start + (i.end ? ' → ' + i.end : ' → 記錄中') + '</h4><p>' + (dur ? dur + ' 天' : '尚未結束') + '</p></div><span class="delete-link" onclick="deletePeriod(\'period\',' + i.id + ')">移除</span></div>';
         } else {
-            const syms = i.symptoms.map(s => `<span class="tag">${s}</span>`).join('');
-            html += `<div class="item-card"><div class="item-info">
-                <h4>${syms}</h4>
-                <p>${i.date}</p>
-            </div><span class="delete-link" onclick="deletePeriod('symptom', ${i.id})">移除</span></div>`;
+            const syms = i.symptoms.map(s => '<span class="tag">' + s + '</span>').join('');
+            html += '<div class="item-card"><div class="item-info"><h4>' + syms + '</h4><p>' + i.date + '</p></div><span class="delete-link" onclick="deletePeriod(\'symptom\',' + i.id + ')">移除</span></div>';
         }
     });
     container.innerHTML = html;
@@ -664,53 +728,35 @@ function getPeriodStats() {
     const data = JSON.parse(localStorage.getItem('period') || '[]').filter(i => i.start).sort((a, b) => a.start < b.start ? -1 : 1);
     if (data.length === 0) return null;
     const durations = data.filter(i => i.end).map(i => Math.round((new Date(i.end) - new Date(i.start)) / 86400000) + 1);
-    const avgDuration = durations.length ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : 5;
+    const avgDuration = durations.length ? Math.round(durations.reduce((a,b) => a+b,0) / durations.length) : 5;
     const cycles = [];
     for (let i = 1; i < data.length; i++) {
-        const diff = Math.round((new Date(data[i].start) - new Date(data[i - 1].start)) / 86400000);
+        const diff = Math.round((new Date(data[i].start) - new Date(data[i-1].start)) / 86400000);
         if (diff > 15 && diff < 60) cycles.push(diff);
     }
-    const avgCycle = cycles.length ? Math.round(cycles.reduce((a, b) => a + b, 0) / cycles.length) : 28;
-    const last = data[data.length - 1];
-    return { last, avgDuration, avgCycle };
+    const avgCycle = cycles.length ? Math.round(cycles.reduce((a,b) => a+b,0) / cycles.length) : 28;
+    return { last: data[data.length-1], avgDuration, avgCycle };
 }
 
 function renderPeriodPredict() {
     const stats = getPeriodStats();
-    const container = document.getElementById('period-predict');
-    if (!stats) { container.innerHTML = '<p style="font-size:0.8rem;color:var(--text-secondary);margin:0;">還沒有足夠的紀錄來預測，至少需要一筆資料。</p>'; return; }
+    const el = document.getElementById('period-predict');
+    if (!stats) { el.innerHTML = '<p style="font-size:0.8rem;color:var(--text-secondary);margin:0;">還沒有足夠的紀錄來預測，至少需要一筆資料。</p>'; return; }
     const { last, avgDuration, avgCycle } = stats;
-    const lastStart = new Date(last.start);
-    const predictDate = new Date(lastStart);
+    const predictDate = new Date(last.start);
     predictDate.setDate(predictDate.getDate() + avgCycle);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = new Date(); today.setHours(0,0,0,0);
     const daysLeft = Math.ceil((predictDate - today) / 86400000);
     const predictStr = predictDate.toISOString().split('T')[0];
-    let countdownHtml = '';
-    if (daysLeft > 0) {
-        countdownHtml = `<div class="predict-countdown">${daysLeft} 天後</div>`;
-    } else if (daysLeft === 0) {
-        countdownHtml = `<div class="predict-countdown" style="color:var(--period-red)">今天</div>`;
-    } else {
-        countdownHtml = `<div class="predict-countdown" style="color:var(--text-secondary)">已過 ${Math.abs(daysLeft)} 天</div>`;
-    }
-    container.innerHTML = `
-        <div style="font-size:0.75rem;color:var(--text-secondary);letter-spacing:1px;margin-bottom:10px;">下次預測來潮</div>
-        ${countdownHtml}
-        <div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:12px;">${predictStr}</div>
-        <div class="predict-row"><span class="predict-label">上次開始</span><span class="predict-value">${last.start}</span></div>
-        <div class="predict-row"><span class="predict-label">平均週期</span><span class="predict-value">${avgCycle} 天</span></div>
-        <div class="predict-row"><span class="predict-label">平均經期</span><span class="predict-value">${avgDuration} 天</span></div>
-    `;
+    const countdownHtml = daysLeft > 0
+        ? '<div class="predict-countdown">' + daysLeft + ' 天後</div>'
+        : daysLeft === 0
+            ? '<div class="predict-countdown">今天</div>'
+            : '<div class="predict-countdown" style="color:var(--text-secondary)">已過 ' + Math.abs(daysLeft) + ' 天</div>';
+    el.innerHTML = '<div style="font-size:0.75rem;color:var(--text-secondary);letter-spacing:1px;margin-bottom:10px;">下次預測來潮</div>' + countdownHtml + '<div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:12px;">' + predictStr + '</div><div class="predict-row"><span class="predict-label">上次開始</span><span>' + last.start + '</span></div><div class="predict-row"><span class="predict-label">平均週期</span><span>' + avgCycle + ' 天</span></div><div class="predict-row"><span class="predict-label">平均經期</span><span>' + avgDuration + ' 天</span></div>';
 }
 
-/* ══ 月曆 ══ */
-function initCalView() {
-    const now = new Date();
-    calViewYear = now.getFullYear();
-    calViewMonth = now.getMonth();
-}
+function initCalView() { const n = new Date(); calViewYear = n.getFullYear(); calViewMonth = n.getMonth(); }
 
 function changeCalMonth(delta) {
     calViewMonth += delta;
@@ -722,61 +768,39 @@ function changeCalMonth(delta) {
 function renderCalendar() {
     if (calViewYear === undefined) initCalView();
     const periodData = JSON.parse(localStorage.getItem('period') || '[]');
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    const stats = getPeriodStats();
-
-    // Build sets of marked dates
     const symptomData = JSON.parse(localStorage.getItem('symptom') || '[]');
-    const periodDays = new Set();
-    const symptomDays = new Set();
-    periodData.forEach(entry => {
-        if (!entry.start) return;
-        const start = new Date(entry.start);
-        const end = entry.end ? new Date(entry.end) : new Date(entry.start);
-        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-            periodDays.add(d.toISOString().split('T')[0]);
-        }
+    const today = new Date(); today.setHours(0,0,0,0);
+    const stats = getPeriodStats();
+    const periodDays = new Set(), symptomDays = new Set(), predictedDays = new Set();
+    periodData.forEach(e => {
+        if (!e.start) return;
+        const end = e.end ? new Date(e.end) : new Date(e.start);
+        for (let d = new Date(e.start); d <= end; d.setDate(d.getDate()+1)) periodDays.add(d.toISOString().split('T')[0]);
     });
-    symptomData.forEach(entry => {
-        if (entry.date) symptomDays.add(entry.date);
-    });
-
-    // Predicted days
-    const predictedDays = new Set();
+    symptomData.forEach(e => { if (e.date) symptomDays.add(e.date); });
     if (stats) {
-        const { last, avgCycle, avgDuration } = stats;
-        const lastStart = new Date(last.start);
-        const predictStart = new Date(lastStart);
-        predictStart.setDate(predictStart.getDate() + avgCycle);
-        for (let i = 0; i < avgDuration; i++) {
-            const d = new Date(predictStart);
-            d.setDate(d.getDate() + i);
-            predictedDays.add(d.toISOString().split('T')[0]);
-        }
+        const ps = new Date(stats.last.start);
+        ps.setDate(ps.getDate() + stats.avgCycle);
+        for (let i = 0; i < stats.avgDuration; i++) { const d = new Date(ps); d.setDate(d.getDate()+i); predictedDays.add(d.toISOString().split('T')[0]); }
     }
-
     const monthNames = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
-    document.getElementById('cal-title').textContent = `${calViewYear} · ${monthNames[calViewMonth]}`;
-
+    document.getElementById('cal-title').textContent = calViewYear + ' · ' + monthNames[calViewMonth];
     const firstDay = new Date(calViewYear, calViewMonth, 1).getDay();
-    const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate();
-    const dayNames = ['日','一','二','三','四','五','六'];
-    let html = dayNames.map(d => `<div class="cal-day-name">${d}</div>`).join('');
+    const daysInMonth = new Date(calViewYear, calViewMonth+1, 0).getDate();
+    let html = ['日','一','二','三','四','五','六'].map(d => '<div class="cal-day-name">' + d + '</div>').join('');
     for (let i = 0; i < firstDay; i++) html += '<div></div>';
     for (let d = 1; d <= daysInMonth; d++) {
-        const dateStr = `${calViewYear}-${String(calViewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-        const dObj = new Date(calViewYear, calViewMonth, d);
+        const ds = calViewYear + '-' + String(calViewMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
         let cls = 'cal-day';
-        if (periodDays.has(dateStr)) cls += ' period-day';
-        else if (predictedDays.has(dateStr)) cls += ' predicted';
-        if (symptomDays.has(dateStr)) cls += ' symptom-day';
-        if (dObj.getTime() === today.getTime()) cls += ' today';
-        html += `<div class="${cls}">${d}</div>`;
+        if (periodDays.has(ds)) cls += ' period-day';
+        else if (predictedDays.has(ds)) cls += ' predicted';
+        if (symptomDays.has(ds)) cls += ' symptom-day';
+        if (new Date(calViewYear, calViewMonth, d).getTime() === today.getTime()) cls += ' today';
+        html += '<div class="' + cls + '">' + d + '</div>';
     }
     document.getElementById('cal-grid').innerHTML = html;
 }
 
-/* ══ 體重 ══ */
 function addWeight() {
     const val = document.getElementById('weight-value').value;
     const date = document.getElementById('weight-date').value || getTodayString();
@@ -786,42 +810,25 @@ function addWeight() {
     localStorage.setItem('weight', JSON.stringify(data));
     document.getElementById('weight-value').value = '';
     resetDates();
-    renderWeightData();
-    renderWeightChart();
+    closeForm('weight-form', 'toggle-weight-form');
+    renderWeightData(); renderWeightChart();
+    showToast('✓ 體重已記錄');
 }
 
 function deleteWeight(id) {
     if (!confirm('確定要移除？')) return;
     let data = JSON.parse(localStorage.getItem('weight') || '[]').filter(i => i.id !== id);
     localStorage.setItem('weight', JSON.stringify(data));
-    renderWeightData();
-    renderWeightChart();
+    renderWeightData(); renderWeightChart();
 }
 
 function renderWeightData() {
     const data = JSON.parse(localStorage.getItem('weight') || '[]');
-    const statsEl = document.getElementById('weight-stats');
-    if (data.length === 0) {
-        statsEl.innerHTML = '';
-        document.getElementById('weight-list').innerHTML = '<div class="empty-state">尚無體重紀錄。</div>';
-        return;
-    }
+    const el = document.getElementById('weight-stats');
+    if (data.length === 0) { el.innerHTML = ''; document.getElementById('weight-list').innerHTML = '<div class="empty-state">尚無體重紀錄。</div>'; return; }
     const weights = data.map(d => d.weight);
-    const latest = weights[0];
-    const avg = (weights.reduce((a, b) => a + b, 0) / weights.length).toFixed(1);
-    const min = Math.min(...weights).toFixed(1);
-    const max = Math.max(...weights).toFixed(1);
-    statsEl.innerHTML = `
-        <div class="weight-stat">最新 <span>${latest.toFixed(1)} kg</span></div>
-        <div class="weight-stat">平均 <span>${avg} kg</span></div>
-        <div class="weight-stat">最低 <span>${min} kg</span></div>
-        <div class="weight-stat">最高 <span>${max} kg</span></div>
-    `;
-    let html = '';
-    data.forEach(i => {
-        html += `<div class="item-card"><div class="item-info"><h4>${i.weight.toFixed(1)} kg</h4><p>${i.date}</p></div><span class="delete-link" onclick="deleteWeight(${i.id})">移除</span></div>`;
-    });
-    document.getElementById('weight-list').innerHTML = html;
+    el.innerHTML = '<div class="weight-stat">最新 <span>' + weights[0].toFixed(1) + ' kg</span></div><div class="weight-stat">平均 <span>' + (weights.reduce((a,b)=>a+b,0)/weights.length).toFixed(1) + ' kg</span></div><div class="weight-stat">最低 <span>' + Math.min(...weights).toFixed(1) + ' kg</span></div><div class="weight-stat">最高 <span>' + Math.max(...weights).toFixed(1) + ' kg</span></div>';
+    document.getElementById('weight-list').innerHTML = data.map(i => '<div class="item-card"><div class="item-info"><h4>' + i.weight.toFixed(1) + ' kg</h4><p>' + i.date + '</p></div><span class="delete-link" onclick="deleteWeight(' + i.id + ')">移除</span></div>').join('');
 }
 
 function renderWeightChart() {
@@ -829,59 +836,26 @@ function renderWeightChart() {
     const canvas = document.getElementById('weightChart');
     if (weightChartInstance) { weightChartInstance.destroy(); weightChartInstance = null; }
     if (data.length === 0) return;
-    const labels = data.map(d => d.date.slice(5));
     const weights = data.map(d => d.weight);
-    const minW = Math.min(...weights) - 1;
-    const maxW = Math.max(...weights) + 1;
     weightChartInstance = new Chart(canvas, {
         type: 'line',
-        data: {
-            labels,
-            datasets: [{
-                label: '體重 kg',
-                data: weights,
-                borderColor: '#7d8471',
-                backgroundColor: 'rgba(125,132,113,0.08)',
-                pointBackgroundColor: '#7d8471',
-                pointRadius: 4,
-                tension: 0.3,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { ticks: { autoSkip: true, maxTicksLimit: 8, font: { size: 10 } }, grid: { display: false } },
-                y: { min: minW, max: maxW, ticks: { font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0.05)' } }
-            }
-        }
+        data: { labels: data.map(d => d.date.slice(5)), datasets: [{ data: weights, borderColor: '#7d8471', backgroundColor: 'rgba(125,132,113,0.08)', pointBackgroundColor: '#7d8471', pointRadius: 4, tension: 0.3, fill: true }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { autoSkip: true, maxTicksLimit: 8, font: { size: 10 } }, grid: { display: false } }, y: { min: Math.min(...weights)-1, max: Math.max(...weights)+1, ticks: { font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0.05)' } } } }
     });
 }
 
-/* ══ 備份 ══ */
 function renderBackupStats() {
-    const labels = { media: '閱聽', selflove: '對自己好', finance: '餘裕', notes: '隨手記記', period: '生理期', symptom: '症狀', weight: '體重' };
-    const container = document.getElementById('backup-stats');
-    let html = '';
-    allStoreKeys.forEach(t => {
-        const count = JSON.parse(localStorage.getItem(t) || '[]').length;
-        html += `<div class="stat-chip">${labels[t]} <span>${count}</span> 筆</div>`;
-    });
-    container.innerHTML = html;
+    const labels = { media:'閱聽', selflove:'對自己好', finance:'餘裕', notes:'隨手記記', period:'生理期', symptom:'症狀', weight:'體重' };
+    document.getElementById('backup-stats').innerHTML = allStoreKeys.map(t => '<div class="stat-chip">' + labels[t] + ' <span>' + JSON.parse(localStorage.getItem(t)||'[]').length + '</span> 筆</div>').join('');
 }
 
 function downloadBackup() {
     const backup = { exportedAt: new Date().toISOString(), version: 2, data: {} };
     allStoreKeys.forEach(t => { backup.data[t] = JSON.parse(localStorage.getItem(t) || '[]'); });
-    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `life-fragments-backup-${getTodayString()}.json`;
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' }));
+    a.download = 'life-fragments-backup-' + getTodayString() + '.json';
     a.click();
-    URL.revokeObjectURL(url);
     showToast('✓ 備份檔案已下載');
 }
 
@@ -889,74 +863,53 @@ function readBackupFile(file) {
     return new Promise((resolve, reject) => {
         if (!file || !file.name.endsWith('.json')) { reject('請選擇 .json 備份檔案'); return; }
         const reader = new FileReader();
-        reader.onload = e => {
-            try {
-                const parsed = JSON.parse(e.target.result);
-                if (!parsed.data) throw new Error();
-                resolve(parsed);
-            } catch { reject('檔案格式不正確。'); }
-        };
+        reader.onload = e => { try { const p = JSON.parse(e.target.result); if (!p.data) throw 0; resolve(p); } catch { reject('檔案格式不正確。'); } };
         reader.onerror = () => reject('讀取失敗');
         reader.readAsText(file);
     });
 }
 
 async function handleRestoreFile(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    try {
-        pendingRestoreData = await readBackupFile(file);
-        showToast(`✓ 已讀取備份（${new Date(pendingRestoreData.exportedAt).toLocaleDateString('zh-TW')}），請點選還原方式`);
-    } catch (err) { showToast('⚠ ' + err, 3500); pendingRestoreData = null; }
+    const file = event.target.files[0]; if (!file) return;
+    try { pendingRestoreData = await readBackupFile(file); showToast('✓ 已讀取備份（' + new Date(pendingRestoreData.exportedAt).toLocaleDateString('zh-TW') + '），請點選還原方式'); }
+    catch (err) { showToast('⚠ ' + err, 3500); pendingRestoreData = null; }
     event.target.value = '';
 }
 
 function triggerRestore(mode) {
-    if (!pendingRestoreData) { showToast('請先選取備份 JSON 檔案', 2500); document.getElementById('restore-file-input').click(); pendingRestoreMode = mode; return; }
+    if (!pendingRestoreData) { showToast('請先選取備份 JSON 檔案', 2500); document.getElementById('restore-file-input').click(); return; }
     applyRestore(pendingRestoreData, mode);
 }
 
 function applyRestore(backup, mode) {
-    if (!confirm(`確定要${mode === 'merge' ? '合併' : '覆蓋'}還原嗎？`)) return;
+    if (!confirm('確定要' + (mode === 'merge' ? '合併' : '覆蓋') + '還原嗎？')) return;
     allStoreKeys.forEach(t => {
         const incoming = backup.data[t] || [];
-        if (mode === 'overwrite') {
-            localStorage.setItem(t, JSON.stringify(incoming));
-        } else {
+        if (mode === 'overwrite') { localStorage.setItem(t, JSON.stringify(incoming)); }
+        else {
             const existing = JSON.parse(localStorage.getItem(t) || '[]');
-            const existingIds = new Set(existing.map(x => x.id));
-            const merged = [...existing, ...incoming.filter(x => !existingIds.has(x.id))];
-            merged.sort((a, b) => b.id - a.id);
+            const ids = new Set(existing.map(x => x.id));
+            const merged = [...existing, ...incoming.filter(x => !ids.has(x.id))].sort((a,b) => b.id - a.id);
             localStorage.setItem(t, JSON.stringify(merged));
         }
     });
-    pendingRestoreData = null;
-    initFilters();
-    renderBackupStats();
-    showToast(`✓ ${mode === 'merge' ? '合併' : '覆蓋'}還原完成！`, 3000);
+    pendingRestoreData = null; initFilters(); renderBackupStats();
+    showToast('✓ ' + (mode === 'merge' ? '合併' : '覆蓋') + '還原完成！', 3000);
 }
 
 function handleDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
-function handleDragLeave(e) { document.getElementById('drop-zone').classList.remove('drag-over'); }
+function handleDragLeave() { document.getElementById('drop-zone').classList.remove('drag-over'); }
 async function handleDrop(e) {
-    e.preventDefault();
-    document.getElementById('drop-zone').classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
-    if (!file) return;
-    try {
-        pendingRestoreData = await readBackupFile(file);
-        showToast(`✓ 已讀取備份（${new Date(pendingRestoreData.exportedAt).toLocaleDateString('zh-TW')}），請點選還原方式`);
-    } catch (err) { showToast('⚠ ' + err, 3500); }
+    e.preventDefault(); document.getElementById('drop-zone').classList.remove('drag-over');
+    const file = e.dataTransfer.files[0]; if (!file) return;
+    try { pendingRestoreData = await readBackupFile(file); showToast('✓ 已讀取備份（' + new Date(pendingRestoreData.exportedAt).toLocaleDateString('zh-TW') + '），請點選還原方式'); }
+    catch (err) { showToast('⚠ ' + err, 3500); }
 }
 
 window.onload = () => {
-    initCalView();
-    resetDates();
-    initFilters();
-    renderData('media');
-    renderFinanceOverview();
+    initCalView(); resetDates(); initFilters();
+    renderData('media'); renderFinanceOverview();
 };
 </script>
 </body>
 </html>
-
