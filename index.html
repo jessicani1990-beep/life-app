@@ -459,6 +459,7 @@
 <div id="toast"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
+let editId = null; // 用來儲存目前正在編輯的項目 ID
 const tabs = ['media', 'selflove', 'finance', 'notes'];
 const allStoreKeys = ['media', 'selflove', 'finance', 'notes', 'exercise', 'period', 'symptom', 'weight'];
 let currentFilters = { media: '全部', selflove: '全部', finance: '全部' };
