@@ -162,6 +162,7 @@
         <button onclick="showTab('selflove')" id="btn-selflove">對自己好</button>
         <button onclick="showTab('finance')" id="btn-finance">餘裕</button>
         <button onclick="showTab('body')" id="btn-body">生理變化</button>
+        <button onclick="showTab('exercise')" id="btn-exercise">運動</button>
         <button onclick="showTab('notes')" id="btn-notes">隨手記記</button>
         <button onclick="showTab('settings')" id="btn-settings">備份</button>
     </nav>
@@ -350,6 +351,64 @@
         </div>
     </div>
 
+
+    <!-- 運動 -->
+    <div id="exercise" class="tab-content">
+
+        <!-- 月曆 -->
+        <div class="period-calendar" id="ex-calendar-wrap">
+            <div class="cal-header">
+                <button class="cal-nav" onclick="changeExCalMonth(-1)">&#8249;</button>
+                <span class="cal-title" id="ex-cal-title"></span>
+                <button class="cal-nav" onclick="changeExCalMonth(1)">&#8250;</button>
+            </div>
+            <div class="cal-grid" id="ex-cal-grid"></div>
+            <div class="cal-legend" style="margin-top:10px;">
+                <div class="cal-legend-item"><div class="legend-dot" style="background:var(--period-light);border:1px solid var(--period-red);"></div>生理期</div>
+                <div class="cal-legend-item"><div style="width:20px;height:20px;border-radius:50%;border:2px solid var(--accent-color);display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:var(--accent-color);">30</div>運動達標</div>
+            </div>
+        </div>
+
+        <!-- 當月統計 -->
+        <div id="ex-month-stats" style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;"></div>
+
+        <!-- 新增表單 -->
+        <button class="add-toggle-btn" id="toggle-exercise-form" onclick="toggleForm('exercise-form',this)">
+            <span class="toggle-icon">＋</span>新增運動
+        </button>
+        <div class="collapsible-form" id="exercise-form">
+            <section class="input-area">
+                <select id="exercise-type">
+                    <option value="低強度有氧">低強度有氧</option>
+                    <option value="高強度有氧">高強度有氧</option>
+                    <option value="雕塑">雕塑</option>
+                    <option value="重訓">重訓</option>
+                    <option value="瑜珈">瑜珈</option>
+                    <option value="其他">其他</option>
+                </select>
+                <input type="text" id="exercise-name" placeholder="項目名稱（例：跑步、深蹲）">
+                <input type="number" id="exercise-mins" placeholder="分鐘數">
+                <input type="number" id="exercise-kcal" placeholder="消耗熱量（kcal，非必填）">
+                <input type="number" id="exercise-steps" placeholder="步數（非必填）">
+                <input type="date" id="exercise-date">
+                <button class="add-btn" onclick="addExercise()">記下這次</button>
+            </section>
+        </div>
+
+        <!-- 類型篩選 -->
+        <div class="category-quick-filter" id="exercise-quick-filters">
+            <button class="cat-btn active" onclick="filterExercise('全部')">全部</button>
+            <button class="cat-btn" onclick="filterExercise('低強度有氧')">低強度有氧</button>
+            <button class="cat-btn" onclick="filterExercise('高強度有氧')">高強度有氧</button>
+            <button class="cat-btn" onclick="filterExercise('雕塑')">雕塑</button>
+            <button class="cat-btn" onclick="filterExercise('重訓')">重訓</button>
+            <button class="cat-btn" onclick="filterExercise('瑜珈')">瑜珈</button>
+            <button class="cat-btn" onclick="filterExercise('其他')">其他</button>
+        </div>
+        <div class="filter-area" id="filter-exercise"></div>
+        <div id="exercise-list"></div>
+    </div>
+
     <!-- 隨手記記 -->
     <div id="notes" class="tab-content">
         <button class="add-toggle-btn" id="toggle-notes-form" onclick="toggleForm('notes-form',this)">
@@ -401,8 +460,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 const tabs = ['media', 'selflove', 'finance', 'notes'];
-const allStoreKeys = ['media', 'selflove', 'finance', 'notes', 'period', 'symptom', 'weight'];
+const allStoreKeys = ['media', 'selflove', 'finance', 'notes', 'exercise', 'period', 'symptom', 'weight'];
 let currentFilters = { media: '全部', selflove: '全部', finance: '全部' };
+let currentExerciseFilter = '全部';
 let currentRatingFilter = '';
 let pendingRestoreData = null;
 let calViewYear, calViewMonth;
@@ -489,6 +549,7 @@ function showTab(tabId) {
     else if (tabId === 'body') { renderPeriodData(); renderCalendar(); renderPeriodPredict(); }
     else if (tabId === 'finance') { renderFinanceOverview(); renderData(tabId); }
     else if (tabId === 'selflove') { renderExpiryAlert(); renderData(tabId); }
+    else if (tabId === 'exercise') { initExerciseFilter(); renderExerciseCal(); renderExerciseMonthStats(); renderExerciseData(); }
     else renderData(tabId);
 }
 
@@ -845,7 +906,7 @@ function renderWeightChart() {
 }
 
 function renderBackupStats() {
-    const labels = { media:'閱聽', selflove:'對自己好', finance:'餘裕', notes:'隨手記記', period:'生理期', symptom:'症狀', weight:'體重' };
+    const labels = { media:'閱聽', selflove:'對自己好', finance:'餘裕', notes:'隨手記記', exercise:'運動', period:'生理期', symptom:'症狀', weight:'體重' };
     document.getElementById('backup-stats').innerHTML = allStoreKeys.map(t => '<div class="stat-chip">' + labels[t] + ' <span>' + JSON.parse(localStorage.getItem(t)||'[]').length + '</span> 筆</div>').join('');
 }
 
@@ -906,8 +967,174 @@ async function handleDrop(e) {
     catch (err) { showToast('⚠ ' + err, 3500); }
 }
 
+/* exercise */
+let exCalYear, exCalMonth;
+function initExCalView() { const n=new Date(); exCalYear=n.getFullYear(); exCalMonth=n.getMonth(); }
+function changeExCalMonth(delta) {
+    exCalMonth+=delta;
+    if(exCalMonth>11){exCalMonth=0;exCalYear++;}
+    if(exCalMonth<0){exCalMonth=11;exCalYear--;}
+    renderExerciseCal(); renderExerciseMonthStats(); renderExerciseData();
+}
+function renderExerciseCal() {
+    if(exCalYear===undefined) initExCalView();
+    const exData=JSON.parse(localStorage.getItem('exercise')||'[]');
+    const periodData=JSON.parse(localStorage.getItem('period')||'[]');
+    const today=new Date(); today.setHours(0,0,0,0);
+    const periodDays=new Set();
+    periodData.forEach(e=>{
+        if(!e.start)return;
+        const end=e.end?new Date(e.end):new Date(e.start);
+        for(let d=new Date(e.start);d<=end;d.setDate(d.getDate()+1)) periodDays.add(d.toISOString().split('T')[0]);
+    });
+    const exByDate={};
+    exData.forEach(e=>{
+        if(!exByDate[e.date])exByDate[e.date]={mins:0,steps:0};
+        exByDate[e.date].mins+=(e.mins||0);
+        exByDate[e.date].steps+=(e.steps||0);
+    });
+    const monthNames=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+    document.getElementById('ex-cal-title').textContent=exCalYear+' · '+monthNames[exCalMonth];
+    const firstDay=new Date(exCalYear,exCalMonth,1).getDay();
+    const daysInMonth=new Date(exCalYear,exCalMonth+1,0).getDate();
+    let html=['日','一','二','三','四','五','六'].map(d=>'<div class="cal-day-name">'+d+'</div>').join('');
+    for(let i=0;i<firstDay;i++) html+='<div></div>';
+    for(let d=1;d<=daysInMonth;d++){
+        const ds=exCalYear+'-'+String(exCalMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+        const ex=exByDate[ds];
+        const isPeriod=periodDays.has(ds);
+        const isActive=ex&&(ex.mins>=30||ex.steps>=10000);
+        const isTodayDay=new Date(exCalYear,exCalMonth,d).getTime()===today.getTime();
+        const periodDot=isPeriod?'<span style="display:block;width:4px;height:4px;border-radius:50%;background:var(--period-red);margin:1px auto 0;"></span>':'';
+        let style='text-align:center;font-size:0.75rem;cursor:default;display:flex;flex-direction:column;align-items:center;justify-content:center;width:28px;height:28px;margin:0 auto;border-radius:50%;position:relative;';
+        if(isActive) style+='border:2px solid var(--accent-color);color:var(--accent-color);font-weight:700;';
+        if(isPeriod&&!isActive) style+='background:var(--period-light);color:var(--period-red);';
+        if(isPeriod&&isActive) style+='background:var(--period-light);';
+        if(isTodayDay) style+='outline:1.5px solid var(--accent-color);outline-offset:1px;';
+        html+='<div style="'+style+'">'+String(d)+periodDot+'</div>';
+    }
+    document.getElementById('ex-cal-grid').innerHTML=html;
+}
+function renderExerciseMonthStats() {
+    if(exCalYear===undefined) initExCalView();
+    const data=JSON.parse(localStorage.getItem('exercise')||'[]');
+    const prefix=exCalYear+'-'+String(exCalMonth+1).padStart(2,'0');
+    const md=data.filter(i=>i.date.startsWith(prefix));
+    const totalMins=md.reduce((s,i)=>s+(i.mins||0),0);
+    const activeDays=new Set(md.filter(i=>(i.mins||0)>=30||(i.steps||0)>=10000).map(i=>i.date)).size;
+    const totalDays=new Set(md.map(i=>i.date)).size;
+    const totalKcal=md.reduce((s,i)=>s+(i.kcal||0),0);
+    document.getElementById('ex-month-stats').innerHTML=
+        '<div class="weight-stat">運動天數 <span>'+totalDays+' 天</span></div>'+
+        '<div class="weight-stat">達標天數 <span>'+activeDays+' 天</span></div>'+
+        '<div class="weight-stat">總分鐘數 <span>'+totalMins+' 分</span></div>'+
+        (totalKcal>0?'<div class="weight-stat">消耗熱量 <span>'+totalKcal+' kcal</span></div>':'');
+}
+function addExercise() {
+    const type=document.getElementById('exercise-type').value;
+    const name=document.getElementById('exercise-name').value.trim();
+    const mins=parseInt(document.getElementById('exercise-mins').value)||0;
+    const kcal=parseInt(document.getElementById('exercise-kcal').value)||0;
+    const steps=parseInt(document.getElementById('exercise-steps').value)||0;
+    const date=document.getElementById('exercise-date').value||getTodayString();
+    if(!name){showToast('請填寫項目名稱');return;}
+    if(mins<=0){showToast('請填寫分鐘數');return;}
+    let data=JSON.parse(localStorage.getItem('exercise')||'[]');
+    data.unshift({id:Date.now(),type,name,mins,kcal,steps,date});
+    localStorage.setItem('exercise',JSON.stringify(data));
+    document.getElementById('exercise-name').value='';
+    document.getElementById('exercise-mins').value='';
+    document.getElementById('exercise-kcal').value='';
+    document.getElementById('exercise-steps').value='';
+    resetDates();
+    closeForm('exercise-form','toggle-exercise-form');
+    renderExerciseCal(); renderExerciseMonthStats(); renderExerciseData();
+    showToast('✓ 已記錄');
+}
+function deleteExercise(id) {
+    if(!confirm('確定要移除？'))return;
+    let data=JSON.parse(localStorage.getItem('exercise')||'[]').filter(i=>i.id!==id);
+    localStorage.setItem('exercise',JSON.stringify(data));
+    renderExerciseCal(); renderExerciseMonthStats(); renderExerciseData();
+}
+function filterExercise(cat) {
+    currentExerciseFilter=cat;
+    document.querySelectorAll('#exercise-quick-filters .cat-btn').forEach(b=>b.classList.toggle('active',b.innerText===cat));
+    renderExerciseData();
+}
+function initExerciseFilter() {
+    const area=document.getElementById('filter-exercise');
+    const data=JSON.parse(localStorage.getItem('exercise')||'[]');
+    const sysYear=new Date().getFullYear(); let maxYear=sysYear;
+    data.forEach(item=>{if(item.date){const y=parseInt(item.date.split('-')[0]);if(y>maxYear)maxYear=y;}});
+    let html='<select id="f-exercise-year" class="filter-select" onchange="renderExerciseData()"><option value="">年份</option>';
+    for(let i=maxYear;i>=2020;i--) html+='<option value="'+i+'">'+i+'年</option>';
+    html+='</select><select id="f-exercise-month" class="filter-select" onchange="onExerciseMonthFilter()"><option value="">月份</option>';
+    for(let i=1;i<=12;i++) html+='<option value="'+String(i).padStart(2,'0')+'">'+i+'月</option>';
+    html+='</select><input type="text" id="f-exercise-search" class="filter-input" placeholder="搜尋項目名稱..." oninput="renderExerciseData()">';
+    area.innerHTML=html;
+    const curMonth=String(new Date().getMonth()+1).padStart(2,'0');
+    const sel=document.getElementById('f-exercise-month');
+    if(sel) sel.value=curMonth;
+}
+function onExerciseMonthFilter() {
+    const sel=document.getElementById('f-exercise-month');
+    if(sel&&sel.value){
+        exCalMonth=parseInt(sel.value)-1;
+        const yearSel=document.getElementById('f-exercise-year');
+        if(yearSel&&yearSel.value) exCalYear=parseInt(yearSel.value);
+        renderExerciseCal(); renderExerciseMonthStats();
+    }
+    renderExerciseData();
+}
+function renderExerciseData() {
+    const yearEl=document.getElementById('f-exercise-year');
+    const monthEl=document.getElementById('f-exercise-month');
+    const searchEl=document.getElementById('f-exercise-search');
+    if(!yearEl)return;
+    const fYear=yearEl.value;
+    const fMonth=monthEl?monthEl.value:'';
+    const fSearch=searchEl?searchEl.value.toLowerCase():'';
+    let data=JSON.parse(localStorage.getItem('exercise')||'[]');
+    data=data.filter(i=>{
+        const matchYear=fYear?i.date.startsWith(fYear):true;
+        const matchMonth=fMonth?i.date.split('-')[1]===fMonth:true;
+        const matchCat=currentExerciseFilter==='全部'||i.type===currentExerciseFilter;
+        const matchSearch=fSearch?(i.name||'').toLowerCase().includes(fSearch):true;
+        return matchYear&&matchMonth&&matchCat&&matchSearch;
+    });
+    const container=document.getElementById('exercise-list');
+    if(data.length===0){container.innerHTML='<div class="empty-state">尚無運動紀錄。</div>';return;}
+    const grouped={};
+    data.forEach(i=>{if(!grouped[i.date])grouped[i.date]=[];grouped[i.date].push(i);});
+    const dates=Object.keys(grouped).sort((a,b)=>b.localeCompare(a));
+    const typeColor={'低強度有氧':'#7d9e8c','高強度有氧':'#4a8a6a','雕塑':'#a07db5','重訓':'#7d8ea4','瑜珈':'#b58c7d','其他':'#8c8c8c'};
+    let html='';
+    dates.forEach(date=>{
+        const items=grouped[date];
+        const totalMins=items.reduce((s,i)=>s+(i.mins||0),0);
+        const totalSteps=items.reduce((s,i)=>s+(i.steps||0),0);
+        const isActive=totalMins>=30||totalSteps>=10000;
+        const dateLabel=date+' · '+totalMins+' 分鐘'+(totalSteps>0?' · '+totalSteps.toLocaleString()+' 步':'')+(isActive?' ✓':'');
+        html+='<div style="margin-bottom:18px;">';
+        html+='<div style="font-size:0.72rem;color:'+(isActive?'var(--accent-color)':'var(--text-secondary)')+';letter-spacing:1px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border-color);font-weight:'+(isActive?'700':'400')+';">'+dateLabel+'</div>';
+        items.forEach(i=>{
+            const col=typeColor[i.type]||'var(--accent-color)';
+            let meta=i.mins+' 分鐘';
+            if(i.kcal) meta+=' · '+i.kcal+' kcal';
+            if(i.steps) meta+=' · '+i.steps.toLocaleString()+' 步';
+            html+='<div class="item-card"><div class="item-info">';
+            html+='<h4><span class="tag" style="color:'+col+';border-color:'+col+';">'+i.type+'</span>'+i.name+'</h4>';
+            html+='<p>'+meta+'</p>';
+            html+='</div><span class="delete-link" onclick="deleteExercise('+i.id+')">移除</span></div>';
+        });
+        html+='</div>';
+    });
+    container.innerHTML=html;
+}
+
 window.onload = () => {
-    initCalView(); resetDates(); initFilters();
+    initCalView(); initExCalView(); resetDates(); initFilters();
     renderData('media'); renderFinanceOverview();
 };
 </script>
