@@ -1418,45 +1418,58 @@ function renderMediaStats(fromDate, toDate) {
 
 /* ══ 對自己好統計 ══ */
 let selfloveChartInstance = null;
-function renderSelfloveStats() {
+function renderSelfloveStats(fromDate, toDate) {
     const data = JSON.parse(localStorage.getItem('selflove') || '[]');
     const el = document.getElementById('selflove-stats-bar');
     if (!data.length) { el.style.display = 'none'; return; }
     el.style.display = 'block';
+    const today = new Date().toISOString().split('T')[0];
     const year = new Date().getFullYear();
-    const thisYear = data.filter(i => (i.buyDate || '').startsWith(String(year)));
+    const defaultFrom = year + '-01-01';
+    const f = fromDate || defaultFrom;
+    const t = toDate || today;
+    const inRange = data.filter(i => (i.buyDate || '') >= f && (i.buyDate || '') <= t);
     const cats = ['化妝品','保養品','吃','服飾包包','玩具公仔','旅行','其他'];
     const catColors = ['#c9856a','#7d9e8c','#d4a373','#a07db5','#7d8ea4','#8c7d9e','#9aa0a6'];
-    const yearTotal = thisYear.reduce((s,i) => s + parseFloat(i.price || 0), 0);
-    // per category spending this year
-    const catSpend = cats.map(c => thisYear.filter(i => i.category === c).reduce((s,i) => s + parseFloat(i.price || 0), 0));
+    const rangeTotal = inRange.reduce((s,i) => s + parseFloat(i.price || 0), 0);
+    const catSpend = cats.map(c => inRange.filter(i => i.category === c).reduce((s,i) => s + parseFloat(i.price || 0), 0));
     const donutId = 'selflove-donut-chart';
-    // all-time counts for donut
-    const allCounts = cats.map(c => data.filter(i => i.category === c).length);
-    const allSpend = cats.map(c => data.filter(i => i.category === c).reduce((s,i) => s + parseFloat(i.price || 0), 0));
+    const inputStyle = 'flex:1;min-width:120px;font-size:0.82rem;padding:7px 10px;border:1px solid var(--border-color);border-radius:6px;background:var(--bg-color);color:var(--text-primary);outline:none;';
+    const rangeLabel = f === defaultFrom && t === today ? year + ' 年' : f + ' ~ ' + t;
     el.innerHTML = `
-        <div class="stats-bar-title">${year} 年消費 · $ ${yearTotal.toLocaleString('zh-TW', {maximumFractionDigits:0})}</div>
+        <div class="stats-bar-title" style="margin-bottom:10px;">統計區間</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+            <input type="date" id="selflove-stats-from" value="${f}"
+                onchange="renderSelfloveStats(this.value, document.getElementById('selflove-stats-to').value)"
+                style="${inputStyle}">
+            <span style="font-size:0.78rem;color:var(--text-secondary);flex-shrink:0;">至</span>
+            <input type="date" id="selflove-stats-to" value="${t}"
+                onchange="renderSelfloveStats(document.getElementById('selflove-stats-from').value, this.value)"
+                style="${inputStyle}">
+        </div>
+        <div class="stats-bar-title">${rangeLabel} 消費 · $ ${rangeTotal.toLocaleString('zh-TW', {maximumFractionDigits:0})}</div>
         <div class="stats-year-row">${cats.map((c,idx) => catSpend[idx] > 0 ? `
             <div class="stats-count-chip">
-                <div class="stats-count-num" style="font-size:1rem;">$${(catSpend[idx]/1000 >= 1 ? (catSpend[idx]/1000).toFixed(1)+'k' : catSpend[idx])}</div>
+                <div class="stats-count-num" style="font-size:1rem;">$${catSpend[idx]/1000 >= 1 ? (catSpend[idx]/1000).toFixed(1)+'k' : catSpend[idx]}</div>
                 <div class="stats-count-label">${c}</div>
             </div>` : '').join('')}</div>
-        <div class="stats-bar-title" style="margin-top:8px;">歷年消費類別佔比</div>
+        <div class="stats-bar-title" style="margin-top:8px;">區間消費類別佔比</div>
         <div class="stats-donut-wrap">
             <canvas id="${donutId}" class="stats-donut-canvas"></canvas>
             <div class="stats-legend" id="selflove-donut-legend"></div>
         </div>`;
     const legendEl = document.getElementById('selflove-donut-legend');
-    legendEl.innerHTML = cats.map((c,idx) => allSpend[idx] > 0 ? `
+    legendEl.innerHTML = cats.map((c,idx) => catSpend[idx] > 0 ? `
         <div class="stats-legend-row">
             <div class="stats-legend-dot" style="background:${catColors[idx]};"></div>
             <span class="stats-legend-label">${c}</span>
-            <span class="stats-legend-val">$${allSpend[idx].toLocaleString('zh-TW',{maximumFractionDigits:0})}</span>
+            <span class="stats-legend-val">$${catSpend[idx].toLocaleString('zh-TW',{maximumFractionDigits:0})}</span>
         </div>` : '').join('');
     const canvas = document.getElementById(donutId);
     if (!canvas) return;
     if (selfloveChartInstance) { selfloveChartInstance.destroy(); selfloveChartInstance = null; }
-    const filtered = cats.map((c,i) => ({ c, n: allSpend[i], col: catColors[i] })).filter(x => x.n > 0);
+    const filtered = cats.map((c,i) => ({ c, n: catSpend[i], col: catColors[i] })).filter(x => x.n > 0);
+    if (!filtered.length) return;
     selfloveChartInstance = new Chart(canvas, {
         type: 'doughnut',
         data: { labels: filtered.map(x => x.c), datasets: [{ data: filtered.map(x => x.n), backgroundColor: filtered.map(x => x.col), borderWidth: 2, borderColor: '#fff' }] },
