@@ -301,6 +301,7 @@
         <div class="body-subtabs">
             <button class="body-subtab active" onclick="showBodyTab('period')" id="btn-period">生理期</button>
             <button class="body-subtab" onclick="showBodyTab('weight')" id="btn-weight">體重</button>
+            <button class="body-subtab" onclick="showBodyTab('cycle')" id="btn-cycle">週期分析</button>
         </div>
 
         <div id="body-period" class="body-subcontent active">
@@ -364,6 +365,11 @@
             <div id="period-list"></div>
         </div>
 
+
+        <!-- 週期分析 -->
+        <div id="body-cycle" class="body-subcontent">
+            <div id="cycle-analysis-content"></div>
+        </div>
         <div id="body-weight" class="body-subcontent">
             <div class="weight-chart-wrap">
                 <div class="weight-stats" id="weight-stats"></div>
@@ -887,6 +893,7 @@ function showBodyTab(tabId) {
     document.getElementById('body-' + tabId).classList.add('active');
     document.getElementById('btn-' + tabId).classList.add('active');
     if (tabId === 'weight') { renderWeightData(); renderWeightChart(); }
+    else if (tabId === 'cycle') { renderCycleAnalysis(); }
     else { renderPeriodData(); renderCalendar(); renderPeriodPredict(); }
 }
 
@@ -1717,6 +1724,166 @@ function saveEditSymptom() {
     data[idx].note = document.getElementById('edit-symptom-note').value.trim();
     localStorage.setItem('symptom', JSON.stringify(data));
     closeModal('symptom'); renderPeriodData(); renderCalendar(); showToast('✓ 已更新');
+}
+
+
+/* ══ 週期分析 ══ */
+function renderCycleAnalysis() {
+    const el = document.getElementById('cycle-analysis-content');
+    const periodData = JSON.parse(localStorage.getItem('period') || '[]').filter(i => i.start && i.end).sort((a,b) => a.start.localeCompare(b.start));
+    const exerciseData = JSON.parse(localStorage.getItem('exercise') || '[]');
+    const symptomData = JSON.parse(localStorage.getItem('symptom') || '[]');
+
+    if (periodData.length < 2) {
+        el.innerHTML = '<div class="cycle-no-data">需要至少 2 筆有完整開始與結束日期的月經紀錄才能進行分析。<br><br>目前有 ' + periodData.length + ' 筆完整紀錄。</div>';
+        return;
+    }
+
+    // ── helper: date range to array of date strings ──
+    function dateRange(start, end) {
+        const dates = [];
+        for (let d = new Date(start); d <= new Date(end); d.setDate(d.getDate()+1))
+            dates.push(d.toISOString().split('T')[0]);
+        return dates;
+    }
+
+    // ── helper: add days to date string ──
+    function addDays(dateStr, n) {
+        const d = new Date(dateStr); d.setDate(d.getDate() + n);
+        return d.toISOString().split('T')[0];
+    }
+
+    // ── build exercise lookup: date -> {mins, steps} ──
+    const exByDate = {};
+    exerciseData.forEach(e => {
+        if (!exByDate[e.date]) exByDate[e.date] = { mins: 0, steps: 0, entries: [] };
+        exByDate[e.date].mins += (e.mins || 0);
+        exByDate[e.date].steps += (e.steps || 0);
+        exByDate[e.date].entries.push(e);
+    });
+
+    // ── build symptom lookup ──
+    const symByDate = {};
+    symptomData.forEach(s => {
+        if (!symByDate[s.date]) symByDate[s.date] = [];
+        symByDate[s.date].push(...(s.symptoms || []));
+    });
+
+    // ── phase stats accumulator ──
+    const phases = {
+        period:    { name: '經期中',   color: '#c66b6b', days: [], exDays: 0, totalMins: 0 },
+        follicular:{ name: '濾泡期',   color: '#7d9e8c', days: [], exDays: 0, totalMins: 0 },
+        luteal:    { name: '黃體期',   color: '#a07db5', days: [], exDays: 0, totalMins: 0 },
+        pre:       { name: '月經前7天',color: '#d4a373', days: [], exDays: 0, totalMins: 0 },
+    };
+
+    // ── build cycle segments ──
+    for (let i = 0; i < periodData.length; i++) {
+        const cur = periodData[i];
+        const next = periodData[i + 1];
+
+        // period days
+        const periodDays = dateRange(cur.start, cur.end);
+        periodDays.forEach(d => phases.period.days.push(d));
+
+        if (next) {
+            const cycleLen = Math.round((new Date(next.start) - new Date(cur.start)) / 86400000);
+            const afterEnd = addDays(cur.end, 1);
+            const beforeNext = addDays(next.start, -1);
+
+            // pre-period: 7 days before next start
+            const preStart = addDays(next.start, -7);
+            const preDays = dateRange(preStart, beforeNext);
+            preDays.forEach(d => phases.pre.days.push(d));
+
+            // follicular: end+1 to ~ovulation (roughly cycle/2 - 1 day from start)
+            const ovulation = addDays(cur.start, Math.round(cycleLen / 2));
+            const follicularDays = dateRange(afterEnd, ovulation);
+            follicularDays.forEach(d => { if (!phases.pre.days.includes(d)) phases.follicular.days.push(d); });
+
+            // luteal: ovulation+1 to preStart-1
+            const lutealDays = dateRange(addDays(ovulation, 1), addDays(preStart, -1));
+            lutealDays.forEach(d => phases.luteal.days.push(d));
+        }
+    }
+
+    // ── aggregate exercise per phase ──
+    Object.values(phases).forEach(ph => {
+        const uniqueDays = [...new Set(ph.days)];
+        ph.totalDays = uniqueDays.length;
+        uniqueDays.forEach(d => {
+            if (exByDate[d] && exByDate[d].mins > 0) {
+                ph.exDays++;
+                ph.totalMins += exByDate[d].mins;
+            }
+        });
+        ph.avgMins = ph.exDays > 0 ? (ph.totalMins / ph.exDays).toFixed(0) : 0;
+        ph.activePct = ph.totalDays > 0 ? Math.round(ph.exDays / ph.totalDays * 100) : 0;
+    });
+
+    // ── symptom vs exercise analysis ──
+    const symTypes = ['胸部脹痛','頭痛','腹部疼痛','點狀出血','痘痘'];
+    const symStats = symTypes.map(sym => {
+        const symDates = Object.keys(symByDate).filter(d => symByDate[d].includes(sym));
+        const noSymDates = exerciseData.map(e => e.date).filter(d => !symByDate[d] || !symByDate[d].includes(sym));
+        const withExPct = symDates.length > 0 ? Math.round(symDates.filter(d => exByDate[d] && exByDate[d].mins > 0).length / symDates.length * 100) : null;
+        const noSymExDays = [...new Set(noSymDates)];
+        const noSymWithExPct = noSymExDays.length > 0 ? Math.round(noSymExDays.filter(d => exByDate[d] && exByDate[d].mins > 0).length / noSymExDays.length * 100) : null;
+        return { sym, symDays: symDates.length, withExPct, noSymWithExPct };
+    }).filter(s => s.symDays >= 3);
+
+    // ── coverage info ──
+    const totalExDays = Object.keys(exByDate).length;
+    const totalPeriodCycles = periodData.length;
+
+    // ── render ──
+    const maxMins = Math.max(...Object.values(phases).map(p => parseInt(p.avgMins) || 0), 1);
+
+    let html = `<div class="cycle-notice">📊 分析基於 <strong>${totalPeriodCycles}</strong> 個週期、<strong>${totalExDays}</strong> 天運動紀錄。週期階段以簡化模型估算（經期 → 濾泡期 → 黃體期），供參考使用。</div>`;
+
+    // phase stats card
+    html += `<div class="cycle-section"><div class="cycle-section-title">各週期階段 · 運動強度</div>`;
+    Object.values(phases).forEach(ph => {
+        const barW = ph.avgMins > 0 ? Math.round(parseInt(ph.avgMins) / maxMins * 100) : 0;
+        html += `<div class="cycle-phase-row">
+            <div class="cycle-phase-dot" style="background:${ph.color};"></div>
+            <div class="cycle-phase-name">${ph.name}</div>
+            <div class="cycle-phase-stats">
+                ${ph.exDays > 0 ? `均 <strong>${ph.avgMins}</strong> 分 · 達標 <strong>${ph.activePct}%</strong>` : '無運動紀錄'}
+                <div class="cycle-phase-bar-wrap"><div class="cycle-phase-bar" style="width:${barW}%;background:${ph.color};opacity:0.7;"></div></div>
+            </div>
+        </div>`;
+    });
+    html += `</div>`;
+
+    // symptom vs exercise card
+    if (symStats.length > 0) {
+        html += `<div class="cycle-section"><div class="cycle-section-title">症狀日 vs 無症狀日 · 運動比例</div>`;
+        symStats.forEach(s => {
+            const hasPct = s.withExPct !== null ? s.withExPct : 0;
+            const noPct = s.noSymWithExPct !== null ? s.noSymWithExPct : 0;
+            html += `<div class="cycle-sym-row">
+                <div class="cycle-sym-label">${s.sym}<br><span style="font-size:0.68rem;">${s.symDays} 天有此症狀</span></div>
+                <div class="cycle-sym-bars">
+                    <div class="cycle-mini-bar-wrap">
+                        <div class="cycle-mini-pct" style="color:var(--warn-yellow);">${hasPct}%</div>
+                        <div class="cycle-mini-bar-bg"><div class="cycle-mini-bar-fill" style="width:${hasPct}%;background:var(--warn-yellow);"></div></div>
+                        <div class="cycle-mini-label">症狀日</div>
+                    </div>
+                    <div class="cycle-mini-bar-wrap">
+                        <div class="cycle-mini-pct" style="color:var(--accent-color);">${noPct}%</div>
+                        <div class="cycle-mini-bar-bg"><div class="cycle-mini-bar-fill" style="width:${noPct}%;background:var(--accent-color);"></div></div>
+                        <div class="cycle-mini-label">無症狀</div>
+                    </div>
+                </div>
+            </div>`;
+        });
+        html += `</div>`;
+    } else {
+        html += `<div class="cycle-section"><div class="cycle-notice" style="margin:0;">症狀紀錄不足（每種症狀需至少 3 天紀錄），無法進行症狀分析。</div></div>`;
+    }
+
+    el.innerHTML = html;
 }
 
 
