@@ -148,6 +148,19 @@
 
         #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: #434343; color: white; padding: 10px 22px; border-radius: 20px; font-size: 0.85rem; opacity: 0; pointer-events: none; transition: opacity 0.3s, transform 0.3s; z-index: 9999; white-space: nowrap; }
         #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* ── 編輯 Modal ── */
+        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:1000; justify-content:center; align-items:flex-end; }
+        .modal-overlay.open { display:flex; }
+        .modal-box { background:var(--card-bg); width:100%; max-width:500px; border-radius:14px 14px 0 0; padding:24px 20px 44px; max-height:85vh; overflow-y:auto; animation:slideUp .25s ease; }
+        @keyframes slideUp { from{transform:translateY(40px);opacity:0} to{transform:translateY(0);opacity:1} }
+        .modal-title { font-size:0.85rem; letter-spacing:1px; color:var(--text-secondary); margin-bottom:18px; }
+        .modal-actions { display:flex; gap:10px; margin-top:16px; }
+        .modal-btn { flex:1; padding:12px; border:none; font-family:inherit; font-size:0.9rem; cursor:pointer; border-radius:2px; transition:0.2s; }
+        .modal-btn-save { background:var(--accent-color); color:white; }
+        .modal-btn-cancel { background:var(--bg-color); color:var(--text-secondary); border:1px solid var(--border-color); }
+        .edit-link { font-size:0.78rem; color:var(--accent-color); cursor:pointer; padding:4px 8px; flex-shrink:0; opacity:0.75; }
+        .item-actions { display:flex; align-items:center; gap:2px; flex-shrink:0; }
     </style>
 </head>
 <body>
@@ -456,10 +469,56 @@
     </div>
 </div>
 
+<!-- 編輯 Modal：對自己好 -->
+<div class="modal-overlay" id="modal-selflove" onclick="closeModal('selflove')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-title">編輯品項</div>
+        <input type="hidden" id="edit-selflove-id">
+        <select id="edit-selflove-type"><option value="化妝品">化妝品</option><option value="保養品">保養品</option><option value="吃">吃</option><option value="服飾包包">服飾包包</option><option value="玩具公仔">玩具公仔</option><option value="旅行">旅行</option><option value="其他">其他</option></select>
+        <input type="text" id="edit-selflove-name" placeholder="產品或犒賞名稱">
+        <input type="number" id="edit-selflove-price" placeholder="金額">
+        <div class="date-field"><label class="date-label">購買日期</label><input type="date" id="edit-selflove-buy-date"></div>
+        <div class="date-field"><label class="date-label">到期日期</label><input type="date" id="edit-selflove-expiry-date"></div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('selflove')">取消</button>
+            <button class="modal-btn modal-btn-save" onclick="saveEditSelflove()">儲存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 編輯 Modal：隨手記記 -->
+<div class="modal-overlay" id="modal-notes" onclick="closeModal('notes')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-title">編輯筆記</div>
+        <input type="hidden" id="edit-notes-id">
+        <input type="text" id="edit-notes-title" placeholder="標題...">
+        <textarea id="edit-notes-content" rows="4" placeholder="細節內容..."></textarea>
+        <div class="date-field"><label class="date-label">日期</label><input type="date" id="edit-notes-date"></div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('notes')">取消</button>
+            <button class="modal-btn modal-btn-save" onclick="saveEditNotes()">儲存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 編輯 Modal：月經紀錄 -->
+<div class="modal-overlay" id="modal-period" onclick="closeModal('period')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-title">補填結束日期</div>
+        <input type="hidden" id="edit-period-id">
+        <div class="date-field"><label class="date-label">開始日期</label><input type="date" id="edit-period-start" disabled style="opacity:0.5;"></div>
+        <div class="date-field"><label class="date-label">結束日期</label><input type="date" id="edit-period-end"></div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('period')">取消</button>
+            <button class="modal-btn modal-btn-save" onclick="saveEditPeriod()">儲存</button>
+        </div>
+    </div>
+</div>
+
+
 <div id="toast"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-let editId = null; // 用來儲存目前正在編輯的項目 ID
 const tabs = ['media', 'selflove', 'finance', 'notes'];
 const allStoreKeys = ['media', 'selflove', 'finance', 'notes', 'exercise', 'period', 'symptom', 'weight'];
 let currentFilters = { media: '全部', selflove: '全部', finance: '全部' };
@@ -556,11 +615,8 @@ function showTab(tabId) {
 
 function addData(type) {
     let data = JSON.parse(localStorage.getItem(type) || '[]');
+    let entry = { id: Date.now() };
     const today = getTodayString();
-    
-    // 1. 決定 ID：如果是編輯模式就用舊 ID，否則產生新的
-    let entry = { id: editId ? editId : Date.now() };
-
     if (type === 'media') {
         entry.category = document.getElementById('media-type').value;
         entry.title = document.getElementById('media-title').value;
@@ -596,33 +652,16 @@ function addData(type) {
         document.getElementById('note-content').value = '';
         closeForm('notes-form', 'toggle-notes-form');
     }
-
-    // 2. 處理資料儲存：判斷是「更新」還是「新增」
-    if (editId) {
-        // 編輯模式：找到原本的那一筆並替換掉
-        const index = data.findIndex(i => i.id === editId);
-        if (index !== -1) {
-            data[index] = entry;
-        }
-        editId = null; // 儲存完畢，重置編輯狀態
-        // 恢復按鈕文字 (根據不同的 type 找到對應按鈕)
-        const btn = document.querySelector(`#${type}-form button[onclick*="addData"]`);
-        if (btn) btn.innerText = '記下一筆';
-    } else {
-        // 新增模式：放到最前面
-        data.unshift(entry);
-    }
-
+    data.unshift(entry);
     localStorage.setItem(type, JSON.stringify(data));
     resetDates();
     initFilters();
     renderData(type);
-    
     if (type === 'finance') renderFinanceOverview();
     if (type === 'selflove') renderExpiryAlert();
-    
-    showToast(editId ? '✓ 已更新' : '✓ 已記錄');
+    showToast('✓ 已記錄');
 }
+
 function deleteData(type, id) {
     if (!confirm('確定要移除這項紀錄嗎？')) return;
     let data = JSON.parse(localStorage.getItem(type)).filter(item => item.id !== id);
@@ -655,17 +694,6 @@ function renderData(type) {
         else if (type === 'notes') nameKey = (i.title || '') + (i.content || '');
         const matchSearch = fSearch ? nameKey.toLowerCase().includes(fSearch) : true;
         return matchYear && matchMonth && matchSearch && matchCategory && matchRating;
-        if (type === 'period') {
-    html += `<h4>經期紀錄</h4>
-             <p>開始：${i.startDate}</p>
-             <p>結束：${i.endDate || '進行中...'}</p>`;
-    
-    // --- 貼在這裡 ---
-    if (!i.endDate) {
-        html += `<button class="btn-small" onclick="closePeriod(${i.id})" style="margin-top:5px; padding:2px 8px; font-size:0.75rem;">今日結束</button>`;
-    }
-    // ----------------
-}
     });
 
     if (data.length === 0) { container.innerHTML = '<div class="empty-state">尚未發現碎片。</div>'; return; }
@@ -694,9 +722,11 @@ function renderData(type) {
         } else if (type === 'notes') {
             html += '<h4>' + (i.title || '無標題') + '</h4><p>' + (i.content || '') + '</p><p style="font-size:0.7rem;color:var(--text-secondary)">' + i.date + '</p>';
         }
-        html += '<span class="edit-link" onclick="startEdit('${type}', ${i.id})">編輯</span>
-            </div><span class="delete-link" onclick="deleteData(\'' + type + '\',' + i.id + ')">移除</span></div>';
-        
+        if (type === 'selflove' || type === 'notes') {
+            html += '</div><div class="item-actions"><span class="edit-link" onclick="openEdit(\'' + type + '\',' + i.id + ')">編輯</span><span class="delete-link" onclick="deleteData(\'' + type + '\',' + i.id + ')">移除</span></div></div>';
+        } else {
+            html += '</div><span class="delete-link" onclick="deleteData(\'' + type + '\',' + i.id + ')">移除</span></div>';
+        }
     });
     container.innerHTML = html;
 }
@@ -810,10 +840,11 @@ function renderPeriodData() {
     combined.forEach(i => {
         if (i._type === 'period') {
             const dur = i.end ? Math.round((new Date(i.end) - new Date(i.start)) / 86400000) + 1 : null;
-            html += '<div class="item-card"><div class="item-info"><h4><span class="tag" style="color:var(--period-red);border-color:var(--period-red);">月經</span>' + i.start + (i.end ? ' → ' + i.end : ' → 記錄中') + '</h4><p>' + (dur ? dur + ' 天' : '尚未結束') + '</p></div><span class="delete-link" onclick="deletePeriod(\'period\',' + i.id + ')">移除</span></div>';
+            const editBtn = !i.end ? '<span class="edit-link" onclick="openEditPeriod(' + i.id + ')">補填結束</span>' : '';
+            html += '<div class="item-card"><div class="item-info"><h4><span class="tag" style="color:var(--period-red);border-color:var(--period-red);">月經</span>' + i.start + (i.end ? ' → ' + i.end : ' → 記錄中') + '</h4><p>' + (dur ? dur + ' 天' : '尚未結束') + '</p></div><div class="item-actions">' + editBtn + '<span class="delete-link" onclick="deletePeriod(\'period\',' + i.id + ')">移除</span></div></div>';
         } else {
             const syms = i.symptoms.map(s => '<span class="tag">' + s + '</span>').join('');
-            html += '<span class="edit-link" onclick="startEdit('${type}', ${i.id})">編輯</span><div class="item-card"><div class="item-info"><h4>' + syms + '</h4><p>' + i.date + '</p></div><span class="delete-link" onclick="deletePeriod(\'symptom\',' + i.id + ')">移除</span></div>';
+            html += '<div class="item-card"><div class="item-info"><h4>' + syms + '</h4><p>' + i.date + '</p></div><span class="delete-link" onclick="deletePeriod(\'symptom\',' + i.id + ')">移除</span></div>';
         }
     });
     container.innerHTML = html;
@@ -941,7 +972,13 @@ function renderWeightChart() {
 
 function renderBackupStats() {
     const labels = { media:'閱聽', selflove:'對自己好', finance:'餘裕', notes:'隨手記記', exercise:'運動', period:'生理期', symptom:'症狀', weight:'體重' };
-    document.getElementById('backup-stats').innerHTML = allStoreKeys.map(t => '<div class="stat-chip">' + labels[t] + ' <span>' + JSON.parse(localStorage.getItem(t)||'[]').length + '</span> 筆</div>').join('');
+    const lastAt = localStorage.getItem('lastBackupAt');
+    const lastStr = lastAt
+        ? '上次備份：' + new Date(lastAt).toLocaleString('zh-TW', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})
+        : '尚未備份過';
+    const urgency = !lastAt ? 'color:var(--alert-red)' : (Date.now() - new Date(lastAt).getTime() > 7*86400000 ? 'color:var(--warn-yellow)' : 'color:var(--accent-color)');
+    const chips = allStoreKeys.map(t => '<div class="stat-chip">' + labels[t] + ' <span>' + JSON.parse(localStorage.getItem(t)||'[]').length + '</span> 筆</div>').join('');
+    document.getElementById('backup-stats').innerHTML = '<div style="font-size:0.78rem;' + urgency + ';margin-bottom:12px;letter-spacing:0.5px;">⏱ ' + lastStr + '</div>' + chips;
 }
 
 function downloadBackup() {
@@ -951,6 +988,8 @@ function downloadBackup() {
     a.href = URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' }));
     a.download = 'life-fragments-backup-' + getTodayString() + '.json';
     a.click();
+    localStorage.setItem('lastBackupAt', new Date().toISOString());
+    renderBackupStats();
     showToast('✓ 備份檔案已下載');
 }
 
@@ -1160,75 +1199,95 @@ function renderExerciseData() {
             html+='<div class="item-card"><div class="item-info">';
             html+='<h4><span class="tag" style="color:'+col+';border-color:'+col+';">'+i.type+'</span>'+i.name+'</h4>';
             html+='<p>'+meta+'</p>';
-            html+='<span class="edit-link" onclick="startEdit('${type}', ${i.id})">編輯</span>
-                </div><span class="delete-link" onclick="deleteExercise('+i.id+')">移除</span></div>';
+            html+='</div><span class="delete-link" onclick="deleteExercise('+i.id+')">移除</span></div>';
         });
         html+='</div>';
     });
     container.innerHTML=html;
 }
 
-function startEdit(type, id) {
+/* ══ 編輯功能 ══ */
+function openModal(id) { document.getElementById('modal-' + id).classList.add('open'); }
+function closeModal(id) { document.getElementById('modal-' + id).classList.remove('open'); }
+
+function openEdit(type, id) {
     const data = JSON.parse(localStorage.getItem(type) || '[]');
     const item = data.find(i => i.id === id);
     if (!item) return;
-
-    editId = id; // 設定編輯中的 ID
-    
-    // 根據不同類型填回欄位 (範例)
     if (type === 'selflove') {
-        document.getElementById('selflove-name').value = item.name;
-        document.getElementById('selflove-expiry').value = item.expiryDate || '';
+        document.getElementById('edit-selflove-id').value = id;
+        document.getElementById('edit-selflove-type').value = item.category || '其他';
+        document.getElementById('edit-selflove-name').value = item.name || '';
+        document.getElementById('edit-selflove-price').value = item.price || '';
+        document.getElementById('edit-selflove-buy-date').value = item.buyDate || '';
+        document.getElementById('edit-selflove-expiry-date').value = item.expiryDate || '';
+        openModal('selflove');
     } else if (type === 'notes') {
-        document.getElementById('notes-title').value = item.title;
-        document.getElementById('notes-content').value = item.content;
-    } else if (type === 'period') {
-        document.getElementById('period-start').value = item.startDate;
-        document.getElementById('period-end').value = item.endDate || '';
+        document.getElementById('edit-notes-id').value = id;
+        document.getElementById('edit-notes-title').value = item.title || '';
+        document.getElementById('edit-notes-content').value = item.content || '';
+        document.getElementById('edit-notes-date').value = item.date || '';
+        openModal('notes');
     }
-
-    // 將按鈕文字改為「儲存修改」，並滾動回頂端
-    document.querySelector(`#${type}-form button`).innerText = '儲存修改';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-    function closePeriod(id) {
+
+function saveEditSelflove() {
+    const id = parseInt(document.getElementById('edit-selflove-id').value);
+    let data = JSON.parse(localStorage.getItem('selflove') || '[]');
+    const idx = data.findIndex(i => i.id === id);
+    if (idx === -1) return;
+    data[idx].category = document.getElementById('edit-selflove-type').value;
+    data[idx].name = document.getElementById('edit-selflove-name').value;
+    data[idx].price = document.getElementById('edit-selflove-price').value;
+    data[idx].buyDate = document.getElementById('edit-selflove-buy-date').value;
+    data[idx].expiryDate = document.getElementById('edit-selflove-expiry-date').value;
+    localStorage.setItem('selflove', JSON.stringify(data));
+    closeModal('selflove');
+    renderExpiryAlert();
+    renderData('selflove');
+    showToast('✓ 已更新');
+}
+
+function saveEditNotes() {
+    const id = parseInt(document.getElementById('edit-notes-id').value);
+    let data = JSON.parse(localStorage.getItem('notes') || '[]');
+    const idx = data.findIndex(i => i.id === id);
+    if (idx === -1) return;
+    data[idx].title = document.getElementById('edit-notes-title').value;
+    data[idx].content = document.getElementById('edit-notes-content').value;
+    data[idx].date = document.getElementById('edit-notes-date').value;
+    localStorage.setItem('notes', JSON.stringify(data));
+    closeModal('notes');
+    renderData('notes');
+    showToast('✓ 已更新');
+}
+
+function openEditPeriod(id) {
     const data = JSON.parse(localStorage.getItem('period') || '[]');
-    const index = data.findIndex(i => i.id === id);
-    if (index !== -1) {
-        // 自動填入今天日期 (格式：YYYY-MM-DD)
-        data[index].endDate = new Date().toISOString().split('T')[0]; 
-        localStorage.setItem('period', JSON.stringify(data));
-        renderData('period'); // 重新渲染畫面
-        showToast('✓ 已補填結束日');
-    }
+    const item = data.find(i => i.id === id);
+    if (!item) return;
+    document.getElementById('edit-period-id').value = id;
+    document.getElementById('edit-period-start').value = item.start || '';
+    document.getElementById('edit-period-end').value = item.end || '';
+    openModal('period');
 }
 
-    function backupData() {
-    const allData = {
-        media: localStorage.getItem('media'),
-        selflove: localStorage.getItem('selflove'),
-        notes: localStorage.getItem('notes'),
-        period: localStorage.getItem('period'),
-        lastBackup: new Date().toLocaleString('zh-TW', { hour12: false }) // 存入時間
-    };
-    
-    // ... 執行原本的備份下載邏輯 ...
-    
-    // 同時存回 localStorage 顯示在介面上
-    localStorage.setItem('last_backup_time', allData.lastBackup);
-    displayBackupTime();
+function saveEditPeriod() {
+    const id = parseInt(document.getElementById('edit-period-id').value);
+    const newEnd = document.getElementById('edit-period-end').value;
+    let data = JSON.parse(localStorage.getItem('period') || '[]');
+    const idx = data.findIndex(i => i.id === id);
+    if (idx === -1) return;
+    data[idx].end = newEnd;
+    localStorage.setItem('period', JSON.stringify(data));
+    closeModal('period');
+    renderPeriodData();
+    renderCalendar();
+    renderPeriodPredict();
+    showToast('✓ 已更新');
 }
 
-    function displayBackupTime() {
-    const time = localStorage.getItem('last_backup_time') || '尚未備份';
-    const infoArea = document.getElementById('backup-info');
-    if (infoArea) {
-        infoArea.innerHTML = `<p style="font-size: 0.8rem; color: #888;">上次備份時間：${time}</p>`;
-    }
-}
-// 頁面載入時執行一次
-window.onload = () => { displayBackupTime(); };
-    
+
 window.onload = () => {
     initCalView(); initExCalView(); resetDates(); initFilters();
     renderData('media'); renderFinanceOverview();
