@@ -403,8 +403,7 @@
         </div>
 
         <!-- 當月統計 -->
-        <div id="ex-month-stats" style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;"></div>
-        <div id="ex-streak-bar" style="margin-bottom:16px;"></div>
+        <div class="stats-bar" id="ex-stats-bar" style="margin-bottom:16px;"></div>
 
         <!-- 新增表單 -->
         <button class="add-toggle-btn" id="toggle-exercise-form" onclick="toggleForm('exercise-form',this)">
@@ -1111,64 +1110,84 @@ function renderExerciseCal() {
     }
     document.getElementById('ex-cal-grid').innerHTML=html;
 }
-function renderExerciseMonthStats() {
+function renderExerciseMonthStats(fromDate, toDate) {
     if(exCalYear===undefined) initExCalView();
     const data=JSON.parse(localStorage.getItem('exercise')||'[]');
-    const prefix=exCalYear+'-'+String(exCalMonth+1).padStart(2,'0');
-    const md=data.filter(i=>i.date.startsWith(prefix));
+    const today=new Date().toISOString().split('T')[0];
+    const year=new Date().getFullYear();
+    const defaultFrom=year+'-01-01';
+    const f=fromDate||defaultFrom;
+    const t=toDate||today;
+    const md=data.filter(i=>i.date>=f&&i.date<=t);
     const totalMins=md.reduce((s,i)=>s+(i.mins||0),0);
+    const totalKcal=md.reduce((s,i)=>s+(i.kcal||0),0);
+    const totalSteps=md.reduce((s,i)=>s+(i.steps||0),0);
     const activeDays=new Set(md.filter(i=>(i.mins||0)>=30||(i.steps||0)>=10000).map(i=>i.date)).size;
     const totalDays=new Set(md.map(i=>i.date)).size;
-    const totalKcal=md.reduce((s,i)=>s+(i.kcal||0),0);
-    document.getElementById('ex-month-stats').innerHTML=
-        '<div class="weight-stat">運動天數 <span>'+totalDays+' 天</span></div>'+
-        '<div class="weight-stat">達標天數 <span>'+activeDays+' 天</span></div>'+
-        '<div class="weight-stat">總分鐘數 <span>'+totalMins+' 分</span></div>'+
-        (totalKcal>0?'<div class="weight-stat">消耗熱量 <span>'+totalKcal+' kcal</span></div>':'');
-    // streak calculation across ALL data (not just this month)
+    // type breakdown
+    const typeCats=['低強度有氧','高強度有氧','雕塑','重訓','瑜珈','其他'];
+    const typeColors=['#7d9e8c','#4a8a6a','#a07db5','#7d8ea4','#b58c7d','#8c8c8c'];
+    const typeCounts=typeCats.map(c=>md.filter(i=>i.type===c).length);
+    // streak (always from all data)
     const allData=JSON.parse(localStorage.getItem('exercise')||'[]');
-    const activeDateSet=new Set();
     const byDate={};
     allData.forEach(i=>{
         if(!byDate[i.date])byDate[i.date]={mins:0,steps:0};
         byDate[i.date].mins+=(i.mins||0);
         byDate[i.date].steps+=(i.steps||0);
     });
+    const activeDateSet=new Set();
     Object.entries(byDate).forEach(([d,v])=>{ if(v.mins>=30||v.steps>=10000) activeDateSet.add(d); });
     const sortedActive=[...activeDateSet].sort();
     let curStreak=0,bestStreak=0,tempStreak=0;
     const todayStr=new Date().toISOString().split('T')[0];
-    // calculate streaks
     for(let i=0;i<sortedActive.length;i++){
         if(i===0){ tempStreak=1; }
         else {
             const prev=new Date(sortedActive[i-1]); prev.setDate(prev.getDate()+1);
-            const curr=new Date(sortedActive[i]);
-            tempStreak = prev.toISOString().split('T')[0]===sortedActive[i] ? tempStreak+1 : 1;
+            tempStreak=prev.toISOString().split('T')[0]===sortedActive[i]?tempStreak+1:1;
         }
         if(tempStreak>bestStreak) bestStreak=tempStreak;
     }
-    // current streak: count back from today or yesterday
     curStreak=0;
-    const checkDates=[todayStr];
     const yd=new Date(); yd.setDate(yd.getDate()-1);
-    checkDates.push(yd.toISOString().split('T')[0]);
-    let startFrom=checkDates.find(d=>activeDateSet.has(d));
+    let startFrom=[todayStr,yd.toISOString().split('T')[0]].find(d=>activeDateSet.has(d));
     if(startFrom){
         let check=new Date(startFrom);
-        while(activeDateSet.has(check.toISOString().split('T')[0])){
-            curStreak++;
-            check.setDate(check.getDate()-1);
-        }
+        while(activeDateSet.has(check.toISOString().split('T')[0])){ curStreak++; check.setDate(check.getDate()-1); }
     }
-    const streakEl=document.getElementById('ex-streak-bar');
-    if(streakEl){
-        if(curStreak>0||bestStreak>0){
-            streakEl.innerHTML='<span class="streak-badge">🔥 連續達標 '+curStreak+' 天</span>'+(bestStreak>curStreak?'<span class="streak-best">最長紀錄 '+bestStreak+' 天</span>':'');
-        } else {
-            streakEl.innerHTML='<span style="font-size:0.78rem;color:var(--text-secondary);">今日達標即開始連續紀錄 🔥</span>';
-        }
-    }
+    const rangeLabel=f===defaultFrom&&t===today?year+' 年':f+' ~ '+t;
+    const inputStyle='flex:1;min-width:120px;font-size:0.82rem;padding:7px 10px;border:1px solid var(--border-color);border-radius:6px;background:var(--bg-color);color:var(--text-primary);outline:none;';
+    const streakHtml=curStreak>0||bestStreak>0
+        ?'<span class="streak-badge">🔥 連續達標 '+curStreak+' 天</span>'+(bestStreak>curStreak?'<span class="streak-best">最長紀錄 '+bestStreak+' 天</span>':'')
+        :'<span style="font-size:0.78rem;color:var(--text-secondary);">今日達標即開始連續紀錄 🔥</span>';
+    const typeChips=typeCats.map((c,idx)=>typeCounts[idx]>0?`
+        <div class="stats-count-chip">
+            <div class="stats-count-num">${typeCounts[idx]}</div>
+            <div class="stats-count-label" style="font-size:0.6rem;">${c}</div>
+        </div>`:'').join('');
+    const el=document.getElementById('ex-stats-bar');
+    if(!el)return;
+    el.innerHTML=`
+        <div class="stats-bar-title" style="margin-bottom:10px;">統計區間</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+            <input type="date" id="ex-stats-from" value="${f}"
+                onchange="renderExerciseMonthStats(this.value,document.getElementById('ex-stats-to').value)"
+                style="${inputStyle}">
+            <span style="font-size:0.78rem;color:var(--text-secondary);flex-shrink:0;">至</span>
+            <input type="date" id="ex-stats-to" value="${t}"
+                onchange="renderExerciseMonthStats(document.getElementById('ex-stats-from').value,this.value)"
+                style="${inputStyle}">
+        </div>
+        <div style="margin-bottom:14px;">${streakHtml}</div>
+        <div class="stats-bar-title">${rangeLabel} · ${totalDays} 天運動 · 達標 ${activeDays} 天</div>
+        <div class="stats-year-row" style="margin-bottom:10px;">
+            <div class="stats-count-chip"><div class="stats-count-num">${totalMins}</div><div class="stats-count-label">分鐘</div></div>
+            ${totalKcal>0?'<div class="stats-count-chip"><div class="stats-count-num" style="font-size:1rem;">'+totalKcal+'</div><div class="stats-count-label">kcal</div></div>':''}
+            ${totalSteps>0?'<div class="stats-count-chip"><div class="stats-count-num" style="font-size:0.95rem;">'+(totalSteps>=10000?(totalSteps/1000).toFixed(1)+'k':totalSteps)+'</div><div class="stats-count-label">步數</div></div>':''}
+        </div>
+        <div class="stats-bar-title" style="margin-bottom:8px;">類型分布</div>
+        <div class="stats-year-row">${typeChips}</div>`;
 }
 function addExercise() {
     const type=document.getElementById('exercise-type').value;
