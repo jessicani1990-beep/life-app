@@ -195,7 +195,7 @@
         <button onclick="showTab('body')" id="btn-body">生理變化</button>
         <button onclick="showTab('exercise')" id="btn-exercise">運動</button>
         <button onclick="showTab('notes')" id="btn-notes">隨手記記</button>
-        <button onclick="showTab('settings')" id="btn-settings">備份</button>
+        <button onclick="showTab('settings')" id="btn-settings" title="備份與設定" style="font-size:1.1rem;padding:10px 10px;">⚙︎</button>
     </nav>
 
     <!-- 閱聽 -->
@@ -346,6 +346,7 @@
                         <button class="symptom-check-btn" onclick="toggleSymptom(this,'腹部疼痛')">腹部疼痛</button>
                         <button class="symptom-check-btn" onclick="toggleSymptom(this,'痘痘')">痘痘</button>
                     </div>
+                    <input type="text" id="symptom-note" placeholder="備註（例：頭痛劇烈、輕微不適…）">
                     <button class="add-btn" onclick="addSymptom()">記錄症狀</button>
                 </section>
             </div>
@@ -488,6 +489,95 @@
         </div>
     </div>
 </div>
+
+<!-- 編輯 Modal：體重 -->
+<div class="modal-overlay" id="modal-weight" onclick="closeModal('weight')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-title">編輯體重紀錄</div>
+        <input type="hidden" id="edit-weight-id">
+        <input type="number" id="edit-weight-value" placeholder="體重（公斤）" step="0.1">
+        <div class="date-field"><label class="date-label">日期</label><input type="date" id="edit-weight-date"></div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('weight')">取消</button>
+            <button class="modal-btn modal-btn-save" onclick="saveEditWeight()">儲存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 編輯 Modal：運動 -->
+<div class="modal-overlay" id="modal-exercise" onclick="closeModal('exercise')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-title">編輯運動紀錄</div>
+        <input type="hidden" id="edit-exercise-id">
+        <select id="edit-exercise-type">
+            <option value="低強度有氧">低強度有氧</option><option value="高強度有氧">高強度有氧</option>
+            <option value="雕塑">雕塑</option><option value="重訓">重訓</option>
+            <option value="瑜珈">瑜珈</option><option value="其他">其他</option>
+        </select>
+        <input type="text" id="edit-exercise-name" placeholder="項目名稱">
+        <input type="number" id="edit-exercise-mins" placeholder="分鐘數">
+        <input type="number" id="edit-exercise-kcal" placeholder="消耗熱量（kcal）">
+        <input type="number" id="edit-exercise-steps" placeholder="步數">
+        <div class="date-field"><label class="date-label">日期</label><input type="date" id="edit-exercise-date"></div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('exercise')">取消</button>
+            <button class="modal-btn modal-btn-save" onclick="saveEditExercise()">儲存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 編輯 Modal：症狀 -->
+<div class="modal-overlay" id="modal-symptom" onclick="closeModal('symptom')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-title">編輯症狀紀錄</div>
+        <input type="hidden" id="edit-symptom-id">
+        <div class="date-field"><label class="date-label">日期</label><input type="date" id="edit-symptom-date"></div>
+        <div class="symptom-checks" id="edit-symptom-checks">
+            <button class="symptom-check-btn" onclick="toggleEditSymptom(this,'胸部脹痛')">胸部脹痛</button>
+            <button class="symptom-check-btn" onclick="toggleEditSymptom(this,'頭痛')">頭痛</button>
+            <button class="symptom-check-btn" onclick="toggleEditSymptom(this,'點狀出血')">點狀出血</button>
+            <button class="symptom-check-btn" onclick="toggleEditSymptom(this,'腹部疼痛')">腹部疼痛</button>
+            <button class="symptom-check-btn" onclick="toggleEditSymptom(this,'痘痘')">痘痘</button>
+        </div>
+        <input type="text" id="edit-symptom-note" placeholder="備註">
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('symptom')">取消</button>
+            <button class="modal-btn modal-btn-save" onclick="saveEditSymptom()">儲存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 編輯 Modal：閱聽 -->
+<div class="modal-overlay" id="modal-media" onclick="closeModal('media')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-title">編輯閱聽紀錄</div>
+        <input type="hidden" id="edit-media-id">
+        <select id="edit-media-type"><option value="書籍">書籍</option><option value="影集">影集</option><option value="電影">電影</option><option value="展覽">展覽</option><option value="遊戲">遊戲</option></select>
+        <input type="text" id="edit-media-title" placeholder="標題名稱">
+        <select id="edit-media-rating"><option value="5">♥♥♥♥♥</option><option value="4">♥♥♥♥</option><option value="3">♥♥♥</option><option value="2">♥♥</option><option value="1">♥</option></select>
+        <div class="date-field"><label class="date-label">日期</label><input type="date" id="edit-media-date"></div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('media')">取消</button>
+            <button class="modal-btn modal-btn-save" onclick="saveEditMedia()">儲存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 編輯 Modal：餘裕 -->
+<div class="modal-overlay" id="modal-finance" onclick="closeModal('finance')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-title">編輯結餘紀錄</div>
+        <input type="hidden" id="edit-finance-id">
+        <select id="edit-finance-type"><option value="中國信託">中國信託</option><option value="永豐銀行">永豐銀行</option><option value="台新銀行">台新銀行</option><option value="玉山銀行">玉山銀行</option><option value="LINE BANK">LINE BANK</option><option value="第一銀行">第一銀行</option><option value="國泰世華">國泰世華</option><option value="富邦銀行">富邦銀行</option><option value="合作金庫">合作金庫</option></select>
+        <input type="text" id="edit-finance-title" placeholder="結餘金額">
+        <div class="date-field"><label class="date-label">日期</label><input type="date" id="edit-finance-date"></div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('finance')">取消</button>
+            <button class="modal-btn modal-btn-save" onclick="saveEditFinance()">儲存</button>
+        </div>
+    </div>
+</div>
+
 
 <!-- 編輯 Modal：對自己好 -->
 <div class="modal-overlay" id="modal-selflove" onclick="closeModal('selflove')">
@@ -823,11 +913,13 @@ function addPeriod() {
 function addSymptom() {
     const date = document.getElementById('symptom-date').value || getTodayString();
     if (selectedSymptoms.length === 0) { showToast('請至少選擇一個症狀'); return; }
+    const note = document.getElementById('symptom-note').value.trim();
     let data = JSON.parse(localStorage.getItem('symptom') || '[]');
-    data.unshift({ id: Date.now(), date, symptoms: [...selectedSymptoms] });
+    data.unshift({ id: Date.now(), date, symptoms: [...selectedSymptoms], note });
     localStorage.setItem('symptom', JSON.stringify(data));
     selectedSymptoms = [];
     document.querySelectorAll('.symptom-check-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById('symptom-note').value = '';
     resetDates();
     closeForm('symptom-form', 'toggle-symptom-form');
     renderPeriodData(); renderCalendar();
@@ -866,7 +958,8 @@ function renderPeriodData() {
             html += '<div class="item-card"><div class="item-info"><h4><span class="tag" style="color:var(--period-red);border-color:var(--period-red);">月經</span>' + i.start + (i.end ? ' → ' + i.end : ' → 記錄中') + '</h4><p>' + (dur ? dur + ' 天' : '尚未結束') + '</p></div><div class="item-actions">' + editBtn + '<span class="delete-link" onclick="deletePeriod(\'period\',' + i.id + ')">移除</span></div></div>';
         } else {
             const syms = i.symptoms.map(s => '<span class="tag">' + s + '</span>').join('');
-            html += '<div class="item-card"><div class="item-info"><h4>' + syms + '</h4><p>' + i.date + '</p></div><span class="delete-link" onclick="deletePeriod(\'symptom\',' + i.id + ')">移除</span></div>';
+            const noteHtml = i.note ? '<p style="font-size:0.75rem;color:var(--text-secondary);margin-top:2px;">' + i.note + '</p>' : '';
+            html += '<div class="item-card"><div class="item-info"><h4>' + syms + '</h4>' + noteHtml + '<p>' + i.date + '</p></div><div class="item-actions"><span class="edit-link" onclick="openEditSymptom(' + i.id + ')">編輯</span><span class="delete-link" onclick="deletePeriod(\'symptom\',' + i.id + ')">移除</span></div></div>';
         }
     });
     container.innerHTML = html;
@@ -954,6 +1047,11 @@ function addWeight() {
     const date = document.getElementById('weight-date').value || getTodayString();
     if (!val) return;
     let data = JSON.parse(localStorage.getItem('weight') || '[]');
+    const dupIdx = data.findIndex(i => i.date === date);
+    if (dupIdx !== -1) {
+        if (!confirm('這天已有體重紀錄（' + data[dupIdx].weight.toFixed(1) + ' kg），要覆蓋嗎？')) return;
+        data.splice(dupIdx, 1);
+    }
     data.unshift({ id: Date.now(), weight: parseFloat(val), date });
     localStorage.setItem('weight', JSON.stringify(data));
     document.getElementById('weight-value').value = '';
@@ -976,7 +1074,7 @@ function renderWeightData() {
     if (data.length === 0) { el.innerHTML = ''; document.getElementById('weight-list').innerHTML = '<div class="empty-state">尚無體重紀錄。</div>'; return; }
     const weights = data.map(d => d.weight);
     el.innerHTML = '<div class="weight-stat">最新 <span>' + weights[0].toFixed(1) + ' kg</span></div><div class="weight-stat">平均 <span>' + (weights.reduce((a,b)=>a+b,0)/weights.length).toFixed(1) + ' kg</span></div><div class="weight-stat">最低 <span>' + Math.min(...weights).toFixed(1) + ' kg</span></div><div class="weight-stat">最高 <span>' + Math.max(...weights).toFixed(1) + ' kg</span></div>';
-    document.getElementById('weight-list').innerHTML = data.map(i => '<div class="item-card"><div class="item-info"><h4>' + i.weight.toFixed(1) + ' kg</h4><p>' + i.date + '</p></div><span class="delete-link" onclick="deleteWeight(' + i.id + ')">移除</span></div>').join('');
+    document.getElementById('weight-list').innerHTML = data.map(i => '<div class="item-card"><div class="item-info"><h4>' + i.weight.toFixed(1) + ' kg</h4><p>' + i.date + '</p></div><div class="item-actions"><span class="edit-link" onclick="openEditWeight(' + i.id + ')">編輯</span><span class="delete-link" onclick="deleteWeight(' + i.id + ')">移除</span></div></div>').join('');
 }
 
 function renderWeightChart() {
@@ -1314,6 +1412,19 @@ function openEdit(type, id) {
         document.getElementById('edit-notes-content').value = item.content || '';
         document.getElementById('edit-notes-date').value = item.date || '';
         openModal('notes');
+    } else if (type === 'media') {
+        document.getElementById('edit-media-id').value = id;
+        document.getElementById('edit-media-type').value = item.category || '書籍';
+        document.getElementById('edit-media-title').value = item.title || '';
+        document.getElementById('edit-media-rating').value = item.rating || '5';
+        document.getElementById('edit-media-date').value = item.date || '';
+        openModal('media');
+    } else if (type === 'finance') {
+        document.getElementById('edit-finance-id').value = id;
+        document.getElementById('edit-finance-type').value = item.category || '中國信託';
+        document.getElementById('edit-finance-title').value = item.title || '';
+        document.getElementById('edit-finance-date').value = item.date || '';
+        openModal('finance');
     }
 }
 
@@ -1494,6 +1605,118 @@ function renderSelfloveStats(fromDate, toDate) {
         data: { labels: filtered.map(x => x.c), datasets: [{ data: filtered.map(x => x.n), backgroundColor: filtered.map(x => x.col), borderWidth: 2, borderColor: '#fff' }] },
         options: { responsive: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ' + ctx.label + '：$' + ctx.raw.toLocaleString('zh-TW',{maximumFractionDigits:0}) } } }, cutout: '62%' }
     });
+}
+
+
+function saveEditMedia() {
+    const id = parseInt(document.getElementById('edit-media-id').value);
+    let data = JSON.parse(localStorage.getItem('media') || '[]');
+    const idx = data.findIndex(i => i.id === id); if (idx === -1) return;
+    data[idx].category = document.getElementById('edit-media-type').value;
+    data[idx].title = document.getElementById('edit-media-title').value;
+    data[idx].rating = document.getElementById('edit-media-rating').value;
+    data[idx].date = document.getElementById('edit-media-date').value;
+    localStorage.setItem('media', JSON.stringify(data));
+    closeModal('media'); renderData('media'); renderMediaStats(); showToast('✓ 已更新');
+}
+
+function saveEditFinance() {
+    const id = parseInt(document.getElementById('edit-finance-id').value);
+    let data = JSON.parse(localStorage.getItem('finance') || '[]');
+    const idx = data.findIndex(i => i.id === id); if (idx === -1) return;
+    data[idx].category = document.getElementById('edit-finance-type').value;
+    data[idx].title = document.getElementById('edit-finance-title').value;
+    data[idx].date = document.getElementById('edit-finance-date').value;
+    localStorage.setItem('finance', JSON.stringify(data));
+    closeModal('finance'); renderData('finance'); renderFinanceOverview(); showToast('✓ 已更新');
+}
+
+function openEditWeight(id) {
+    const data = JSON.parse(localStorage.getItem('weight') || '[]');
+    const item = data.find(i => i.id === id); if (!item) return;
+    document.getElementById('edit-weight-id').value = id;
+    document.getElementById('edit-weight-value').value = item.weight;
+    document.getElementById('edit-weight-date').value = item.date;
+    openModal('weight');
+}
+
+function saveEditWeight() {
+    const id = parseInt(document.getElementById('edit-weight-id').value);
+    const newVal = parseFloat(document.getElementById('edit-weight-value').value);
+    const newDate = document.getElementById('edit-weight-date').value;
+    if (!newVal || !newDate) return;
+    let data = JSON.parse(localStorage.getItem('weight') || '[]');
+    const idx = data.findIndex(i => i.id === id); if (idx === -1) return;
+    // check duplicate date (other entries)
+    const dupIdx = data.findIndex(i => i.date === newDate && i.id !== id);
+    if (dupIdx !== -1) {
+        if (!confirm('這天已有另一筆紀錄（' + data[dupIdx].weight.toFixed(1) + ' kg），要覆蓋嗎？')) return;
+        data.splice(dupIdx, 1);
+    }
+    const idx2 = data.findIndex(i => i.id === id);
+    data[idx2].weight = newVal; data[idx2].date = newDate;
+    data.sort((a,b) => b.date.localeCompare(a.date));
+    localStorage.setItem('weight', JSON.stringify(data));
+    closeModal('weight'); renderWeightData(); renderWeightChart(); showToast('✓ 已更新');
+}
+
+function openEditExercise(id) {
+    const data = JSON.parse(localStorage.getItem('exercise') || '[]');
+    const item = data.find(i => i.id === id); if (!item) return;
+    document.getElementById('edit-exercise-id').value = id;
+    document.getElementById('edit-exercise-type').value = item.type || '其他';
+    document.getElementById('edit-exercise-name').value = item.name || '';
+    document.getElementById('edit-exercise-mins').value = item.mins || '';
+    document.getElementById('edit-exercise-kcal').value = item.kcal || '';
+    document.getElementById('edit-exercise-steps').value = item.steps || '';
+    document.getElementById('edit-exercise-date').value = item.date || '';
+    openModal('exercise');
+}
+
+function saveEditExercise() {
+    const id = parseInt(document.getElementById('edit-exercise-id').value);
+    let data = JSON.parse(localStorage.getItem('exercise') || '[]');
+    const idx = data.findIndex(i => i.id === id); if (idx === -1) return;
+    data[idx].type = document.getElementById('edit-exercise-type').value;
+    data[idx].name = document.getElementById('edit-exercise-name').value;
+    data[idx].mins = parseInt(document.getElementById('edit-exercise-mins').value) || 0;
+    data[idx].kcal = parseInt(document.getElementById('edit-exercise-kcal').value) || 0;
+    data[idx].steps = parseInt(document.getElementById('edit-exercise-steps').value) || 0;
+    data[idx].date = document.getElementById('edit-exercise-date').value;
+    localStorage.setItem('exercise', JSON.stringify(data));
+    closeModal('exercise'); renderExerciseCal(); renderExerciseMonthStats(); renderExerciseData(); showToast('✓ 已更新');
+}
+
+let editSymptomSelected = [];
+function toggleEditSymptom(btn, sym) {
+    btn.classList.toggle('selected');
+    if (editSymptomSelected.includes(sym)) editSymptomSelected = editSymptomSelected.filter(s => s !== sym);
+    else editSymptomSelected.push(sym);
+}
+
+function openEditSymptom(id) {
+    const data = JSON.parse(localStorage.getItem('symptom') || '[]');
+    const item = data.find(i => i.id === id); if (!item) return;
+    editSymptomSelected = [...(item.symptoms || [])];
+    document.getElementById('edit-symptom-id').value = id;
+    document.getElementById('edit-symptom-date').value = item.date || '';
+    document.getElementById('edit-symptom-note').value = item.note || '';
+    document.querySelectorAll('#edit-symptom-checks .symptom-check-btn').forEach(btn => {
+        btn.classList.toggle('selected', editSymptomSelected.includes(btn.innerText));
+    });
+    openModal('symptom');
+}
+
+function saveEditSymptom() {
+    const id = parseInt(document.getElementById('edit-symptom-id').value);
+    if (editSymptomSelected.length === 0) { showToast('請至少選擇一個症狀'); return; }
+    let data = JSON.parse(localStorage.getItem('symptom') || '[]');
+    const idx = data.findIndex(i => i.id === id); if (idx === -1) return;
+    data[idx].date = document.getElementById('edit-symptom-date').value;
+    data[idx].symptoms = [...editSymptomSelected];
+    data[idx].note = document.getElementById('edit-symptom-note').value.trim();
+    localStorage.setItem('symptom', JSON.stringify(data));
+    closeModal('symptom'); renderPeriodData(); renderCalendar(); showToast('✓ 已更新');
 }
 
 
