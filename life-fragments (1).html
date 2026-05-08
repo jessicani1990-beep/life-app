@@ -1,0 +1,1926 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生活碎片 | Life Fragments</title>
+    <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f9f7f2;
+            --accent-color: #7d8471;
+            --text-primary: #434343;
+            --text-secondary: #8c8c8c;
+            --card-bg: #ffffff;
+            --border-color: #e0ddd5;
+            --alert-red: #c66b6b;
+            --warn-yellow: #d4a373;
+            --period-red: #c66b6b;
+            --period-light: #f7e8e8;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'Noto Serif TC', serif; background-color: var(--bg-color); color: var(--text-primary); margin: 0; line-height: 1.6; display: flex; justify-content: center; overflow-x: hidden; }
+        .container { width: 100%; max-width: 500px; padding: 40px 20px; }
+        header { text-align: center; margin-bottom: 30px; }
+        header h1 { font-weight: 700; letter-spacing: 2px; font-size: 1.5rem; margin-bottom: 5px; }
+        header p { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+
+        nav { display: flex; justify-content: space-around; margin-bottom: 25px; border-bottom: 1px solid var(--border-color); overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+        nav::-webkit-scrollbar { display: none; }
+        nav button { border: none; background: none; padding: 10px 12px; font-family: inherit; color: var(--text-secondary); cursor: pointer; font-size: 0.9rem; flex-shrink: 0; }
+        nav button.active { color: var(--accent-color); border-bottom: 2px solid var(--accent-color); font-weight: bold; }
+
+        section.input-area { background: var(--card-bg); padding: 20px; border-radius: 2px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); margin-bottom: 16px; border: 1px solid var(--border-color); }
+        .filter-area { margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color); }
+
+        .category-quick-filter { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+        .cat-btn { font-size: 0.75rem; padding: 4px 12px; border: 1px solid var(--border-color); border-radius: 20px; background: white; color: var(--text-secondary); cursor: pointer; white-space: nowrap; transition: 0.2s; }
+        .cat-btn.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
+
+        .tab-content { display: none; animation: fadeIn 0.4s; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        input, select, textarea { padding: 10px 0; border: none; border-bottom: 1px solid var(--border-color); font-family: inherit; background: transparent; outline: none; color: var(--text-primary); width: 100%; margin-bottom: 10px; border-radius: 0; -webkit-appearance: none; }
+        textarea { height: 60px; resize: none; }
+        .filter-input { font-size: 0.85rem; flex: 2; min-width: 150px; margin-bottom: 0; }
+        .filter-select { font-size: 0.85rem; flex: 1; margin-bottom: 0; }
+
+        button.add-btn { background-color: var(--accent-color); color: white; border: none; width: 100%; padding: 12px; letter-spacing: 2px; cursor: pointer; font-family: inherit; transition: 0.2s; margin-bottom: 0; }
+        button.add-btn:active { opacity: 0.8; }
+
+        .item-card { border-bottom: 1px solid var(--border-color); padding: 15px 5px; display: flex; justify-content: space-between; align-items: center; }
+        .item-info h4 { margin: 0; font-size: 1rem; font-weight: 400; }
+        .item-info p { margin: 0; font-size: 0.8rem; color: var(--text-secondary); white-space: pre-wrap; }
+        .tag { font-size: 0.7rem; padding: 2px 6px; border: 1px solid var(--border-color); border-radius: 10px; margin-right: 5px; color: var(--accent-color); }
+        .delete-link { font-size: 0.8rem; color: #d1d1d1; cursor: pointer; padding: 5px; flex-shrink: 0; }
+        .empty-state { text-align: center; color: var(--text-secondary); margin-top: 30px; font-size: 0.85rem; }
+
+        .date-field { margin-bottom: 10px; }
+        .date-label { display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 2px; letter-spacing: 0.5px; }
+        .date-field input { margin-bottom: 0; }
+
+        .filter-group-label { font-size: 0.7rem; color: var(--text-secondary); letter-spacing: 1px; margin-bottom: 6px; }
+
+        /* 收合式表單 */
+        .add-toggle-btn { display: flex; align-items: center; gap: 8px; background: none; border: 1px dashed var(--border-color); width: 100%; padding: 11px 16px; font-family: inherit; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer; margin-bottom: 16px; letter-spacing: 1px; transition: 0.2s; }
+        .add-toggle-btn:hover { border-color: var(--accent-color); color: var(--accent-color); }
+        .add-toggle-btn.open { border-color: var(--accent-color); color: var(--accent-color); border-style: solid; background: #fafaf8; }
+        .toggle-icon { font-size: 1.1rem; line-height: 1; transition: transform 0.25s; display: inline-block; }
+        .add-toggle-btn.open .toggle-icon { transform: rotate(45deg); }
+        .collapsible-form { display: none; }
+        .collapsible-form.open { display: block; }
+
+        /* 效期提醒 */
+        .expiry-alert { background: #fdf6f0; border: 1px solid var(--warn-yellow); padding: 16px 20px; margin-bottom: 16px; }
+        .expiry-alert-title { font-size: 0.72rem; color: var(--warn-yellow); letter-spacing: 1.5px; margin-bottom: 10px; }
+        .expiry-item { border-bottom: 1px dashed #f0e0cc; padding: 9px 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .expiry-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .expiry-item-name { font-size: 0.88rem; flex: 1; }
+        .expiry-badge { font-size: 0.72rem; padding: 2px 9px; border-radius: 10px; white-space: nowrap; flex-shrink: 0; }
+        .badge-warn { background: #fef0e0; color: var(--warn-yellow); }
+        .badge-urgent { background: #fce8e8; color: var(--alert-red); }
+        .badge-expired { background: #f5e8e8; color: var(--alert-red); font-weight: bold; }
+
+        /* 備份 */
+        .backup-section { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 2px; padding: 24px 20px; margin-bottom: 16px; }
+        .backup-section h3 { margin: 0 0 6px 0; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; }
+        .backup-section p { margin: 0 0 16px 0; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.7; }
+        .backup-btn { display: block; width: 100%; padding: 12px; font-family: inherit; font-size: 0.9rem; letter-spacing: 2px; cursor: pointer; border-radius: 2px; transition: 0.2s; }
+        .backup-btn-primary { background-color: var(--accent-color); color: white; border: none; }
+        .backup-btn-outline { background: transparent; color: var(--accent-color); border: 1px solid var(--accent-color); }
+        .backup-btn-outline:active { background: #f0f0ec; }
+        .backup-btn-danger { background: transparent; color: var(--alert-red); border: 1px solid var(--alert-red); margin-top: 8px; }
+        #restore-file-input { display: none; }
+        .drop-zone { border: 1.5px dashed var(--border-color); border-radius: 2px; padding: 28px 16px; text-align: center; color: var(--text-secondary); font-size: 0.82rem; cursor: pointer; transition: 0.2s; margin-bottom: 12px; }
+        .drop-zone:hover, .drop-zone.drag-over { border-color: var(--accent-color); background: #f4f3ee; color: var(--accent-color); }
+        .drop-zone .drop-icon { font-size: 1.8rem; display: block; margin-bottom: 8px; }
+        .backup-stats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+        .stat-chip { font-size: 0.75rem; padding: 4px 12px; border: 1px solid var(--border-color); border-radius: 20px; color: var(--text-secondary); background: white; }
+        .stat-chip span { color: var(--accent-color); font-weight: bold; }
+
+        /* 餘裕總覽 */
+        .finance-overview { background: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; margin-bottom: 16px; }
+        .finance-overview h3 { font-size: 0.8rem; color: var(--text-secondary); letter-spacing: 1px; margin: 0 0 12px 0; font-weight: 400; }
+        .finance-total { font-size: 1.6rem; font-weight: 700; color: var(--text-primary); margin-bottom: 15px; }
+        .bank-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--border-color); font-size: 0.85rem; }
+        .bank-row:last-child { border-bottom: none; }
+        .bank-name { color: var(--text-secondary); }
+
+        /* 生理變化 */
+        .body-subtabs { display: flex; margin-bottom: 20px; border: 1px solid var(--border-color); overflow: hidden; }
+        .body-subtab { flex: 1; padding: 10px; text-align: center; font-size: 0.85rem; background: white; border: none; font-family: inherit; color: var(--text-secondary); cursor: pointer; transition: 0.2s; }
+        .body-subtab.active { background: var(--accent-color); color: white; }
+        .body-subcontent { display: none; }
+        .body-subcontent.active { display: block; }
+
+        .period-calendar { background: var(--card-bg); border: 1px solid var(--border-color); padding: 15px; margin-bottom: 16px; }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .cal-nav { background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--accent-color); padding: 5px 10px; width: auto; margin: 0; }
+        .cal-title { font-size: 0.9rem; font-weight: 700; letter-spacing: 1px; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+        .cal-day-name { text-align: center; font-size: 0.65rem; color: var(--text-secondary); padding: 4px 0; }
+        .cal-day { text-align: center; font-size: 0.75rem; cursor: default; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 28px; height: 28px; margin: 0 auto; position: relative; }
+        .cal-day.period-day { background: var(--period-light); color: var(--period-red); font-weight: 700; }
+        .cal-day.symptom-day::after { content: ''; display: block; width: 4px; height: 4px; border-radius: 50%; background: var(--warn-yellow); position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); }
+        .cal-day.today { outline: 1.5px solid var(--accent-color); outline-offset: 1px; }
+        .cal-day.predicted { background: #f0f3ee; color: var(--accent-color); font-style: italic; }
+        .cal-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; font-size: 0.7rem; color: var(--text-secondary); }
+        .cal-legend-item { display: flex; align-items: center; gap: 5px; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+        .period-predict-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; margin-bottom: 16px; }
+        .predict-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--border-color); font-size: 0.85rem; }
+        .predict-row:last-child { border-bottom: none; }
+        .predict-label { color: var(--text-secondary); }
+        .predict-countdown { font-size: 1.4rem; font-weight: 700; color: var(--period-red); }
+
+        .symptom-checks { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+        .symptom-check-btn { font-size: 0.75rem; padding: 5px 12px; border: 1px solid var(--border-color); border-radius: 20px; background: white; color: var(--text-secondary); cursor: pointer; transition: 0.2s; }
+        .symptom-check-btn.selected { background: var(--warn-yellow); color: white; border-color: var(--warn-yellow); }
+
+        .weight-chart-wrap { background: var(--card-bg); border: 1px solid var(--border-color); padding: 15px; margin-bottom: 16px; }
+        .weight-stats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+        .weight-stat { font-size: 0.75rem; padding: 4px 12px; border: 1px solid var(--border-color); border-radius: 20px; color: var(--text-secondary); background: white; }
+        .weight-stat span { color: var(--accent-color); font-weight: bold; }
+
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: #434343; color: white; padding: 10px 22px; border-radius: 20px; font-size: 0.85rem; opacity: 0; pointer-events: none; transition: opacity 0.3s, transform 0.3s; z-index: 9999; white-space: nowrap; }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+
+        /* ── 統計卡 ── */
+        .stats-bar { background: var(--card-bg); border: 1px solid var(--border-color); padding: 16px 20px; margin-bottom: 16px; }
+        .stats-bar-title { font-size: 0.68rem; letter-spacing: 1.5px; color: var(--text-secondary); margin-bottom: 14px; text-transform: uppercase; }
+        .stats-year-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+        .stats-count-chip { display: flex; flex-direction: column; align-items: center; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; min-width: 64px; background: var(--bg-color); }
+        .stats-count-num { font-size: 1.5rem; font-weight: 700; line-height: 1; color: var(--text-primary); }
+        .stats-count-label { font-size: 0.65rem; color: var(--text-secondary); margin-top: 4px; letter-spacing: 0.5px; }
+        .stats-avg-hearts { font-size: 0.82rem; color: #c9856a; letter-spacing: 3px; }
+        .stats-donut-wrap { display: flex; align-items: center; gap: 16px; }
+        .stats-donut-canvas { width: 90px !important; height: 90px !important; flex-shrink: 0; }
+        .stats-legend { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+        .stats-legend-row { display: flex; align-items: center; gap: 7px; font-size: 0.78rem; }
+        .stats-legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+        .stats-legend-label { flex: 1; color: var(--text-secondary); }
+        .stats-legend-val { font-size: 0.72rem; color: var(--text-primary); }
+        .streak-badge { display: inline-flex; align-items: center; gap: 5px; background: linear-gradient(135deg, #e8913a 0%, #c9704a 100%); color: white; border-radius: 20px; padding: 5px 14px; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.5px; }
+        .streak-best { font-size: 0.72rem; color: var(--text-secondary); margin-left: 6px; }
+        /* ── 編輯 Modal ── */
+        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:1000; justify-content:center; align-items:flex-end; }
+        .modal-overlay.open { display:flex; }
+        .modal-box { background:var(--card-bg); width:100%; max-width:500px; border-radius:14px 14px 0 0; padding:24px 20px 44px; max-height:85vh; overflow-y:auto; animation:slideUp .25s ease; }
+        @keyframes slideUp { from{transform:translateY(40px);opacity:0} to{transform:translateY(0);opacity:1} }
+        .modal-title { font-size:0.85rem; letter-spacing:1px; color:var(--text-secondary); margin-bottom:18px; }
+        .modal-actions { display:flex; gap:10px; margin-top:16px; }
+        .modal-btn { flex:1; padding:12px; border:none; font-family:inherit; font-size:0.9rem; cursor:pointer; border-radius:2px; transition:0.2s; }
+        .modal-btn-save { background:var(--accent-color); color:white; }
+        .modal-btn-cancel { background:var(--bg-color); color:var(--text-secondary); border:1px solid var(--border-color); }
+        .edit-link { font-size:0.78rem; color:var(--accent-color); cursor:pointer; padding:4px 8px; flex-shrink:0; opacity:0.75; }
+        .item-actions { display:flex; align-items:center; gap:2px; flex-shrink:0; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>生活碎片</h1>
+        <p>Life Fragments Archive</p>
+    </header>
+
+    <nav>
+        <button onclick="showTab('media')" id="btn-media" class="active">閱聽</button>
+        <button onclick="showTab('selflove')" id="btn-selflove">買物</button>
+        <button onclick="showTab('finance')" id="btn-finance">餘裕</button>
+        <button onclick="showTab('body')" id="btn-body">身體</button>
+        <button onclick="showTab('exercise')" id="btn-exercise">運動</button>
+        <button onclick="showTab('notes')" id="btn-notes">隨手記記</button>
+        <button onclick="showTab('settings')" id="btn-settings" title="備份與設定" style="font-size:1.1rem;padding:10px 10px;">⚙︎</button>
+    </nav>
+
+    <!-- 閱聽 -->
+    <div id="media" class="tab-content active">
+        <button class="add-toggle-btn" id="toggle-media-form" onclick="toggleForm('media-form',this)">
+            <span class="toggle-icon">＋</span>新增紀錄
+        </button>
+        <div class="collapsible-form" id="media-form">
+            <section class="input-area">
+                <select id="media-type"><option value="書籍">書籍</option><option value="影集">影集</option><option value="電影">電影</option><option value="展覽">展覽</option><option value="遊戲">遊戲</option></select>
+                <input type="text" id="media-title" placeholder="標題名稱">
+                <select id="media-rating"><option value="5">♥♥♥♥♥</option><option value="4">♥♥♥♥</option><option value="3">♥♥♥</option><option value="2">♥♥</option><option value="1">♥</option></select>
+                <input type="date" id="media-date">
+                <button class="add-btn" onclick="addData('media')">記下一筆</button>
+            </section>
+        </div>
+        <div class="stats-bar" id="media-stats-bar" style="display:none;"></div>
+        <div class="filter-group-label">類型</div>
+        <div class="category-quick-filter" id="media-quick-filters">
+            <button class="cat-btn active" onclick="filterByCategory('media','全部')">全部</button>
+            <button class="cat-btn" onclick="filterByCategory('media','書籍')">書</button>
+            <button class="cat-btn" onclick="filterByCategory('media','影集')">影集</button>
+            <button class="cat-btn" onclick="filterByCategory('media','電影')">電影</button>
+            <button class="cat-btn" onclick="filterByCategory('media','展覽')">展覽</button>
+            <button class="cat-btn" onclick="filterByCategory('media','遊戲')">遊戲</button>
+        </div>
+        <div class="filter-group-label">評分</div>
+        <div class="category-quick-filter" id="media-rating-filters">
+            <button class="cat-btn active" onclick="filterByRating('')">全部</button>
+            <button class="cat-btn" onclick="filterByRating('5')">♥♥♥♥♥</button>
+            <button class="cat-btn" onclick="filterByRating('4')">♥♥♥♥</button>
+            <button class="cat-btn" onclick="filterByRating('3')">♥♥♥</button>
+            <button class="cat-btn" onclick="filterByRating('2')">♥♥</button>
+            <button class="cat-btn" onclick="filterByRating('1')">♥</button>
+        </div>
+        <div class="filter-area" id="filter-media"></div>
+        <div id="media-list"></div>
+    </div>
+
+    <!-- 買物 -->
+    <div id="selflove" class="tab-content">
+        <div class="expiry-alert" id="selflove-expiry-alert" style="display:none;"></div>
+        <button class="add-toggle-btn" id="toggle-selflove-form" onclick="toggleForm('selflove-form',this)">
+            <span class="toggle-icon">＋</span>新增品項
+        </button>
+        <div class="collapsible-form" id="selflove-form">
+            <section class="input-area">
+                <select id="selflove-type"><option value="化妝品">化妝品</option><option value="保養品">保養品</option><option value="吃">吃</option><option value="服飾包包">服飾包包</option><option value="玩具公仔">玩具公仔</option><option value="旅行">旅行</option><option value="其他">其他</option></select>
+                <input type="text" id="selflove-name" placeholder="產品或犒賞名稱">
+                <input type="number" id="selflove-price" placeholder="金額">
+                <div class="date-field"><label class="date-label">購買日期</label><input type="date" id="selflove-buy-date"></div>
+                <div class="date-field"><label class="date-label">到期日期 <span style="color:var(--text-secondary);font-size:0.75rem;">（非必填）</span></label><input type="date" id="selflove-expiry-date"></div>
+                <button class="add-btn" onclick="addData('selflove')">留存美好</button>
+            </section>
+        </div>
+        <div class="stats-bar" id="selflove-stats-bar" style="display:none;"></div>
+        <div class="category-quick-filter" id="selflove-quick-filters">
+            <button class="cat-btn active" onclick="filterByCategory('selflove','全部')">全部</button>
+            <button class="cat-btn" onclick="filterByCategory('selflove','化妝品')">化妝品</button>
+            <button class="cat-btn" onclick="filterByCategory('selflove','保養品')">保養品</button>
+            <button class="cat-btn" onclick="filterByCategory('selflove','吃')">吃</button>
+            <button class="cat-btn" onclick="filterByCategory('selflove','服飾包包')">服飾包包</button>
+            <button class="cat-btn" onclick="filterByCategory('selflove','玩具公仔')">玩具公仔</button>
+            <button class="cat-btn" onclick="filterByCategory('selflove','旅行')">旅行</button>
+            <button class="cat-btn" onclick="filterByCategory('selflove','其他')">其他</button>
+        </div>
+        <div class="filter-area" id="filter-selflove"></div>
+        <div id="selflove-list"></div>
+    </div>
+
+    <!-- 餘裕 -->
+    <div id="finance" class="tab-content">
+        <div class="finance-overview" id="finance-overview"></div>
+        <button class="add-toggle-btn" id="toggle-finance-form" onclick="toggleForm('finance-form',this)">
+            <span class="toggle-icon">＋</span>新增結餘
+        </button>
+        <div class="collapsible-form" id="finance-form">
+            <section class="input-area">
+                <select id="finance-type"><option value="中國信託">中國信託</option><option value="永豐銀行">永豐銀行</option><option value="台新銀行">台新銀行</option><option value="玉山銀行">玉山銀行</option><option value="LINE BANK">LINE BANK</option><option value="第一銀行">第一銀行</option><option value="國泰世華">國泰世華</option><option value="富邦銀行">富邦銀行</option><option value="合作金庫">合作金庫</option></select>
+                <input type="text" id="finance-title" placeholder="結餘金額">
+                <input type="date" id="finance-date">
+                <button class="add-btn" onclick="addData('finance')">記下一筆</button>
+            </section>
+        </div>
+        <div class="category-quick-filter" id="finance-quick-filters">
+            <button class="cat-btn active" onclick="filterByCategory('finance','全部')">全部</button>
+            <button class="cat-btn" onclick="filterByCategory('finance','中信')">中信</button>
+            <button class="cat-btn" onclick="filterByCategory('finance','永豐')">永豐</button>
+            <button class="cat-btn" onclick="filterByCategory('finance','台新')">台新</button>
+            <button class="cat-btn" onclick="filterByCategory('finance','玉山')">玉山</button>
+            <button class="cat-btn" onclick="filterByCategory('finance','LINE')">LINE</button>
+            <button class="cat-btn" onclick="filterByCategory('finance','一銀')">一銀</button>
+            <button class="cat-btn" onclick="filterByCategory('finance','國泰')">國泰</button>
+            <button class="cat-btn" onclick="filterByCategory('finance','富邦')">富邦</button>
+            <button class="cat-btn" onclick="filterByCategory('finance','合庫')">合庫</button>
+        </div>
+        <div class="filter-area" id="filter-finance"></div>
+        <div id="finance-list"></div>
+    </div>
+
+    <!-- 身體 -->
+    <div id="body" class="tab-content">
+        <div class="body-subtabs">
+            <button class="body-subtab active" onclick="showBodyTab('period')" id="btn-period">生理期</button>
+            <button class="body-subtab" onclick="showBodyTab('weight')" id="btn-weight">體重</button>
+            <button class="body-subtab" onclick="showBodyTab('cycle')" id="btn-cycle">週期分析</button>
+        </div>
+
+        <div id="body-period" class="body-subcontent active">
+            <div class="period-predict-card" id="period-predict"></div>
+            <div class="period-calendar">
+                <div class="cal-header">
+                    <button class="cal-nav" onclick="changeCalMonth(-1)">&#8249;</button>
+                    <span class="cal-title" id="cal-title"></span>
+                    <button class="cal-nav" onclick="changeCalMonth(1)">&#8250;</button>
+                </div>
+                <div class="cal-grid" id="cal-grid"></div>
+                <div class="cal-legend">
+                    <div class="cal-legend-item"><div class="legend-dot" style="background:var(--period-light);border:1px solid var(--period-red);"></div>生理期</div>
+                    <div class="cal-legend-item"><div class="legend-dot" style="background:var(--warn-yellow);width:6px;height:6px;"></div>症狀</div>
+                    <div class="cal-legend-item"><div class="legend-dot" style="background:#f0f3ee;border:1px solid var(--accent-color);"></div>預測</div>
+                    <div class="cal-legend-item"><div class="legend-dot" style="outline:1.5px solid var(--accent-color);outline-offset:1px;"></div>今天</div>
+                </div>
+            </div>
+
+            <button class="add-toggle-btn" id="toggle-period-form" onclick="toggleForm('period-form',this)">
+                <span class="toggle-icon">＋</span>記錄月經
+            </button>
+            <div class="collapsible-form" id="period-form">
+                <section class="input-area">
+                    <div style="font-size:0.78rem;color:var(--text-secondary);letter-spacing:1px;margin-bottom:12px;">月經紀錄</div>
+                    <div class="date-field"><label class="date-label">開始日期</label><input type="date" id="period-start"></div>
+                    <div class="date-field"><label class="date-label">結束日期 <span style="font-size:0.72rem;">（非必填，可之後補）</span></label><input type="date" id="period-end"></div>
+                    <button class="add-btn" onclick="addPeriod()">記下這次月經</button>
+                </section>
+            </div>
+
+            <button class="add-toggle-btn" id="toggle-symptom-form" onclick="toggleForm('symptom-form',this)">
+                <span class="toggle-icon">＋</span>記錄症狀
+            </button>
+            <div class="collapsible-form" id="symptom-form">
+                <section class="input-area">
+                    <div style="font-size:0.78rem;color:var(--text-secondary);letter-spacing:1px;margin-bottom:12px;">症狀紀錄</div>
+                    <div class="date-field"><label class="date-label">日期</label><input type="date" id="symptom-date"></div>
+                    <div class="symptom-checks">
+                        <button class="symptom-check-btn" onclick="toggleSymptom(this,'胸部脹痛')">胸部脹痛</button>
+                        <button class="symptom-check-btn" onclick="toggleSymptom(this,'頭痛')">頭痛</button>
+                        <button class="symptom-check-btn" onclick="toggleSymptom(this,'點狀出血')">點狀出血</button>
+                        <button class="symptom-check-btn" onclick="toggleSymptom(this,'腹部疼痛')">腹部疼痛</button>
+                        <button class="symptom-check-btn" onclick="toggleSymptom(this,'痘痘')">痘痘</button>
+                    </div>
+                    <input type="text" id="symptom-note" placeholder="備註（例：頭痛劇烈、輕微不適…）">
+                    <button class="add-btn" onclick="addSymptom()">記錄症狀</button>
+                </section>
+            </div>
+
+            <div class="filter-group-label" style="margin-top:4px;">篩選紀錄</div>
+            <div class="category-quick-filter" id="period-symptom-filters">
+                <button class="cat-btn active" onclick="filterPeriodSymptom('全部')">全部</button>
+                <button class="cat-btn" onclick="filterPeriodSymptom('月經')">月經</button>
+                <button class="cat-btn" onclick="filterPeriodSymptom('胸部脹痛')">胸部脹痛</button>
+                <button class="cat-btn" onclick="filterPeriodSymptom('頭痛')">頭痛</button>
+                <button class="cat-btn" onclick="filterPeriodSymptom('點狀出血')">點狀出血</button>
+                <button class="cat-btn" onclick="filterPeriodSymptom('腹部疼痛')">腹部疼痛</button>
+                <button class="cat-btn" onclick="filterPeriodSymptom('痘痘')">痘痘</button>
+            </div>
+            <div id="period-list"></div>
+        </div>
+
+
+        <!-- 週期分析 -->
+        <div id="body-cycle" class="body-subcontent">
+            <div id="cycle-analysis-content"></div>
+        </div>
+        <div id="body-weight" class="body-subcontent">
+            <div class="weight-chart-wrap">
+                <div class="weight-stats" id="weight-stats"></div>
+                <div style="position:relative;width:100%;height:200px;">
+                    <canvas id="weightChart" role="img" aria-label="體重趨勢折線圖"></canvas>
+                </div>
+            </div>
+            <button class="add-toggle-btn" id="toggle-weight-form" onclick="toggleForm('weight-form',this)">
+                <span class="toggle-icon">＋</span>記錄體重
+            </button>
+            <div class="collapsible-form" id="weight-form">
+                <section class="input-area">
+                    <input type="number" id="weight-value" placeholder="體重（公斤）" step="0.1">
+                    <input type="date" id="weight-date">
+                    <button class="add-btn" onclick="addWeight()">記錄體重</button>
+                </section>
+            </div>
+            <div id="weight-list"></div>
+        </div>
+    </div>
+
+
+    <!-- 運動 -->
+    <div id="exercise" class="tab-content">
+
+        <!-- 月曆 -->
+        <div class="period-calendar" id="ex-calendar-wrap">
+            <div class="cal-header">
+                <button class="cal-nav" onclick="changeExCalMonth(-1)">&#8249;</button>
+                <span class="cal-title" id="ex-cal-title"></span>
+                <button class="cal-nav" onclick="changeExCalMonth(1)">&#8250;</button>
+            </div>
+            <div class="cal-grid" id="ex-cal-grid"></div>
+            <div class="cal-legend" style="margin-top:10px;">
+                <div class="cal-legend-item"><div class="legend-dot" style="background:var(--period-light);border:1px solid var(--period-red);"></div>生理期</div>
+                <div class="cal-legend-item"><div style="width:20px;height:20px;border-radius:50%;border:2px solid var(--accent-color);display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:var(--accent-color);">30</div>運動達標</div>
+            </div>
+        </div>
+
+        <!-- 當月統計 -->
+        <div class="stats-bar" id="ex-stats-bar" style="margin-bottom:16px;"></div>
+
+        <!-- 新增表單 -->
+        <button class="add-toggle-btn" id="toggle-exercise-form" onclick="toggleForm('exercise-form',this)">
+            <span class="toggle-icon">＋</span>新增運動
+        </button>
+        <div class="collapsible-form" id="exercise-form">
+            <section class="input-area">
+                <select id="exercise-type">
+                    <option value="低強度有氧">低強度有氧</option>
+                    <option value="高強度有氧">高強度有氧</option>
+                    <option value="雕塑">雕塑</option>
+                    <option value="重訓">重訓</option>
+                    <option value="瑜珈">瑜珈</option>
+                    <option value="其他">其他</option>
+                </select>
+                <input type="text" id="exercise-name" placeholder="項目名稱（例：跑步、深蹲）">
+                <input type="number" id="exercise-mins" placeholder="分鐘數（非必填）">
+                <input type="number" id="exercise-kcal" placeholder="消耗熱量（kcal，非必填）">
+                <input type="number" id="exercise-steps" placeholder="步數（非必填）">
+                <input type="date" id="exercise-date">
+                <button class="add-btn" onclick="addExercise()">記下這次</button>
+            </section>
+        </div>
+
+        <!-- 每日步數 -->
+        <button class="add-toggle-btn" id="toggle-steps-form" onclick="toggleForm('steps-form',this)">
+            <span class="toggle-icon">＋</span>記錄步數
+        </button>
+        <div class="collapsible-form" id="steps-form">
+            <section class="input-area">
+                <div style="font-size:0.78rem;color:var(--text-secondary);letter-spacing:1px;margin-bottom:10px;">每日步數（不含運動項目）</div>
+                <input type="number" id="steps-only-value" placeholder="今日步數">
+                <input type="date" id="steps-only-date">
+                <button class="add-btn" onclick="addStepsOnly()">記錄步數</button>
+            </section>
+        </div>
+
+        <!-- 類型篩選 -->
+        <div class="category-quick-filter" id="exercise-quick-filters">
+            <button class="cat-btn active" onclick="filterExercise('全部')">全部</button>
+            <button class="cat-btn" onclick="filterExercise('低強度有氧')">低強度有氧</button>
+            <button class="cat-btn" onclick="filterExercise('高強度有氧')">高強度有氧</button>
+            <button class="cat-btn" onclick="filterExercise('雕塑')">雕塑</button>
+            <button class="cat-btn" onclick="filterExercise('重訓')">重訓</button>
+            <button class="cat-btn" onclick="filterExercise('瑜珈')">瑜珈</button>
+            <button class="cat-btn" onclick="filterExercise('其他')">其他</button>
+            <button class="cat-btn" onclick="filterExercise('步數')">步數</button>
+        </div>
+        <div class="filter-area" id="filter-exercise"></div>
+        <div id="exercise-list"></div>
+    </div>
+
+    <!-- 隨手記記 -->
+    <div id="notes" class="tab-content">
+        <button class="add-toggle-btn" id="toggle-notes-form" onclick="toggleForm('notes-form',this)">
+            <span class="toggle-icon">＋</span>新增筆記
+        </button>
+        <div class="collapsible-form" id="notes-form">
+            <section class="input-area">
+                <input type="text" id="note-title" placeholder="記點什麼標題...">
+                <textarea id="note-content" placeholder="細節內容..."></textarea>
+                <input type="date" id="note-date">
+                <button class="add-btn" onclick="addData('notes')">封存瞬間</button>
+            </section>
+        </div>
+        <div class="filter-area" id="filter-notes"></div>
+        <div id="notes-list"></div>
+    </div>
+
+    <!-- 備份 -->
+    <div id="settings" class="tab-content">
+        <div class="backup-section">
+            <h3>目前資料</h3>
+            <p>存放在這台裝置的碎片數量。</p>
+            <div class="backup-stats" id="backup-stats"></div>
+        </div>
+        <div class="backup-section">
+            <h3>下載備份</h3>
+            <p>將所有紀錄匯出成 JSON 檔案，可保存至相簿、雲端硬碟或任何你信任的地方。</p>
+            <button class="backup-btn backup-btn-primary" onclick="downloadBackup()">下載備份檔案</button>
+        </div>
+        <div class="backup-section">
+            <h3>還原備份</h3>
+            <p>上傳先前下載的備份 JSON 檔案。<br>⚠️ <b>合併模式</b>會保留現有資料並加入備份中的新資料；<b>覆蓋模式</b>會清除現有資料並完全以備份取代。</p>
+            <input type="file" id="restore-file-input" accept=".json" onchange="handleRestoreFile(event)">
+            <div class="drop-zone" id="drop-zone"
+                 onclick="document.getElementById('restore-file-input').click()"
+                 ondragover="handleDragOver(event)"
+                 ondragleave="handleDragLeave(event)"
+                 ondrop="handleDrop(event)">
+                <span class="drop-icon">📂</span>
+                點此選取 JSON 備份檔，或將檔案拖曳到這裡
+            </div>
+            <button class="backup-btn backup-btn-outline" onclick="triggerRestore('merge')">合併還原（保留現有資料）</button>
+            <button class="backup-btn backup-btn-danger" onclick="triggerRestore('overwrite')">覆蓋還原（取代現有資料）</button>
+        </div>
+    </div>
+</div>
+
+<!-- 編輯 Modal：體重 -->
+<div class="modal-overlay" id="modal-weight" onclick="closeModal('weight')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-title">編輯體重紀錄</div>
+        <input type="hidden" id="edit-weight-id">
+        <input type="number" id="edit-weight-value" placeholder="體重（公斤）" step="0.1">
+        <div class="date-field"><label class="date-label">日期</label><input type="date" id="edit-weight-date"></div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('weight')">取消</button>
+            <button class="modal-btn modal-btn-save" onclick="saveEditWeight()">儲存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 編輯 Modal：運動 -->
+<div class="modal-overlay" id="modal-exercise" onclick="closeModal('exercise')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-title">編輯運動紀錄</div>
+        <input type="hidden" id="edit-exercise-id">
+        <select id="edit-exercise-type">
+            <option value="低強度有氧">低強度有氧</option><option value="高強度有氧">高強度有氧</option>
+            <option value="雕塑">雕塑</option><option value="重訓">重訓</option>
+            <option value="瑜珈">瑜珈</option><option value="其他">其他</option>
+        </select>
+        <input type="text" id="edit-exercise-name" placeholder="項目名稱">
+        <input type="number" id="edit-exercise-mins" placeholder="分鐘數">
+        <input type="number" id="edit-exercise-kcal" placeholder="消耗熱量（kcal）">
+        <input type="number" id="edit-exercise-steps" placeholder="步數">
+        <div class="date-field"><label class="date-label">日期</label><input type="date" id="edit-exercise-date"></div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('exercise')">取消</button>
+            <button class="modal-btn modal-btn-save" onclick="saveEditExercise()">儲存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 編輯 Modal：症狀 -->
+<div class="modal-overlay" id="modal-symptom" onclick="closeModal('symptom')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-title">編輯症狀紀錄</div>
+        <input type="hidden" id="edit-symptom-id">
+        <div class="date-field"><label class="date-label">日期</label><input type="date" id="edit-symptom-date"></div>
+        <div class="symptom-checks" id="edit-symptom-checks">
+            <button class="symptom-check-btn" onclick="toggleEditSymptom(this,'胸部脹痛')">胸部脹痛</button>
+            <button class="symptom-check-btn" onclick="toggleEditSymptom(this,'頭痛')">頭痛</button>
+            <button class="symptom-check-btn" onclick="toggleEditSymptom(this,'點狀出血')">點狀出血</button>
+            <button class="symptom-check-btn" onclick="toggleEditSymptom(this,'腹部疼痛')">腹部疼痛</button>
+            <button class="symptom-check-btn" onclick="toggleEditSymptom(this,'痘痘')">痘痘</button>
+        </div>
+        <input type="text" id="edit-symptom-note" placeholder="備註">
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('symptom')">取消</button>
+            <button class="modal-btn modal-btn-save" onclick="saveEditSymptom()">儲存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 編輯 Modal：閱聽 -->
+<div class="modal-overlay" id="modal-media" onclick="closeModal('media')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-title">編輯閱聽紀錄</div>
+        <input type="hidden" id="edit-media-id">
+        <select id="edit-media-type"><option value="書籍">書籍</option><option value="影集">影集</option><option value="電影">電影</option><option value="展覽">展覽</option><option value="遊戲">遊戲</option></select>
+        <input type="text" id="edit-media-title" placeholder="標題名稱">
+        <select id="edit-media-rating"><option value="5">♥♥♥♥♥</option><option value="4">♥♥♥♥</option><option value="3">♥♥♥</option><option value="2">♥♥</option><option value="1">♥</option></select>
+        <div class="date-field"><label class="date-label">日期</label><input type="date" id="edit-media-date"></div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('media')">取消</button>
+            <button class="modal-btn modal-btn-save" onclick="saveEditMedia()">儲存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 編輯 Modal：餘裕 -->
+<div class="modal-overlay" id="modal-finance" onclick="closeModal('finance')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-title">編輯結餘紀錄</div>
+        <input type="hidden" id="edit-finance-id">
+        <select id="edit-finance-type"><option value="中國信託">中國信託</option><option value="永豐銀行">永豐銀行</option><option value="台新銀行">台新銀行</option><option value="玉山銀行">玉山銀行</option><option value="LINE BANK">LINE BANK</option><option value="第一銀行">第一銀行</option><option value="國泰世華">國泰世華</option><option value="富邦銀行">富邦銀行</option><option value="合作金庫">合作金庫</option></select>
+        <input type="text" id="edit-finance-title" placeholder="結餘金額">
+        <div class="date-field"><label class="date-label">日期</label><input type="date" id="edit-finance-date"></div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('finance')">取消</button>
+            <button class="modal-btn modal-btn-save" onclick="saveEditFinance()">儲存</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- 編輯 Modal：對自己好 -->
+<div class="modal-overlay" id="modal-selflove" onclick="closeModal('selflove')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-title">編輯品項</div>
+        <input type="hidden" id="edit-selflove-id">
+        <select id="edit-selflove-type"><option value="化妝品">化妝品</option><option value="保養品">保養品</option><option value="吃">吃</option><option value="服飾包包">服飾包包</option><option value="玩具公仔">玩具公仔</option><option value="旅行">旅行</option><option value="其他">其他</option></select>
+        <input type="text" id="edit-selflove-name" placeholder="產品或犒賞名稱">
+        <input type="number" id="edit-selflove-price" placeholder="金額">
+        <div class="date-field"><label class="date-label">購買日期</label><input type="date" id="edit-selflove-buy-date"></div>
+        <div class="date-field"><label class="date-label">到期日期</label><input type="date" id="edit-selflove-expiry-date"></div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('selflove')">取消</button>
+            <button class="modal-btn modal-btn-save" onclick="saveEditSelflove()">儲存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 編輯 Modal：隨手記記 -->
+<div class="modal-overlay" id="modal-notes" onclick="closeModal('notes')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-title">編輯筆記</div>
+        <input type="hidden" id="edit-notes-id">
+        <input type="text" id="edit-notes-title" placeholder="標題...">
+        <textarea id="edit-notes-content" rows="4" placeholder="細節內容..."></textarea>
+        <div class="date-field"><label class="date-label">日期</label><input type="date" id="edit-notes-date"></div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('notes')">取消</button>
+            <button class="modal-btn modal-btn-save" onclick="saveEditNotes()">儲存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 編輯 Modal：月經紀錄 -->
+<div class="modal-overlay" id="modal-period" onclick="closeModal('period')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-title">補填結束日期</div>
+        <input type="hidden" id="edit-period-id">
+        <div class="date-field"><label class="date-label">開始日期</label><input type="date" id="edit-period-start" disabled style="opacity:0.5;"></div>
+        <div class="date-field"><label class="date-label">結束日期</label><input type="date" id="edit-period-end"></div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('period')">取消</button>
+            <button class="modal-btn modal-btn-save" onclick="saveEditPeriod()">儲存</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const tabs = ['media', 'selflove', 'finance', 'notes'];
+const allStoreKeys = ['media', 'selflove', 'finance', 'notes', 'exercise', 'period', 'symptom', 'weight'];
+let currentFilters = { media: '全部', selflove: '全部', finance: '全部' };
+let currentExerciseFilter = '全部';
+let currentRatingFilter = '';
+let pendingRestoreData = null;
+let calViewYear, calViewMonth;
+let selectedSymptoms = [];
+let currentPeriodSymptomFilter = '全部';
+let weightChartInstance = null;
+
+function getTodayString() { return new Date().toISOString().split('T')[0]; }
+
+function showToast(msg, duration = 2500) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function resetDates() {
+    const today = getTodayString();
+    document.querySelectorAll('input[type="date"]').forEach(el => {
+        if (el.id !== 'selflove-expiry-date' && el.id !== 'period-end') el.value = today;
+    });
+}
+
+function toggleForm(formId, btn) {
+    const form = document.getElementById(formId);
+    const isOpen = form.classList.contains('open');
+    form.classList.toggle('open', !isOpen);
+    btn.classList.toggle('open', !isOpen);
+}
+
+function closeForm(formId, btnId) {
+    document.getElementById(formId).classList.remove('open');
+    document.getElementById(btnId).classList.remove('open');
+}
+
+function initFilters() {
+    tabs.forEach(tab => {
+        const area = document.getElementById('filter-' + tab);
+        const data = JSON.parse(localStorage.getItem(tab) || '[]');
+        const sysYear = new Date().getFullYear();
+        let maxYear = sysYear;
+        data.forEach(item => {
+            const d = tab === 'selflove' ? item.buyDate : item.date;
+            if (d) { const y = parseInt(d.split('-')[0]); if (y > maxYear) maxYear = y; }
+        });
+        let html = '<select id="f-' + tab + '-year" class="filter-select" onchange="renderData(\'' + tab + '\')"><option value="">年份</option>';
+        for (let i = maxYear; i >= 2020; i--) html += '<option value="' + i + '">' + i + '年</option>';
+        html += '</select><select id="f-' + tab + '-month" class="filter-select" onchange="renderData(\'' + tab + '\')"><option value="">月份</option>';
+        for (let i = 1; i <= 12; i++) html += '<option value="' + String(i).padStart(2,'0') + '">' + i + '月</option>';
+        html += '</select><input type="text" id="f-' + tab + '-search" class="filter-input" placeholder="關鍵字搜尋..." oninput="renderData(\'' + tab + '\')">';
+        area.innerHTML = html;
+    });
+}
+
+function filterByCategory(tab, category) {
+    currentFilters[tab] = category;
+    document.querySelectorAll('#' + tab + '-quick-filters .cat-btn').forEach(btn => {
+        let t = btn.innerText;
+        if (tab === 'media' && t === '書') t = '書籍';
+        btn.classList.toggle('active', t === category);
+    });
+    renderData(tab);
+}
+
+function filterByRating(rating) {
+    currentRatingFilter = rating;
+    document.querySelectorAll('#media-rating-filters .cat-btn').forEach(btn => {
+        const btnText = btn.innerText.trim();
+        if (rating === '') {
+            btn.classList.toggle('active', btnText === '全部');
+        } else {
+            btn.classList.toggle('active', btnText === '♥'.repeat(parseInt(rating)));
+        }
+    });
+    renderData('media');
+}
+
+function showTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    document.getElementById('btn-' + tabId).classList.add('active');
+    if (tabId === 'settings') renderBackupStats();
+    else if (tabId === 'body') { renderPeriodData(); renderCalendar(); renderPeriodPredict(); }
+    else if (tabId === 'finance') { renderFinanceOverview(); renderData(tabId); }
+    else if (tabId === 'selflove') { renderExpiryAlert(); renderSelfloveStats(); renderData(tabId); }
+    else if (tabId === 'exercise') { initExerciseFilter(); renderExerciseCal(); renderExerciseMonthStats(); renderExerciseData(); }
+    else { if (tabId === 'media') renderMediaStats(); renderData(tabId); }
+}
+
+function addData(type) {
+    let data = JSON.parse(localStorage.getItem(type) || '[]');
+    let entry = { id: Date.now() };
+    const today = getTodayString();
+    if (type === 'media') {
+        entry.category = document.getElementById('media-type').value;
+        entry.title = document.getElementById('media-title').value;
+        entry.rating = document.getElementById('media-rating').value;
+        entry.date = document.getElementById('media-date').value || today;
+        if (!entry.title) return;
+        document.getElementById('media-title').value = '';
+        closeForm('media-form', 'toggle-media-form');
+    } else if (type === 'selflove') {
+        entry.category = document.getElementById('selflove-type').value;
+        entry.name = document.getElementById('selflove-name').value;
+        entry.price = document.getElementById('selflove-price').value;
+        entry.buyDate = document.getElementById('selflove-buy-date').value || today;
+        entry.expiryDate = document.getElementById('selflove-expiry-date').value;
+        if (!entry.name) return;
+        document.getElementById('selflove-name').value = '';
+        document.getElementById('selflove-price').value = '';
+        document.getElementById('selflove-expiry-date').value = '';
+        closeForm('selflove-form', 'toggle-selflove-form');
+    } else if (type === 'finance') {
+        entry.category = document.getElementById('finance-type').value;
+        entry.title = document.getElementById('finance-title').value;
+        entry.date = document.getElementById('finance-date').value || today;
+        if (!entry.title) return;
+        document.getElementById('finance-title').value = '';
+        closeForm('finance-form', 'toggle-finance-form');
+    } else if (type === 'notes') {
+        entry.title = document.getElementById('note-title').value;
+        entry.content = document.getElementById('note-content').value;
+        entry.date = document.getElementById('note-date').value || today;
+        if (!entry.title && !entry.content) return;
+        document.getElementById('note-title').value = '';
+        document.getElementById('note-content').value = '';
+        closeForm('notes-form', 'toggle-notes-form');
+    }
+    data.unshift(entry);
+    localStorage.setItem(type, JSON.stringify(data));
+    resetDates();
+    initFilters();
+    renderData(type);
+    if (type === 'finance') renderFinanceOverview();
+    if (type === 'selflove') { renderExpiryAlert(); renderSelfloveStats(); }
+    if (type === 'media') renderMediaStats();
+    showToast('✓ 已記錄');
+}
+
+function deleteData(type, id) {
+    if (!confirm('確定要移除這項紀錄嗎？')) return;
+    let data = JSON.parse(localStorage.getItem(type)).filter(item => item.id !== id);
+    localStorage.setItem(type, JSON.stringify(data));
+    renderData(type);
+    if (type === 'finance') renderFinanceOverview();
+    if (type === 'selflove') { renderExpiryAlert(); renderSelfloveStats(); }
+    if (type === 'media') renderMediaStats();
+}
+
+function renderData(type) {
+    const container = document.getElementById(type + '-list');
+    let data = JSON.parse(localStorage.getItem(type) || '[]');
+    const fYear = document.getElementById('f-' + type + '-year').value;
+    const fMonth = document.getElementById('f-' + type + '-month').value;
+    const fSearch = document.getElementById('f-' + type + '-search').value.toLowerCase();
+
+    data = data.filter(i => {
+        const dateKey = type === 'selflove' ? i.buyDate : i.date;
+        const matchYear = fYear ? (dateKey || '').startsWith(fYear) : true;
+        const matchMonth = fMonth ? (dateKey || '').split('-')[1] === fMonth : true;
+        let matchCategory = true;
+        if ((type === 'media' || type === 'selflove') && currentFilters[type] !== '全部') matchCategory = i.category === currentFilters[type];
+        if (type === 'finance' && currentFilters[type] !== '全部') matchCategory = (i.category || '').includes(currentFilters[type]);
+        let matchRating = true;
+        if (type === 'media' && currentRatingFilter !== '') matchRating = String(i.rating) === String(currentRatingFilter);
+        let nameKey = '';
+        if (type === 'media') nameKey = (i.title || '') + (i.category || '');
+        else if (type === 'selflove') nameKey = (i.name || '') + (i.category || '');
+        else if (type === 'finance') nameKey = (i.category || '') + (i.title || '');
+        else if (type === 'notes') nameKey = (i.title || '') + (i.content || '');
+        const matchSearch = fSearch ? nameKey.toLowerCase().includes(fSearch) : true;
+        return matchYear && matchMonth && matchSearch && matchCategory && matchRating;
+    });
+
+    if (data.length === 0) { container.innerHTML = '<div class="empty-state">尚未發現碎片。</div>'; return; }
+    const today = new Date();
+    let html = '';
+    data.forEach(i => {
+        html += '<div class="item-card"><div class="item-info">';
+        if (type === 'media') {
+            const ratingNum = parseInt(i.rating || '0');
+            const hearts = ratingNum > 0 ? '♥'.repeat(ratingNum) : '';
+            html += '<h4><span class="tag">' + i.category + '</span>' + i.title + '</h4>';
+            if (hearts) html += '<p style="color:#c9856a;font-size:0.95rem;letter-spacing:3px;margin:2px 0;">' + hearts + '</p>';
+            html += '<p>' + i.date + ' 紀錄</p>';
+        } else if (type === 'selflove') {
+            let status = '';
+            if (i.expiryDate) {
+                const diff = (new Date(i.expiryDate) - today) / 86400000;
+                if (diff < 0) status = ' <span style="color:var(--alert-red);font-size:0.75rem;">已過期</span>';
+                else if (diff <= 30) status = ' <span style="color:var(--warn-yellow);font-size:0.75rem;">即將到期</span>';
+            }
+            html += '<h4><span class="tag">' + i.category + '</span>' + i.name + status + '</h4>';
+            html += '<p>金額：$' + Number(i.price || 0).toLocaleString() + ' / 購入：' + i.buyDate + '</p>';
+            if (i.expiryDate) html += '<p style="font-size:0.75rem;color:var(--text-secondary)">效期：' + i.expiryDate + '</p>';
+        } else if (type === 'finance') {
+            html += '<h4><span class="tag">' + (i.category || '') + '</span>' + (i.title || '') + '</h4><p>' + i.date + '</p>';
+        } else if (type === 'notes') {
+            html += '<h4>' + (i.title || '無標題') + '</h4><p>' + (i.content || '') + '</p><p style="font-size:0.7rem;color:var(--text-secondary)">' + i.date + '</p>';
+        }
+        html += '</div><div class="item-actions"><span class="edit-link" onclick="openEdit(\'' + type + '\',' + i.id + ')">編輯</span><span class="delete-link" onclick="deleteData(\'' + type + '\',' + i.id + ')">移除</span></div></div>';
+    });
+    container.innerHTML = html;
+}
+
+function renderExpiryAlert() {
+    const data = JSON.parse(localStorage.getItem('selflove') || '[]');
+    const today = new Date(); today.setHours(0,0,0,0);
+    const el = document.getElementById('selflove-expiry-alert');
+    const expiring = data
+        .filter(i => i.expiryDate)
+        .map(i => ({ ...i, diff: Math.ceil((new Date(i.expiryDate) - today) / 86400000) }))
+        .filter(i => i.diff <= 30)
+        .sort((a, b) => a.diff - b.diff);
+    if (expiring.length === 0) { el.style.display = 'none'; return; }
+    el.style.display = 'block';
+    let html = '<div class="expiry-alert-title">⏰ 效期提醒 · ' + expiring.length + ' 項</div>';
+    expiring.forEach(i => {
+        let badge, label;
+        if (i.diff < 0) { badge = 'badge-expired'; label = '已過期'; }
+        else if (i.diff === 0) { badge = 'badge-urgent'; label = '今天到期'; }
+        else if (i.diff <= 7) { badge = 'badge-urgent'; label = '剩 ' + i.diff + ' 天'; }
+        else { badge = 'badge-warn'; label = '剩 ' + i.diff + ' 天'; }
+        html += '<div class="expiry-item"><span class="expiry-item-name"><span class="tag">' + i.category + '</span>' + i.name + '</span><span class="expiry-badge ' + badge + '">' + label + '</span></div>';
+    });
+    el.innerHTML = html;
+}
+
+function renderFinanceOverview() {
+    const data = JSON.parse(localStorage.getItem('finance') || '[]');
+    const latest = {};
+    data.forEach(item => { if (!latest[item.category] || item.date > latest[item.category].date) latest[item.category] = item; });
+    const banks = Object.values(latest);
+    const el = document.getElementById('finance-overview');
+    if (banks.length === 0) { el.innerHTML = '<p style="font-size:0.8rem;color:var(--text-secondary);margin:0;">尚無任何帳戶紀錄。</p>'; return; }
+    const total = banks.reduce((s, b) => s + parseFloat(b.title || 0), 0);
+    let html = '<h3>各帳戶最新結餘</h3><div class="finance-total">$ ' + total.toLocaleString('zh-TW', {maximumFractionDigits:0}) + '</div>';
+    banks.sort((a, b) => parseFloat(b.title) - parseFloat(a.title)).forEach(b => {
+        html += '<div class="bank-row"><span class="bank-name">' + b.category + '</span><span>$ ' + parseFloat(b.title||0).toLocaleString('zh-TW',{maximumFractionDigits:0}) + ' <span style="font-size:0.7rem;color:var(--text-secondary);margin-left:4px;">' + b.date + '</span></span></div>';
+    });
+    el.innerHTML = html;
+}
+
+function showBodyTab(tabId) {
+    document.querySelectorAll('.body-subcontent').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.body-subtab').forEach(b => b.classList.remove('active'));
+    document.getElementById('body-' + tabId).classList.add('active');
+    document.getElementById('btn-' + tabId).classList.add('active');
+    if (tabId === 'weight') { renderWeightData(); renderWeightChart(); }
+    else if (tabId === 'cycle') { renderCycleAnalysis(); }
+    else { renderPeriodData(); renderCalendar(); renderPeriodPredict(); }
+}
+
+function toggleSymptom(btn, sym) {
+    btn.classList.toggle('selected');
+    if (selectedSymptoms.includes(sym)) selectedSymptoms = selectedSymptoms.filter(s => s !== sym);
+    else selectedSymptoms.push(sym);
+}
+
+function addPeriod() {
+    const start = document.getElementById('period-start').value;
+    if (!start) { showToast('請填寫開始日期'); return; }
+    const end = document.getElementById('period-end').value;
+    let data = JSON.parse(localStorage.getItem('period') || '[]');
+    data.unshift({ id: Date.now(), start, end });
+    localStorage.setItem('period', JSON.stringify(data));
+    document.getElementById('period-end').value = '';
+    resetDates();
+    closeForm('period-form', 'toggle-period-form');
+    renderPeriodData(); renderCalendar(); renderPeriodPredict();
+    showToast('✓ 月經已記錄');
+}
+
+function addSymptom() {
+    const date = document.getElementById('symptom-date').value || getTodayString();
+    if (selectedSymptoms.length === 0) { showToast('請至少選擇一個症狀'); return; }
+    const note = document.getElementById('symptom-note').value.trim();
+    let data = JSON.parse(localStorage.getItem('symptom') || '[]');
+    data.unshift({ id: Date.now(), date, symptoms: [...selectedSymptoms], note });
+    localStorage.setItem('symptom', JSON.stringify(data));
+    selectedSymptoms = [];
+    document.querySelectorAll('.symptom-check-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById('symptom-note').value = '';
+    resetDates();
+    closeForm('symptom-form', 'toggle-symptom-form');
+    renderPeriodData(); renderCalendar();
+    showToast('✓ 症狀已記錄');
+}
+
+function deletePeriod(type, id) {
+    if (!confirm('確定要移除？')) return;
+    let data = JSON.parse(localStorage.getItem(type) || '[]').filter(i => i.id !== id);
+    localStorage.setItem(type, JSON.stringify(data));
+    renderPeriodData(); renderCalendar(); renderPeriodPredict();
+}
+
+function filterPeriodSymptom(sym) {
+    currentPeriodSymptomFilter = sym;
+    document.querySelectorAll('#period-symptom-filters .cat-btn').forEach(b => b.classList.toggle('active', b.innerText === sym));
+    renderPeriodData();
+}
+
+function renderPeriodData() {
+    const periodData = JSON.parse(localStorage.getItem('period') || '[]');
+    const symptomData = JSON.parse(localStorage.getItem('symptom') || '[]');
+    let combined = [
+        ...periodData.map(i => ({ ...i, _type: 'period', _sortDate: i.start })),
+        ...symptomData.map(i => ({ ...i, _type: 'symptom', _sortDate: i.date }))
+    ].sort((a, b) => b._sortDate.localeCompare(a._sortDate));
+    const f = currentPeriodSymptomFilter;
+    if (f !== '全部') combined = combined.filter(i => f === '月經' ? i._type === 'period' : i._type === 'symptom' && i.symptoms && i.symptoms.includes(f));
+    const container = document.getElementById('period-list');
+    if (combined.length === 0) { container.innerHTML = '<div class="empty-state">尚無紀錄。</div>'; return; }
+    let html = '';
+    combined.forEach(i => {
+        if (i._type === 'period') {
+            const dur = i.end ? Math.round((new Date(i.end) - new Date(i.start)) / 86400000) + 1 : null;
+            const editBtn = !i.end ? '<span class="edit-link" onclick="openEditPeriod(' + i.id + ')">補填結束</span>' : '';
+            html += '<div class="item-card"><div class="item-info"><h4><span class="tag" style="color:var(--period-red);border-color:var(--period-red);">月經</span>' + i.start + (i.end ? ' → ' + i.end : ' → 記錄中') + '</h4><p>' + (dur ? dur + ' 天' : '尚未結束') + '</p></div><div class="item-actions">' + editBtn + '<span class="delete-link" onclick="deletePeriod(\'period\',' + i.id + ')">移除</span></div></div>';
+        } else {
+            const syms = i.symptoms.map(s => '<span class="tag">' + s + '</span>').join('');
+            const noteHtml = i.note ? '<p style="font-size:0.75rem;color:var(--text-secondary);margin-top:2px;">' + i.note + '</p>' : '';
+            html += '<div class="item-card"><div class="item-info"><h4>' + syms + '</h4>' + noteHtml + '<p>' + i.date + '</p></div><div class="item-actions"><span class="edit-link" onclick="openEditSymptom(' + i.id + ')">編輯</span><span class="delete-link" onclick="deletePeriod(\'symptom\',' + i.id + ')">移除</span></div></div>';
+        }
+    });
+    container.innerHTML = html;
+}
+
+function getPeriodStats() {
+    const data = JSON.parse(localStorage.getItem('period') || '[]').filter(i => i.start).sort((a, b) => a.start < b.start ? -1 : 1);
+    if (data.length === 0) return null;
+    const durations = data.filter(i => i.end).map(i => Math.round((new Date(i.end) - new Date(i.start)) / 86400000) + 1);
+    const avgDuration = durations.length ? Math.round(durations.reduce((a,b) => a+b,0) / durations.length) : 5;
+    const cycles = [];
+    for (let i = 1; i < data.length; i++) {
+        const diff = Math.round((new Date(data[i].start) - new Date(data[i-1].start)) / 86400000);
+        if (diff > 15 && diff < 60) cycles.push(diff);
+    }
+    const avgCycle = cycles.length ? Math.round(cycles.reduce((a,b) => a+b,0) / cycles.length) : 28;
+    return { last: data[data.length-1], avgDuration, avgCycle };
+}
+
+function renderPeriodPredict() {
+    const stats = getPeriodStats();
+    const el = document.getElementById('period-predict');
+    if (!stats) { el.innerHTML = '<p style="font-size:0.8rem;color:var(--text-secondary);margin:0;">還沒有足夠的紀錄來預測，至少需要一筆資料。</p>'; return; }
+    const { last, avgDuration, avgCycle } = stats;
+    const predictDate = new Date(last.start);
+    predictDate.setDate(predictDate.getDate() + avgCycle);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const daysLeft = Math.ceil((predictDate - today) / 86400000);
+    const predictStr = predictDate.toISOString().split('T')[0];
+    const countdownHtml = daysLeft > 0
+        ? '<div class="predict-countdown">' + daysLeft + ' 天後</div>'
+        : daysLeft === 0
+            ? '<div class="predict-countdown">今天</div>'
+            : '<div class="predict-countdown" style="color:var(--text-secondary)">已過 ' + Math.abs(daysLeft) + ' 天</div>';
+    el.innerHTML = '<div style="font-size:0.75rem;color:var(--text-secondary);letter-spacing:1px;margin-bottom:10px;">下次預測來潮</div>' + countdownHtml + '<div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:12px;">' + predictStr + '</div><div class="predict-row"><span class="predict-label">上次開始</span><span>' + last.start + '</span></div><div class="predict-row"><span class="predict-label">平均週期</span><span>' + avgCycle + ' 天</span></div><div class="predict-row"><span class="predict-label">平均經期</span><span>' + avgDuration + ' 天</span></div>';
+}
+
+function initCalView() { const n = new Date(); calViewYear = n.getFullYear(); calViewMonth = n.getMonth(); }
+
+function changeCalMonth(delta) {
+    calViewMonth += delta;
+    if (calViewMonth > 11) { calViewMonth = 0; calViewYear++; }
+    if (calViewMonth < 0) { calViewMonth = 11; calViewYear--; }
+    renderCalendar();
+}
+
+function renderCalendar() {
+    if (calViewYear === undefined) initCalView();
+    const periodData = JSON.parse(localStorage.getItem('period') || '[]');
+    const symptomData = JSON.parse(localStorage.getItem('symptom') || '[]');
+    const today = new Date(); today.setHours(0,0,0,0);
+    const stats = getPeriodStats();
+    const periodDays = new Set(), symptomDays = new Set(), predictedDays = new Set();
+    periodData.forEach(e => {
+        if (!e.start) return;
+        const end = e.end ? new Date(e.end) : new Date(e.start);
+        for (let d = new Date(e.start); d <= end; d.setDate(d.getDate()+1)) periodDays.add(d.toISOString().split('T')[0]);
+    });
+    symptomData.forEach(e => { if (e.date) symptomDays.add(e.date); });
+    if (stats) {
+        const ps = new Date(stats.last.start);
+        ps.setDate(ps.getDate() + stats.avgCycle);
+        for (let i = 0; i < stats.avgDuration; i++) { const d = new Date(ps); d.setDate(d.getDate()+i); predictedDays.add(d.toISOString().split('T')[0]); }
+    }
+    const monthNames = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+    document.getElementById('cal-title').textContent = calViewYear + ' · ' + monthNames[calViewMonth];
+    const firstDay = new Date(calViewYear, calViewMonth, 1).getDay();
+    const daysInMonth = new Date(calViewYear, calViewMonth+1, 0).getDate();
+    let html = ['日','一','二','三','四','五','六'].map(d => '<div class="cal-day-name">' + d + '</div>').join('');
+    for (let i = 0; i < firstDay; i++) html += '<div></div>';
+    for (let d = 1; d <= daysInMonth; d++) {
+        const ds = calViewYear + '-' + String(calViewMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+        let cls = 'cal-day';
+        if (periodDays.has(ds)) cls += ' period-day';
+        else if (predictedDays.has(ds)) cls += ' predicted';
+        if (symptomDays.has(ds)) cls += ' symptom-day';
+        if (new Date(calViewYear, calViewMonth, d).getTime() === today.getTime()) cls += ' today';
+        html += '<div class="' + cls + '">' + d + '</div>';
+    }
+    document.getElementById('cal-grid').innerHTML = html;
+}
+
+function addWeight() {
+    const val = document.getElementById('weight-value').value;
+    const date = document.getElementById('weight-date').value || getTodayString();
+    if (!val) return;
+    let data = JSON.parse(localStorage.getItem('weight') || '[]');
+    const dupIdx = data.findIndex(i => i.date === date);
+    if (dupIdx !== -1) {
+        if (!confirm('這天已有體重紀錄（' + data[dupIdx].weight.toFixed(1) + ' kg），要覆蓋嗎？')) return;
+        data.splice(dupIdx, 1);
+    }
+    data.unshift({ id: Date.now(), weight: parseFloat(val), date });
+    localStorage.setItem('weight', JSON.stringify(data));
+    document.getElementById('weight-value').value = '';
+    resetDates();
+    closeForm('weight-form', 'toggle-weight-form');
+    renderWeightData(); renderWeightChart();
+    showToast('✓ 體重已記錄');
+}
+
+function deleteWeight(id) {
+    if (!confirm('確定要移除？')) return;
+    let data = JSON.parse(localStorage.getItem('weight') || '[]').filter(i => i.id !== id);
+    localStorage.setItem('weight', JSON.stringify(data));
+    renderWeightData(); renderWeightChart();
+}
+
+function renderWeightData() {
+    const data = JSON.parse(localStorage.getItem('weight') || '[]');
+    const el = document.getElementById('weight-stats');
+    if (data.length === 0) { el.innerHTML = ''; document.getElementById('weight-list').innerHTML = '<div class="empty-state">尚無體重紀錄。</div>'; return; }
+    const weights = data.map(d => d.weight);
+    el.innerHTML = '<div class="weight-stat">最新 <span>' + weights[0].toFixed(1) + ' kg</span></div><div class="weight-stat">平均 <span>' + (weights.reduce((a,b)=>a+b,0)/weights.length).toFixed(1) + ' kg</span></div><div class="weight-stat">最低 <span>' + Math.min(...weights).toFixed(1) + ' kg</span></div><div class="weight-stat">最高 <span>' + Math.max(...weights).toFixed(1) + ' kg</span></div>';
+    document.getElementById('weight-list').innerHTML = data.map(i => '<div class="item-card"><div class="item-info"><h4>' + i.weight.toFixed(1) + ' kg</h4><p>' + i.date + '</p></div><div class="item-actions"><span class="edit-link" onclick="openEditWeight(' + i.id + ')">編輯</span><span class="delete-link" onclick="deleteWeight(' + i.id + ')">移除</span></div></div>').join('');
+}
+
+function renderWeightChart() {
+    const data = JSON.parse(localStorage.getItem('weight') || '[]').slice().reverse();
+    const canvas = document.getElementById('weightChart');
+    if (weightChartInstance) { weightChartInstance.destroy(); weightChartInstance = null; }
+    if (data.length === 0) return;
+    const weights = data.map(d => d.weight);
+    weightChartInstance = new Chart(canvas, {
+        type: 'line',
+        data: { labels: data.map(d => d.date.slice(5)), datasets: [{ data: weights, borderColor: '#7d8471', backgroundColor: 'rgba(125,132,113,0.08)', pointBackgroundColor: '#7d8471', pointRadius: 4, tension: 0.3, fill: true }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { autoSkip: true, maxTicksLimit: 8, font: { size: 10 } }, grid: { display: false } }, y: { min: Math.min(...weights)-1, max: Math.max(...weights)+1, ticks: { font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0.05)' } } } }
+    });
+}
+
+function renderBackupStats() {
+    const labels = { media:'閱聽', selflove:'買物', finance:'餘裕', notes:'隨手記記', exercise:'運動', period:'生理期', symptom:'症狀', weight:'體重' };
+    const lastAt = localStorage.getItem('lastBackupAt');
+    const lastStr = lastAt
+        ? '上次備份：' + new Date(lastAt).toLocaleString('zh-TW', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})
+        : '尚未備份過';
+    const urgency = !lastAt ? 'color:var(--alert-red)' : (Date.now() - new Date(lastAt).getTime() > 7*86400000 ? 'color:var(--warn-yellow)' : 'color:var(--accent-color)');
+    const chips = allStoreKeys.map(t => '<div class="stat-chip">' + labels[t] + ' <span>' + JSON.parse(localStorage.getItem(t)||'[]').length + '</span> 筆</div>').join('');
+    document.getElementById('backup-stats').innerHTML = '<div style="font-size:0.78rem;' + urgency + ';margin-bottom:12px;letter-spacing:0.5px;">⏱ ' + lastStr + '</div>' + chips;
+}
+
+function downloadBackup() {
+    const backup = { exportedAt: new Date().toISOString(), version: 2, data: {} };
+    allStoreKeys.forEach(t => { backup.data[t] = JSON.parse(localStorage.getItem(t) || '[]'); });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' }));
+    a.download = 'life-fragments-backup-' + getTodayString() + '.json';
+    a.click();
+    localStorage.setItem('lastBackupAt', new Date().toISOString());
+    renderBackupStats();
+    showToast('✓ 備份檔案已下載');
+}
+
+function readBackupFile(file) {
+    return new Promise((resolve, reject) => {
+        if (!file || !file.name.endsWith('.json')) { reject('請選擇 .json 備份檔案'); return; }
+        const reader = new FileReader();
+        reader.onload = e => { try { const p = JSON.parse(e.target.result); if (!p.data) throw 0; resolve(p); } catch { reject('檔案格式不正確。'); } };
+        reader.onerror = () => reject('讀取失敗');
+        reader.readAsText(file);
+    });
+}
+
+async function handleRestoreFile(event) {
+    const file = event.target.files[0]; if (!file) return;
+    try { pendingRestoreData = await readBackupFile(file); showToast('✓ 已讀取備份（' + new Date(pendingRestoreData.exportedAt).toLocaleDateString('zh-TW') + '），請點選還原方式'); }
+    catch (err) { showToast('⚠ ' + err, 3500); pendingRestoreData = null; }
+    event.target.value = '';
+}
+
+function triggerRestore(mode) {
+    if (!pendingRestoreData) { showToast('請先選取備份 JSON 檔案', 2500); document.getElementById('restore-file-input').click(); return; }
+    applyRestore(pendingRestoreData, mode);
+}
+
+function applyRestore(backup, mode) {
+    if (!confirm('確定要' + (mode === 'merge' ? '合併' : '覆蓋') + '還原嗎？')) return;
+    allStoreKeys.forEach(t => {
+        const incoming = backup.data[t] || [];
+        if (mode === 'overwrite') { localStorage.setItem(t, JSON.stringify(incoming)); }
+        else {
+            const existing = JSON.parse(localStorage.getItem(t) || '[]');
+            const ids = new Set(existing.map(x => x.id));
+            const merged = [...existing, ...incoming.filter(x => !ids.has(x.id))].sort((a,b) => b.id - a.id);
+            localStorage.setItem(t, JSON.stringify(merged));
+        }
+    });
+    pendingRestoreData = null; initFilters(); renderBackupStats();
+    showToast('✓ ' + (mode === 'merge' ? '合併' : '覆蓋') + '還原完成！', 3000);
+}
+
+function handleDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
+function handleDragLeave() { document.getElementById('drop-zone').classList.remove('drag-over'); }
+async function handleDrop(e) {
+    e.preventDefault(); document.getElementById('drop-zone').classList.remove('drag-over');
+    const file = e.dataTransfer.files[0]; if (!file) return;
+    try { pendingRestoreData = await readBackupFile(file); showToast('✓ 已讀取備份（' + new Date(pendingRestoreData.exportedAt).toLocaleDateString('zh-TW') + '），請點選還原方式'); }
+    catch (err) { showToast('⚠ ' + err, 3500); }
+}
+
+/* exercise */
+let exCalYear, exCalMonth;
+function initExCalView() { const n=new Date(); exCalYear=n.getFullYear(); exCalMonth=n.getMonth(); }
+function changeExCalMonth(delta) {
+    exCalMonth+=delta;
+    if(exCalMonth>11){exCalMonth=0;exCalYear++;}
+    if(exCalMonth<0){exCalMonth=11;exCalYear--;}
+    renderExerciseCal(); renderExerciseMonthStats(); renderExerciseData();
+}
+function renderExerciseCal() {
+    if(exCalYear===undefined) initExCalView();
+    const exData=JSON.parse(localStorage.getItem('exercise')||'[]');
+    const periodData=JSON.parse(localStorage.getItem('period')||'[]');
+    const today=new Date(); today.setHours(0,0,0,0);
+    const periodDays=new Set();
+    periodData.forEach(e=>{
+        if(!e.start)return;
+        const end=e.end?new Date(e.end):new Date(e.start);
+        for(let d=new Date(e.start);d<=end;d.setDate(d.getDate()+1)) periodDays.add(d.toISOString().split('T')[0]);
+    });
+    const exByDate={};
+    exData.forEach(e=>{
+        if(!exByDate[e.date])exByDate[e.date]={mins:0,steps:0};
+        exByDate[e.date].mins+=(e.mins||0);
+        exByDate[e.date].steps+=(e.steps||0);
+    });
+    const monthNames=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+    document.getElementById('ex-cal-title').textContent=exCalYear+' · '+monthNames[exCalMonth];
+    const firstDay=new Date(exCalYear,exCalMonth,1).getDay();
+    const daysInMonth=new Date(exCalYear,exCalMonth+1,0).getDate();
+    let html=['日','一','二','三','四','五','六'].map(d=>'<div class="cal-day-name">'+d+'</div>').join('');
+    for(let i=0;i<firstDay;i++) html+='<div></div>';
+    for(let d=1;d<=daysInMonth;d++){
+        const ds=exCalYear+'-'+String(exCalMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+        const ex=exByDate[ds];
+        const isPeriod=periodDays.has(ds);
+        const isActive=ex&&(ex.mins>=30||ex.steps>=10000);
+        const isTodayDay=new Date(exCalYear,exCalMonth,d).getTime()===today.getTime();
+        const periodDot=isPeriod?'<span style="display:block;width:4px;height:4px;border-radius:50%;background:var(--period-red);margin:1px auto 0;"></span>':'';
+        let style='text-align:center;font-size:0.75rem;cursor:default;display:flex;flex-direction:column;align-items:center;justify-content:center;width:28px;height:28px;margin:0 auto;border-radius:50%;position:relative;';
+        if(isActive) style+='border:2px solid var(--accent-color);color:var(--accent-color);font-weight:700;';
+        if(isPeriod&&!isActive) style+='background:var(--period-light);color:var(--period-red);';
+        if(isPeriod&&isActive) style+='background:var(--period-light);';
+        if(isTodayDay) style+='outline:1.5px solid var(--accent-color);outline-offset:1px;';
+        html+='<div style="'+style+'">'+String(d)+periodDot+'</div>';
+    }
+    document.getElementById('ex-cal-grid').innerHTML=html;
+}
+function renderExerciseMonthStats(fromDate, toDate) {
+    if(exCalYear===undefined) initExCalView();
+    const data=JSON.parse(localStorage.getItem('exercise')||'[]');
+    const today=new Date().toISOString().split('T')[0];
+    const year=new Date().getFullYear();
+    const defaultFrom=year+'-01-01';
+    const f=fromDate||defaultFrom;
+    const t=toDate||today;
+    const md=data.filter(i=>i.date>=f&&i.date<=t);
+    const totalMins=md.reduce((s,i)=>s+(i.mins||0),0);
+    const totalKcal=md.reduce((s,i)=>s+(i.kcal||0),0);
+    const totalSteps=md.reduce((s,i)=>s+(i.steps||0),0);
+    const activeDays=new Set(md.filter(i=>(i.mins||0)>=30||(i.steps||0)>=10000).map(i=>i.date)).size;
+    const totalDays=new Set(md.map(i=>i.date)).size;
+    // type breakdown
+    const typeCats=['低強度有氧','高強度有氧','雕塑','重訓','瑜珈','其他'];  // 步數另計
+    const typeColors=['#7d9e8c','#4a8a6a','#a07db5','#7d8ea4','#b58c7d','#8c8c8c'];
+    const typeCounts=typeCats.map(c=>md.filter(i=>i.type===c).length);
+    // streak (always from all data)
+    const allData=JSON.parse(localStorage.getItem('exercise')||'[]');
+    const byDate={};
+    allData.forEach(i=>{
+        if(!byDate[i.date])byDate[i.date]={mins:0,steps:0};
+        byDate[i.date].mins+=(i.mins||0);
+        byDate[i.date].steps+=(i.steps||0);
+    });
+    const activeDateSet=new Set();
+    Object.entries(byDate).forEach(([d,v])=>{ if(v.mins>=30||v.steps>=10000) activeDateSet.add(d); });
+    const sortedActive=[...activeDateSet].sort();
+    let curStreak=0,bestStreak=0,tempStreak=0;
+    const todayStr=new Date().toISOString().split('T')[0];
+    for(let i=0;i<sortedActive.length;i++){
+        if(i===0){ tempStreak=1; }
+        else {
+            const prev=new Date(sortedActive[i-1]); prev.setDate(prev.getDate()+1);
+            tempStreak=prev.toISOString().split('T')[0]===sortedActive[i]?tempStreak+1:1;
+        }
+        if(tempStreak>bestStreak) bestStreak=tempStreak;
+    }
+    curStreak=0;
+    const yd=new Date(); yd.setDate(yd.getDate()-1);
+    let startFrom=[todayStr,yd.toISOString().split('T')[0]].find(d=>activeDateSet.has(d));
+    if(startFrom){
+        let check=new Date(startFrom);
+        while(activeDateSet.has(check.toISOString().split('T')[0])){ curStreak++; check.setDate(check.getDate()-1); }
+    }
+    const rangeLabel=f===defaultFrom&&t===today?year+' 年':f+' ~ '+t;
+    const inputStyle='flex:1;min-width:120px;font-size:0.82rem;padding:7px 10px;border:1px solid var(--border-color);border-radius:6px;background:var(--bg-color);color:var(--text-primary);outline:none;';
+    const streakHtml=curStreak>0||bestStreak>0
+        ?'<span class="streak-badge">🔥 連續達標 '+curStreak+' 天</span>'+(bestStreak>curStreak?'<span class="streak-best">最長紀錄 '+bestStreak+' 天</span>':'')
+        :'<span style="font-size:0.78rem;color:var(--text-secondary);">今日達標即開始連續紀錄 🔥</span>';
+    const typeChips=typeCats.map((c,idx)=>typeCounts[idx]>0?`
+        <div class="stats-count-chip">
+            <div class="stats-count-num">${typeCounts[idx]}</div>
+            <div class="stats-count-label" style="font-size:0.6rem;">${c}</div>
+        </div>`:'').join('');
+    const el=document.getElementById('ex-stats-bar');
+    if(!el)return;
+    el.innerHTML=`
+        <div class="stats-bar-title" style="margin-bottom:10px;">統計區間</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+            <input type="date" id="ex-stats-from" value="${f}"
+                onchange="renderExerciseMonthStats(this.value,document.getElementById('ex-stats-to').value)"
+                style="${inputStyle}">
+            <span style="font-size:0.78rem;color:var(--text-secondary);flex-shrink:0;">至</span>
+            <input type="date" id="ex-stats-to" value="${t}"
+                onchange="renderExerciseMonthStats(document.getElementById('ex-stats-from').value,this.value)"
+                style="${inputStyle}">
+        </div>
+        <div style="margin-bottom:14px;">${streakHtml}</div>
+        <div class="stats-bar-title">${rangeLabel} · ${totalDays} 天運動 · 達標 ${activeDays} 天</div>
+        <div class="stats-year-row" style="margin-bottom:10px;">
+            <div class="stats-count-chip"><div class="stats-count-num">${totalMins}</div><div class="stats-count-label">分鐘</div></div>
+            ${totalKcal>0?'<div class="stats-count-chip"><div class="stats-count-num" style="font-size:1rem;">'+totalKcal+'</div><div class="stats-count-label">kcal</div></div>':''}
+            ${totalSteps>0?'<div class="stats-count-chip"><div class="stats-count-num" style="font-size:0.95rem;">'+(totalSteps>=10000?(totalSteps/1000).toFixed(1)+'k':totalSteps)+'</div><div class="stats-count-label">步數</div></div>':''}
+        </div>
+        <div class="stats-bar-title" style="margin-bottom:8px;">類型分布</div>
+        <div class="stats-year-row">${typeChips}</div>`;
+}
+function addExercise() {
+    const type=document.getElementById('exercise-type').value;
+    const name=document.getElementById('exercise-name').value.trim();
+    const mins=parseInt(document.getElementById('exercise-mins').value)||0;
+    const kcal=parseInt(document.getElementById('exercise-kcal').value)||0;
+    const steps=parseInt(document.getElementById('exercise-steps').value)||0;
+    const date=document.getElementById('exercise-date').value||getTodayString();
+    if(!name){showToast('請填寫項目名稱');return;}
+    let data=JSON.parse(localStorage.getItem('exercise')||'[]');
+    data.unshift({id:Date.now(),type,name,mins,kcal,steps,date});
+    localStorage.setItem('exercise',JSON.stringify(data));
+    document.getElementById('exercise-name').value='';
+    document.getElementById('exercise-mins').value='';
+    document.getElementById('exercise-kcal').value='';
+    document.getElementById('exercise-steps').value='';
+    resetDates();
+    closeForm('exercise-form','toggle-exercise-form');
+    renderExerciseCal(); renderExerciseMonthStats(); renderExerciseData();
+    showToast('✓ 已記錄');
+}
+
+function addStepsOnly() {
+    const steps = parseInt(document.getElementById('steps-only-value').value) || 0;
+    const date = document.getElementById('steps-only-date').value || getTodayString();
+    if (steps <= 0) { showToast('請填寫步數'); return; }
+    // check if same date already has a steps-only entry, merge if so
+    let data = JSON.parse(localStorage.getItem('exercise') || '[]');
+    const existIdx = data.findIndex(i => i.date === date && i.type === '步數');
+    if (existIdx !== -1) {
+        if (!confirm('這天已有步數紀錄（' + data[existIdx].steps.toLocaleString() + ' 步），要覆蓋嗎？')) return;
+        data.splice(existIdx, 1);
+    }
+    data.unshift({ id: Date.now(), type: '步數', name: '每日步數', mins: 0, kcal: 0, steps, date });
+    localStorage.setItem('exercise', JSON.stringify(data));
+    document.getElementById('steps-only-value').value = '';
+    resetDates();
+    closeForm('steps-form', 'toggle-steps-form');
+    renderExerciseCal(); renderExerciseMonthStats(); renderExerciseData();
+    showToast('✓ 步數已記錄');
+}
+
+function deleteExercise(id) {
+    if(!confirm('確定要移除？'))return;
+    let data=JSON.parse(localStorage.getItem('exercise')||'[]').filter(i=>i.id!==id);
+    localStorage.setItem('exercise',JSON.stringify(data));
+    renderExerciseCal(); renderExerciseMonthStats(); renderExerciseData();
+}
+function filterExercise(cat) {
+    currentExerciseFilter=cat;
+    document.querySelectorAll('#exercise-quick-filters .cat-btn').forEach(b=>b.classList.toggle('active',b.innerText===cat));
+    renderExerciseData();
+}
+function initExerciseFilter() {
+    const area=document.getElementById('filter-exercise');
+    const data=JSON.parse(localStorage.getItem('exercise')||'[]');
+    const sysYear=new Date().getFullYear(); let maxYear=sysYear;
+    data.forEach(item=>{if(item.date){const y=parseInt(item.date.split('-')[0]);if(y>maxYear)maxYear=y;}});
+    let html='<select id="f-exercise-year" class="filter-select" onchange="renderExerciseData()"><option value="">年份</option>';
+    for(let i=maxYear;i>=2020;i--) html+='<option value="'+i+'">'+i+'年</option>';
+    html+='</select><select id="f-exercise-month" class="filter-select" onchange="onExerciseMonthFilter()"><option value="">月份</option>';
+    for(let i=1;i<=12;i++) html+='<option value="'+String(i).padStart(2,'0')+'">'+i+'月</option>';
+    html+='</select><input type="text" id="f-exercise-search" class="filter-input" placeholder="搜尋項目名稱..." oninput="renderExerciseData()">';
+    area.innerHTML=html;
+    const curMonth=String(new Date().getMonth()+1).padStart(2,'0');
+    const sel=document.getElementById('f-exercise-month');
+    if(sel) sel.value=curMonth;
+}
+function onExerciseMonthFilter() {
+    const sel=document.getElementById('f-exercise-month');
+    if(sel&&sel.value){
+        exCalMonth=parseInt(sel.value)-1;
+        const yearSel=document.getElementById('f-exercise-year');
+        if(yearSel&&yearSel.value) exCalYear=parseInt(yearSel.value);
+        renderExerciseCal(); renderExerciseMonthStats();
+    }
+    renderExerciseData();
+}
+function renderExerciseData() {
+    const yearEl=document.getElementById('f-exercise-year');
+    const monthEl=document.getElementById('f-exercise-month');
+    const searchEl=document.getElementById('f-exercise-search');
+    if(!yearEl)return;
+    const fYear=yearEl.value;
+    const fMonth=monthEl?monthEl.value:'';
+    const fSearch=searchEl?searchEl.value.toLowerCase():'';
+    let data=JSON.parse(localStorage.getItem('exercise')||'[]');
+    data=data.filter(i=>{
+        const matchYear=fYear?i.date.startsWith(fYear):true;
+        const matchMonth=fMonth?i.date.split('-')[1]===fMonth:true;
+        const matchCat=currentExerciseFilter==='全部'||i.type===currentExerciseFilter;
+        const matchSearch=fSearch?(i.name||'').toLowerCase().includes(fSearch):true;
+        return matchYear&&matchMonth&&matchCat&&matchSearch;
+    });
+    const container=document.getElementById('exercise-list');
+    if(data.length===0){container.innerHTML='<div class="empty-state">尚無運動紀錄。</div>';return;}
+    const grouped={};
+    data.forEach(i=>{if(!grouped[i.date])grouped[i.date]=[];grouped[i.date].push(i);});
+    const dates=Object.keys(grouped).sort((a,b)=>b.localeCompare(a));
+    const typeColor={'低強度有氧':'#7d9e8c','高強度有氧':'#4a8a6a','雕塑':'#a07db5','重訓':'#7d8ea4','瑜珈':'#b58c7d','其他':'#8c8c8c','步數':'#6b9ab8'};
+    let html='';
+    dates.forEach(date=>{
+        const items=grouped[date];
+        const totalMins=items.reduce((s,i)=>s+(i.mins||0),0);
+        const totalSteps=items.reduce((s,i)=>s+(i.steps||0),0);
+        const isActive=totalMins>=30||totalSteps>=10000;
+        const dateLabel=date+' · '+totalMins+' 分鐘'+(totalSteps>0?' · '+totalSteps.toLocaleString()+' 步':'')+(isActive?' ✓':'');
+        html+='<div style="margin-bottom:18px;">';
+        html+='<div style="font-size:0.72rem;color:'+(isActive?'var(--accent-color)':'var(--text-secondary)')+';letter-spacing:1px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border-color);font-weight:'+(isActive?'700':'400')+';">'+dateLabel+'</div>';
+        items.forEach(i=>{
+            const col=typeColor[i.type]||'var(--accent-color)';
+            let meta=i.type==='步數'?i.steps.toLocaleString()+' 步':i.mins+' 分鐘';
+            if(i.type!=='步數'&&i.kcal) meta+=' · '+i.kcal+' kcal';
+            if(i.type!=='步數'&&i.steps) meta+=' · '+i.steps.toLocaleString()+' 步';
+            html+='<div class="item-card"><div class="item-info">';
+            html+='<h4><span class="tag" style="color:'+col+';border-color:'+col+';">'+i.type+'</span>'+i.name+'</h4>';
+            html+='<p>'+meta+'</p>';
+            html+='</div><div class="item-actions"><span class="edit-link" onclick="openEditExercise('+i.id+')">編輯</span><span class="delete-link" onclick="deleteExercise('+i.id+')">移除</span></div></div>';
+        });
+        html+='</div>';
+    });
+    container.innerHTML=html;
+}
+
+/* ══ 編輯功能 ══ */
+function openModal(id) { document.getElementById('modal-' + id).classList.add('open'); }
+function closeModal(id) { document.getElementById('modal-' + id).classList.remove('open'); }
+
+function openEdit(type, id) {
+    const data = JSON.parse(localStorage.getItem(type) || '[]');
+    const item = data.find(i => i.id === id);
+    if (!item) return;
+    if (type === 'selflove') {
+        document.getElementById('edit-selflove-id').value = id;
+        document.getElementById('edit-selflove-type').value = item.category || '其他';
+        document.getElementById('edit-selflove-name').value = item.name || '';
+        document.getElementById('edit-selflove-price').value = item.price || '';
+        document.getElementById('edit-selflove-buy-date').value = item.buyDate || '';
+        document.getElementById('edit-selflove-expiry-date').value = item.expiryDate || '';
+        openModal('selflove');
+    } else if (type === 'notes') {
+        document.getElementById('edit-notes-id').value = id;
+        document.getElementById('edit-notes-title').value = item.title || '';
+        document.getElementById('edit-notes-content').value = item.content || '';
+        document.getElementById('edit-notes-date').value = item.date || '';
+        openModal('notes');
+    } else if (type === 'media') {
+        document.getElementById('edit-media-id').value = id;
+        document.getElementById('edit-media-type').value = item.category || '書籍';
+        document.getElementById('edit-media-title').value = item.title || '';
+        document.getElementById('edit-media-rating').value = item.rating || '5';
+        document.getElementById('edit-media-date').value = item.date || '';
+        openModal('media');
+    } else if (type === 'finance') {
+        document.getElementById('edit-finance-id').value = id;
+        document.getElementById('edit-finance-type').value = item.category || '中國信託';
+        document.getElementById('edit-finance-title').value = item.title || '';
+        document.getElementById('edit-finance-date').value = item.date || '';
+        openModal('finance');
+    }
+}
+
+function saveEditSelflove() {
+    const id = parseInt(document.getElementById('edit-selflove-id').value);
+    let data = JSON.parse(localStorage.getItem('selflove') || '[]');
+    const idx = data.findIndex(i => i.id === id);
+    if (idx === -1) return;
+    data[idx].category = document.getElementById('edit-selflove-type').value;
+    data[idx].name = document.getElementById('edit-selflove-name').value;
+    data[idx].price = document.getElementById('edit-selflove-price').value;
+    data[idx].buyDate = document.getElementById('edit-selflove-buy-date').value;
+    data[idx].expiryDate = document.getElementById('edit-selflove-expiry-date').value;
+    localStorage.setItem('selflove', JSON.stringify(data));
+    closeModal('selflove');
+    renderExpiryAlert();
+    renderData('selflove');
+    showToast('✓ 已更新');
+}
+
+function saveEditNotes() {
+    const id = parseInt(document.getElementById('edit-notes-id').value);
+    let data = JSON.parse(localStorage.getItem('notes') || '[]');
+    const idx = data.findIndex(i => i.id === id);
+    if (idx === -1) return;
+    data[idx].title = document.getElementById('edit-notes-title').value;
+    data[idx].content = document.getElementById('edit-notes-content').value;
+    data[idx].date = document.getElementById('edit-notes-date').value;
+    localStorage.setItem('notes', JSON.stringify(data));
+    closeModal('notes');
+    renderData('notes');
+    showToast('✓ 已更新');
+}
+
+function openEditPeriod(id) {
+    const data = JSON.parse(localStorage.getItem('period') || '[]');
+    const item = data.find(i => i.id === id);
+    if (!item) return;
+    document.getElementById('edit-period-id').value = id;
+    document.getElementById('edit-period-start').value = item.start || '';
+    document.getElementById('edit-period-end').value = item.end || '';
+    openModal('period');
+}
+
+function saveEditPeriod() {
+    const id = parseInt(document.getElementById('edit-period-id').value);
+    const newEnd = document.getElementById('edit-period-end').value;
+    let data = JSON.parse(localStorage.getItem('period') || '[]');
+    const idx = data.findIndex(i => i.id === id);
+    if (idx === -1) return;
+    data[idx].end = newEnd;
+    localStorage.setItem('period', JSON.stringify(data));
+    closeModal('period');
+    renderPeriodData();
+    renderCalendar();
+    renderPeriodPredict();
+    showToast('✓ 已更新');
+}
+
+
+/* ══ 閱聽統計 ══ */
+let mediaChartInstance = null;
+function renderMediaStats(fromDate, toDate) {
+    const data = JSON.parse(localStorage.getItem('media') || '[]');
+    const el = document.getElementById('media-stats-bar');
+    if (!data.length) { el.style.display = 'none'; return; }
+    el.style.display = 'block';
+    const today = new Date().toISOString().split('T')[0];
+    const year = new Date().getFullYear();
+    const defaultFrom = year + '-01-01';
+    const f = fromDate || defaultFrom;
+    const t = toDate || today;
+    const inRange = data.filter(i => (i.date || '') >= f && (i.date || '') <= t);
+    const cats = ['書籍','影集','電影','展覽','遊戲'];
+    const catColors = ['#7d8471','#a07db5','#7d8ea4','#b58c7d','#7d9e8c'];
+    const counts = cats.map(c => inRange.filter(i => i.category === c).length);
+    const total = inRange.length;
+    const rated = inRange.filter(i => i.rating);
+    const avgRating = rated.length ? (rated.reduce((s,i) => s + parseInt(i.rating), 0) / rated.length) : 0;
+    const avgHearts = avgRating > 0 ? '♥'.repeat(Math.round(avgRating)) : '—';
+    const chipsHtml = cats.map((c,idx) => counts[idx] > 0 ? `
+        <div class="stats-count-chip">
+            <div class="stats-count-num">${counts[idx]}</div>
+            <div class="stats-count-label">${c}</div>
+        </div>` : '').join('');
+    const donutId = 'media-donut-chart';
+    el.innerHTML = `
+        <div class="stats-bar-title" style="margin-bottom:10px;">統計區間</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+            <input type="date" id="media-stats-from" value="${f}" onchange="renderMediaStats(this.value, document.getElementById('media-stats-to').value)"
+                style="flex:1;min-width:120px;font-size:0.82rem;padding:7px 10px;border:1px solid var(--border-color);border-radius:6px;background:var(--bg-color);color:var(--text-primary);outline:none;">
+            <span style="font-size:0.78rem;color:var(--text-secondary);flex-shrink:0;">至</span>
+            <input type="date" id="media-stats-to" value="${t}" onchange="renderMediaStats(document.getElementById('media-stats-from').value, this.value)"
+                style="flex:1;min-width:120px;font-size:0.82rem;padding:7px 10px;border:1px solid var(--border-color);border-radius:6px;background:var(--bg-color);color:var(--text-primary);outline:none;">
+        </div>
+        <div class="stats-bar-title">${f === defaultFrom && t === today ? year + ' 年' : f + ' ~ ' + t} · 共 ${total} 筆</div>
+        <div class="stats-year-row">${chipsHtml}${total > 0 ? `<div class="stats-count-chip"><div class="stats-avg-hearts" style="font-size:1rem;">${avgHearts}</div><div class="stats-count-label">平均評分</div></div>` : ''}</div>
+        <div class="stats-bar-title" style="margin-top:8px;">區間類型佔比</div>
+        <div class="stats-donut-wrap">
+            <canvas id="${donutId}" class="stats-donut-canvas"></canvas>
+            <div class="stats-legend" id="media-donut-legend"></div>
+        </div>`;
+    const legendEl = document.getElementById('media-donut-legend');
+    legendEl.innerHTML = cats.map((c,idx) => counts[idx] > 0 ? `
+        <div class="stats-legend-row">
+            <div class="stats-legend-dot" style="background:${catColors[idx]};"></div>
+            <span class="stats-legend-label">${c}</span>
+            <span class="stats-legend-val">${counts[idx]} 筆</span>
+        </div>` : '').join('');
+    const canvas = document.getElementById(donutId);
+    if (!canvas) return;
+    if (mediaChartInstance) { mediaChartInstance.destroy(); mediaChartInstance = null; }
+    const filtered = cats.map((c,i) => ({ c, n: counts[i], col: catColors[i] })).filter(x => x.n > 0);
+    if (!filtered.length) return;
+    mediaChartInstance = new Chart(canvas, {
+        type: 'doughnut',
+        data: { labels: filtered.map(x => x.c), datasets: [{ data: filtered.map(x => x.n), backgroundColor: filtered.map(x => x.col), borderWidth: 2, borderColor: '#fff' }] },
+        options: { responsive: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ' + ctx.label + '：' + ctx.raw + ' 筆' } } }, cutout: '62%' }
+    });
+}
+
+/* ══ 對自己好統計 ══ */
+let selfloveChartInstance = null;
+function renderSelfloveStats(fromDate, toDate) {
+    const data = JSON.parse(localStorage.getItem('selflove') || '[]');
+    const el = document.getElementById('selflove-stats-bar');
+    if (!data.length) { el.style.display = 'none'; return; }
+    el.style.display = 'block';
+    const today = new Date().toISOString().split('T')[0];
+    const year = new Date().getFullYear();
+    const defaultFrom = year + '-01-01';
+    const f = fromDate || defaultFrom;
+    const t = toDate || today;
+    const inRange = data.filter(i => (i.buyDate || '') >= f && (i.buyDate || '') <= t);
+    const cats = ['化妝品','保養品','吃','服飾包包','玩具公仔','旅行','其他'];
+    const catColors = ['#c9856a','#7d9e8c','#d4a373','#a07db5','#7d8ea4','#8c7d9e','#9aa0a6'];
+    const rangeTotal = inRange.reduce((s,i) => s + parseFloat(i.price || 0), 0);
+    const catSpend = cats.map(c => inRange.filter(i => i.category === c).reduce((s,i) => s + parseFloat(i.price || 0), 0));
+    const donutId = 'selflove-donut-chart';
+    const inputStyle = 'flex:1;min-width:120px;font-size:0.82rem;padding:7px 10px;border:1px solid var(--border-color);border-radius:6px;background:var(--bg-color);color:var(--text-primary);outline:none;';
+    const rangeLabel = f === defaultFrom && t === today ? year + ' 年' : f + ' ~ ' + t;
+    el.innerHTML = `
+        <div class="stats-bar-title" style="margin-bottom:10px;">統計區間</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+            <input type="date" id="selflove-stats-from" value="${f}"
+                onchange="renderSelfloveStats(this.value, document.getElementById('selflove-stats-to').value)"
+                style="${inputStyle}">
+            <span style="font-size:0.78rem;color:var(--text-secondary);flex-shrink:0;">至</span>
+            <input type="date" id="selflove-stats-to" value="${t}"
+                onchange="renderSelfloveStats(document.getElementById('selflove-stats-from').value, this.value)"
+                style="${inputStyle}">
+        </div>
+        <div class="stats-bar-title">${rangeLabel} 消費 · $ ${rangeTotal.toLocaleString('zh-TW', {maximumFractionDigits:0})}</div>
+        <div class="stats-year-row">${cats.map((c,idx) => catSpend[idx] > 0 ? `
+            <div class="stats-count-chip">
+                <div class="stats-count-num" style="font-size:1rem;">$${catSpend[idx]/1000 >= 1 ? (catSpend[idx]/1000).toFixed(1)+'k' : catSpend[idx]}</div>
+                <div class="stats-count-label">${c}</div>
+            </div>` : '').join('')}</div>
+        <div class="stats-bar-title" style="margin-top:8px;">區間消費類別佔比</div>
+        <div class="stats-donut-wrap">
+            <canvas id="${donutId}" class="stats-donut-canvas"></canvas>
+            <div class="stats-legend" id="selflove-donut-legend"></div>
+        </div>`;
+    const legendEl = document.getElementById('selflove-donut-legend');
+    legendEl.innerHTML = cats.map((c,idx) => catSpend[idx] > 0 ? `
+        <div class="stats-legend-row">
+            <div class="stats-legend-dot" style="background:${catColors[idx]};"></div>
+            <span class="stats-legend-label">${c}</span>
+            <span class="stats-legend-val">$${catSpend[idx].toLocaleString('zh-TW',{maximumFractionDigits:0})}</span>
+        </div>` : '').join('');
+    const canvas = document.getElementById(donutId);
+    if (!canvas) return;
+    if (selfloveChartInstance) { selfloveChartInstance.destroy(); selfloveChartInstance = null; }
+    const filtered = cats.map((c,i) => ({ c, n: catSpend[i], col: catColors[i] })).filter(x => x.n > 0);
+    if (!filtered.length) return;
+    selfloveChartInstance = new Chart(canvas, {
+        type: 'doughnut',
+        data: { labels: filtered.map(x => x.c), datasets: [{ data: filtered.map(x => x.n), backgroundColor: filtered.map(x => x.col), borderWidth: 2, borderColor: '#fff' }] },
+        options: { responsive: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ' + ctx.label + '：$' + ctx.raw.toLocaleString('zh-TW',{maximumFractionDigits:0}) } } }, cutout: '62%' }
+    });
+}
+
+
+function saveEditMedia() {
+    const id = parseInt(document.getElementById('edit-media-id').value);
+    let data = JSON.parse(localStorage.getItem('media') || '[]');
+    const idx = data.findIndex(i => i.id === id); if (idx === -1) return;
+    data[idx].category = document.getElementById('edit-media-type').value;
+    data[idx].title = document.getElementById('edit-media-title').value;
+    data[idx].rating = document.getElementById('edit-media-rating').value;
+    data[idx].date = document.getElementById('edit-media-date').value;
+    localStorage.setItem('media', JSON.stringify(data));
+    closeModal('media'); renderData('media'); renderMediaStats(); showToast('✓ 已更新');
+}
+
+function saveEditFinance() {
+    const id = parseInt(document.getElementById('edit-finance-id').value);
+    let data = JSON.parse(localStorage.getItem('finance') || '[]');
+    const idx = data.findIndex(i => i.id === id); if (idx === -1) return;
+    data[idx].category = document.getElementById('edit-finance-type').value;
+    data[idx].title = document.getElementById('edit-finance-title').value;
+    data[idx].date = document.getElementById('edit-finance-date').value;
+    localStorage.setItem('finance', JSON.stringify(data));
+    closeModal('finance'); renderData('finance'); renderFinanceOverview(); showToast('✓ 已更新');
+}
+
+function openEditWeight(id) {
+    const data = JSON.parse(localStorage.getItem('weight') || '[]');
+    const item = data.find(i => i.id === id); if (!item) return;
+    document.getElementById('edit-weight-id').value = id;
+    document.getElementById('edit-weight-value').value = item.weight;
+    document.getElementById('edit-weight-date').value = item.date;
+    openModal('weight');
+}
+
+function saveEditWeight() {
+    const id = parseInt(document.getElementById('edit-weight-id').value);
+    const newVal = parseFloat(document.getElementById('edit-weight-value').value);
+    const newDate = document.getElementById('edit-weight-date').value;
+    if (!newVal || !newDate) return;
+    let data = JSON.parse(localStorage.getItem('weight') || '[]');
+    const idx = data.findIndex(i => i.id === id); if (idx === -1) return;
+    // check duplicate date (other entries)
+    const dupIdx = data.findIndex(i => i.date === newDate && i.id !== id);
+    if (dupIdx !== -1) {
+        if (!confirm('這天已有另一筆紀錄（' + data[dupIdx].weight.toFixed(1) + ' kg），要覆蓋嗎？')) return;
+        data.splice(dupIdx, 1);
+    }
+    const idx2 = data.findIndex(i => i.id === id);
+    data[idx2].weight = newVal; data[idx2].date = newDate;
+    data.sort((a,b) => b.date.localeCompare(a.date));
+    localStorage.setItem('weight', JSON.stringify(data));
+    closeModal('weight'); renderWeightData(); renderWeightChart(); showToast('✓ 已更新');
+}
+
+function openEditExercise(id) {
+    const data = JSON.parse(localStorage.getItem('exercise') || '[]');
+    const item = data.find(i => i.id === id); if (!item) return;
+    document.getElementById('edit-exercise-id').value = id;
+    document.getElementById('edit-exercise-type').value = item.type || '其他';
+    document.getElementById('edit-exercise-name').value = item.name || '';
+    document.getElementById('edit-exercise-mins').value = item.mins || '';
+    document.getElementById('edit-exercise-kcal').value = item.kcal || '';
+    document.getElementById('edit-exercise-steps').value = item.steps || '';
+    document.getElementById('edit-exercise-date').value = item.date || '';
+    openModal('exercise');
+}
+
+function saveEditExercise() {
+    const id = parseInt(document.getElementById('edit-exercise-id').value);
+    let data = JSON.parse(localStorage.getItem('exercise') || '[]');
+    const idx = data.findIndex(i => i.id === id); if (idx === -1) return;
+    data[idx].type = document.getElementById('edit-exercise-type').value;
+    data[idx].name = document.getElementById('edit-exercise-name').value;
+    data[idx].mins = parseInt(document.getElementById('edit-exercise-mins').value) || 0;
+    data[idx].kcal = parseInt(document.getElementById('edit-exercise-kcal').value) || 0;
+    data[idx].steps = parseInt(document.getElementById('edit-exercise-steps').value) || 0;
+    data[idx].date = document.getElementById('edit-exercise-date').value;
+    localStorage.setItem('exercise', JSON.stringify(data));
+    closeModal('exercise'); renderExerciseCal(); renderExerciseMonthStats(); renderExerciseData(); showToast('✓ 已更新');
+}
+
+let editSymptomSelected = [];
+function toggleEditSymptom(btn, sym) {
+    btn.classList.toggle('selected');
+    if (editSymptomSelected.includes(sym)) editSymptomSelected = editSymptomSelected.filter(s => s !== sym);
+    else editSymptomSelected.push(sym);
+}
+
+function openEditSymptom(id) {
+    const data = JSON.parse(localStorage.getItem('symptom') || '[]');
+    const item = data.find(i => i.id === id); if (!item) return;
+    editSymptomSelected = [...(item.symptoms || [])];
+    document.getElementById('edit-symptom-id').value = id;
+    document.getElementById('edit-symptom-date').value = item.date || '';
+    document.getElementById('edit-symptom-note').value = item.note || '';
+    document.querySelectorAll('#edit-symptom-checks .symptom-check-btn').forEach(btn => {
+        btn.classList.toggle('selected', editSymptomSelected.includes(btn.innerText));
+    });
+    openModal('symptom');
+}
+
+function saveEditSymptom() {
+    const id = parseInt(document.getElementById('edit-symptom-id').value);
+    if (editSymptomSelected.length === 0) { showToast('請至少選擇一個症狀'); return; }
+    let data = JSON.parse(localStorage.getItem('symptom') || '[]');
+    const idx = data.findIndex(i => i.id === id); if (idx === -1) return;
+    data[idx].date = document.getElementById('edit-symptom-date').value;
+    data[idx].symptoms = [...editSymptomSelected];
+    data[idx].note = document.getElementById('edit-symptom-note').value.trim();
+    localStorage.setItem('symptom', JSON.stringify(data));
+    closeModal('symptom'); renderPeriodData(); renderCalendar(); showToast('✓ 已更新');
+}
+
+
+/* ══ 週期分析 ══ */
+function renderCycleAnalysis() {
+    const el = document.getElementById('cycle-analysis-content');
+    const periodData = JSON.parse(localStorage.getItem('period') || '[]').filter(i => i.start && i.end).sort((a,b) => a.start.localeCompare(b.start));
+    const exerciseData = JSON.parse(localStorage.getItem('exercise') || '[]');
+    const symptomData = JSON.parse(localStorage.getItem('symptom') || '[]');
+
+    if (periodData.length < 2) {
+        el.innerHTML = '<div class="cycle-no-data">需要至少 2 筆有完整開始與結束日期的月經紀錄才能進行分析。<br><br>目前有 ' + periodData.length + ' 筆完整紀錄。</div>';
+        return;
+    }
+
+    // ── helper: date range to array of date strings ──
+    function dateRange(start, end) {
+        const dates = [];
+        for (let d = new Date(start); d <= new Date(end); d.setDate(d.getDate()+1))
+            dates.push(d.toISOString().split('T')[0]);
+        return dates;
+    }
+
+    // ── helper: add days to date string ──
+    function addDays(dateStr, n) {
+        const d = new Date(dateStr); d.setDate(d.getDate() + n);
+        return d.toISOString().split('T')[0];
+    }
+
+    // ── build exercise lookup: date -> {mins, steps} ──
+    const exByDate = {};
+    exerciseData.forEach(e => {
+        if (!exByDate[e.date]) exByDate[e.date] = { mins: 0, steps: 0, entries: [] };
+        exByDate[e.date].mins += (e.mins || 0);
+        exByDate[e.date].steps += (e.steps || 0);
+        exByDate[e.date].entries.push(e);
+    });
+
+    // ── build symptom lookup ──
+    const symByDate = {};
+    symptomData.forEach(s => {
+        if (!symByDate[s.date]) symByDate[s.date] = [];
+        symByDate[s.date].push(...(s.symptoms || []));
+    });
+
+    // ── phase stats accumulator ──
+    const phases = {
+        period:    { name: '經期中',   color: '#c66b6b', days: [], exDays: 0, totalMins: 0 },
+        follicular:{ name: '濾泡期',   color: '#7d9e8c', days: [], exDays: 0, totalMins: 0 },
+        luteal:    { name: '黃體期',   color: '#a07db5', days: [], exDays: 0, totalMins: 0 },
+        pre:       { name: '月經前7天',color: '#d4a373', days: [], exDays: 0, totalMins: 0 },
+    };
+
+    // ── build cycle segments ──
+    for (let i = 0; i < periodData.length; i++) {
+        const cur = periodData[i];
+        const next = periodData[i + 1];
+
+        // period days
+        const periodDays = dateRange(cur.start, cur.end);
+        periodDays.forEach(d => phases.period.days.push(d));
+
+        if (next) {
+            const cycleLen = Math.round((new Date(next.start) - new Date(cur.start)) / 86400000);
+            const afterEnd = addDays(cur.end, 1);
+            const beforeNext = addDays(next.start, -1);
+
+            // pre-period: 7 days before next start
+            const preStart = addDays(next.start, -7);
+            const preDays = dateRange(preStart, beforeNext);
+            preDays.forEach(d => phases.pre.days.push(d));
+
+            // follicular: end+1 to ~ovulation (roughly cycle/2 - 1 day from start)
+            const ovulation = addDays(cur.start, Math.round(cycleLen / 2));
+            const follicularDays = dateRange(afterEnd, ovulation);
+            follicularDays.forEach(d => { if (!phases.pre.days.includes(d)) phases.follicular.days.push(d); });
+
+            // luteal: ovulation+1 to preStart-1
+            const lutealDays = dateRange(addDays(ovulation, 1), addDays(preStart, -1));
+            lutealDays.forEach(d => phases.luteal.days.push(d));
+        }
+    }
+
+    // ── aggregate exercise per phase ──
+    Object.values(phases).forEach(ph => {
+        const uniqueDays = [...new Set(ph.days)];
+        ph.totalDays = uniqueDays.length;
+        uniqueDays.forEach(d => {
+            if (exByDate[d] && exByDate[d].mins > 0) {
+                ph.exDays++;
+                ph.totalMins += exByDate[d].mins;
+            }
+        });
+        ph.avgMins = ph.exDays > 0 ? (ph.totalMins / ph.exDays).toFixed(0) : 0;
+        ph.activePct = ph.totalDays > 0 ? Math.round(ph.exDays / ph.totalDays * 100) : 0;
+    });
+
+    // ── symptom vs exercise analysis ──
+    const symTypes = ['胸部脹痛','頭痛','腹部疼痛','點狀出血','痘痘'];
+    const symStats = symTypes.map(sym => {
+        const symDates = Object.keys(symByDate).filter(d => symByDate[d].includes(sym));
+        const noSymDates = exerciseData.map(e => e.date).filter(d => !symByDate[d] || !symByDate[d].includes(sym));
+        const withExPct = symDates.length > 0 ? Math.round(symDates.filter(d => exByDate[d] && exByDate[d].mins > 0).length / symDates.length * 100) : null;
+        const noSymExDays = [...new Set(noSymDates)];
+        const noSymWithExPct = noSymExDays.length > 0 ? Math.round(noSymExDays.filter(d => exByDate[d] && exByDate[d].mins > 0).length / noSymExDays.length * 100) : null;
+        return { sym, symDays: symDates.length, withExPct, noSymWithExPct };
+    }).filter(s => s.symDays >= 3);
+
+    // ── coverage info ──
+    const totalExDays = Object.keys(exByDate).length;
+    const totalPeriodCycles = periodData.length;
+
+    // ── render ──
+    const maxMins = Math.max(...Object.values(phases).map(p => parseInt(p.avgMins) || 0), 1);
+
+    let html = `<div class="cycle-notice">📊 分析基於 <strong>${totalPeriodCycles}</strong> 個週期、<strong>${totalExDays}</strong> 天運動紀錄。週期階段以簡化模型估算（經期 → 濾泡期 → 黃體期），供參考使用。</div>`;
+
+    // phase stats card
+    html += `<div class="cycle-section"><div class="cycle-section-title">各週期階段 · 運動強度</div>`;
+    Object.values(phases).forEach(ph => {
+        const barW = ph.avgMins > 0 ? Math.round(parseInt(ph.avgMins) / maxMins * 100) : 0;
+        html += `<div class="cycle-phase-row">
+            <div class="cycle-phase-dot" style="background:${ph.color};"></div>
+            <div class="cycle-phase-name">${ph.name}</div>
+            <div class="cycle-phase-stats">
+                ${ph.exDays > 0 ? `均 <strong>${ph.avgMins}</strong> 分 · 達標 <strong>${ph.activePct}%</strong>` : '無運動紀錄'}
+                <div class="cycle-phase-bar-wrap"><div class="cycle-phase-bar" style="width:${barW}%;background:${ph.color};opacity:0.7;"></div></div>
+            </div>
+        </div>`;
+    });
+    html += `</div>`;
+
+    // symptom vs exercise card
+    if (symStats.length > 0) {
+        html += `<div class="cycle-section"><div class="cycle-section-title">症狀日 vs 無症狀日 · 運動比例</div>`;
+        symStats.forEach(s => {
+            const hasPct = s.withExPct !== null ? s.withExPct : 0;
+            const noPct = s.noSymWithExPct !== null ? s.noSymWithExPct : 0;
+            html += `<div class="cycle-sym-row">
+                <div class="cycle-sym-label">${s.sym}<br><span style="font-size:0.68rem;">${s.symDays} 天有此症狀</span></div>
+                <div class="cycle-sym-bars">
+                    <div class="cycle-mini-bar-wrap">
+                        <div class="cycle-mini-pct" style="color:var(--warn-yellow);">${hasPct}%</div>
+                        <div class="cycle-mini-bar-bg"><div class="cycle-mini-bar-fill" style="width:${hasPct}%;background:var(--warn-yellow);"></div></div>
+                        <div class="cycle-mini-label">症狀日</div>
+                    </div>
+                    <div class="cycle-mini-bar-wrap">
+                        <div class="cycle-mini-pct" style="color:var(--accent-color);">${noPct}%</div>
+                        <div class="cycle-mini-bar-bg"><div class="cycle-mini-bar-fill" style="width:${noPct}%;background:var(--accent-color);"></div></div>
+                        <div class="cycle-mini-label">無症狀</div>
+                    </div>
+                </div>
+            </div>`;
+        });
+        html += `</div>`;
+    } else {
+        html += `<div class="cycle-section"><div class="cycle-notice" style="margin:0;">症狀紀錄不足（每種症狀需至少 3 天紀錄），無法進行症狀分析。</div></div>`;
+    }
+
+    el.innerHTML = html;
+}
+
+
+window.onload = () => {
+    initCalView(); initExCalView(); resetDates(); initFilters();
+    renderData('media'); renderMediaStats(); renderFinanceOverview();
+};
+</script>
+</body>
+</html>
