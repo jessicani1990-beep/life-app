@@ -1215,7 +1215,7 @@ function renderExerciseCal() {
         const isPeriod=periodDays.has(ds);
         const isActive=ex&&(ex.mins>=30||ex.steps>=10000);
         const isTodayDay=new Date(exCalYear,exCalMonth,d).getTime()===today.getTime();
-        const periodDot=isPeriod?'<span style="display:block;width:4px;height:4px;border-radius:50%;background:var(--period-red);margin:1px auto 0;"></span>':'';
+        const periodDot='';
         let style='text-align:center;font-size:0.75rem;cursor:default;display:flex;flex-direction:column;align-items:center;justify-content:center;width:28px;height:28px;margin:0 auto;border-radius:50%;position:relative;';
         if(isActive) style+='border:2px solid var(--accent-color);color:var(--accent-color);font-weight:700;';
         if(isPeriod&&!isActive) style+='background:var(--period-light);color:var(--period-red);';
