@@ -1237,7 +1237,7 @@ function renderExerciseMonthStats(fromDate, toDate) {
     const totalMins=md.reduce((s,i)=>s+(i.mins||0),0);
     const totalKcal=md.reduce((s,i)=>s+(i.kcal||0),0);
     const totalSteps=md.reduce((s,i)=>s+(i.steps||0),0);
-    const activeDays=new Set(md.filter(i=>(i.mins||0)>=30||(i.steps||0)>=10000).map(i=>i.date)).size;
+    const activeDays=new Set(md.filter(i=>(i.mins||0)>=30||(i.steps||0)>=6000).map(i=>i.date)).size;
     const totalDays=new Set(md.map(i=>i.date)).size;
     // type breakdown
     const typeCats=['低強度有氧','高強度有氧','雕塑','重訓','瑜珈','其他'];  // 步數另計
@@ -1252,7 +1252,7 @@ function renderExerciseMonthStats(fromDate, toDate) {
         byDate[i.date].steps+=(i.steps||0);
     });
     const activeDateSet=new Set();
-    Object.entries(byDate).forEach(([d,v])=>{ if(v.mins>=30||v.steps>=10000) activeDateSet.add(d); });
+    Object.entries(byDate).forEach(([d,v])=>{ if(v.mins>=30||v.steps>=6000) activeDateSet.add(d); });
     const sortedActive=[...activeDateSet].sort();
     let curStreak=0,bestStreak=0,tempStreak=0;
     const todayStr=new Date().toISOString().split('T')[0];
@@ -1299,7 +1299,7 @@ function renderExerciseMonthStats(fromDate, toDate) {
         <div class="stats-year-row" style="margin-bottom:10px;">
             <div class="stats-count-chip"><div class="stats-count-num">${totalMins}</div><div class="stats-count-label">分鐘</div></div>
             ${totalKcal>0?'<div class="stats-count-chip"><div class="stats-count-num" style="font-size:1rem;">'+totalKcal+'</div><div class="stats-count-label">kcal</div></div>':''}
-            ${totalSteps>0?'<div class="stats-count-chip"><div class="stats-count-num" style="font-size:0.95rem;">'+(totalSteps>=10000?(totalSteps/1000).toFixed(1)+'k':totalSteps)+'</div><div class="stats-count-label">步數</div></div>':''}
+            ${totalSteps>0?'<div class="stats-count-chip"><div class="stats-count-num" style="font-size:0.95rem;">'+(totalSteps>=6000?(totalSteps/1000).toFixed(1)+'k':totalSteps)+'</div><div class="stats-count-label">步數</div></div>':''}
         </div>
         <div class="stats-bar-title" style="margin-bottom:8px;">類型分布</div>
         <div class="stats-year-row">${typeChips}</div>`;
@@ -1408,7 +1408,7 @@ function renderExerciseData() {
         const items=grouped[date];
         const totalMins=items.reduce((s,i)=>s+(i.mins||0),0);
         const totalSteps=items.reduce((s,i)=>s+(i.steps||0),0);
-        const isActive=totalMins>=30||totalSteps>=10000;
+        const isActive=totalMins>=30||totalSteps>=6000;
         const dateLabel=date+' · '+totalMins+' 分鐘'+(totalSteps>0?' · '+totalSteps.toLocaleString()+' 步':'')+(isActive?' ✓':'');
         html+='<div style="margin-bottom:18px;">';
         html+='<div style="font-size:0.72rem;color:'+(isActive?'var(--accent-color)':'var(--text-secondary)')+';letter-spacing:1px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border-color);font-weight:'+(isActive?'700':'400')+';">'+dateLabel+'</div>';
