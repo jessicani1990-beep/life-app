@@ -473,6 +473,14 @@
                 <input type="text" id="note-title" placeholder="記點什麼標題...">
                 <textarea id="note-content" placeholder="細節內容..."></textarea>
                 <input type="date" id="note-date">
+                <input type="file" id="note-photo-input" accept="image/*" style="display:none" onchange="previewNotePhoto(this)">
+                <label class="photo-upload-label" onclick="document.getElementById('note-photo-input').click()">
+                    <span>📷</span><span id="note-photo-label">附上一張照片（非必填）</span>
+                </label>
+                <div class="photo-preview-wrap" id="note-photo-preview" style="display:none;">
+                    <img id="note-photo-img" class="note-photo">
+                    <button class="photo-remove-btn" onclick="removeNotePhoto()">✕</button>
+                </div>
                 <button class="add-btn" onclick="addData('notes')">封存瞬間</button>
             </section>
         </div>
@@ -624,6 +632,14 @@
         <input type="text" id="edit-notes-title" placeholder="標題...">
         <textarea id="edit-notes-content" rows="4" placeholder="細節內容..."></textarea>
         <div class="date-field"><label class="date-label">日期</label><input type="date" id="edit-notes-date"></div>
+        <input type="file" id="edit-note-photo-input" accept="image/*" style="display:none" onchange="previewEditNotePhoto(this)">
+        <label class="photo-upload-label" onclick="document.getElementById('edit-note-photo-input').click()">
+            <span>📷</span><span id="edit-note-photo-label">更換照片</span>
+        </label>
+        <div class="photo-preview-wrap" id="edit-note-photo-preview" style="display:none;">
+            <img id="edit-note-photo-img" class="note-photo">
+            <button class="photo-remove-btn" onclick="removeEditNotePhoto()">✕</button>
+        </div>
         <div class="modal-actions">
             <button class="modal-btn modal-btn-cancel" onclick="closeModal('notes')">取消</button>
             <button class="modal-btn modal-btn-save" onclick="saveEditNotes()">儲存</button>
@@ -646,6 +662,7 @@
 </div>
 
 
+<div class="lightbox" id="lightbox" onclick="closeLightbox()"><button class="lightbox-close" onclick="closeLightbox()">✕</button><img id="lightbox-img"></div>
 <div id="toast"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
@@ -777,9 +794,11 @@ function addData(type) {
         entry.title = document.getElementById('note-title').value;
         entry.content = document.getElementById('note-content').value;
         entry.date = document.getElementById('note-date').value || today;
+        entry.photo = window._notePhotoData || null;
         if (!entry.title && !entry.content) return;
         document.getElementById('note-title').value = '';
         document.getElementById('note-content').value = '';
+        removeNotePhoto();
         closeForm('notes-form', 'toggle-notes-form');
     }
     data.unshift(entry);
@@ -852,7 +871,8 @@ function renderData(type) {
         } else if (type === 'finance') {
             html += '<h4><span class="tag">' + (i.category || '') + '</span>' + (i.title || '') + '</h4><p>' + i.date + '</p>';
         } else if (type === 'notes') {
-            html += '<h4>' + (i.title || '無標題') + '</h4><p>' + (i.content || '') + '</p><p style="font-size:0.7rem;color:var(--text-secondary)">' + i.date + '</p>';
+            const photoHtml = i.photo ? '<img class="note-photo-thumb" src="' + i.photo + '" onclick="openLightbox(this.src)" loading="lazy">' : '';
+            html += '<h4>' + (i.title || '無標題') + '</h4><p>' + (i.content || '') + '</p>' + photoHtml + '<p style="font-size:0.7rem;color:var(--text-secondary)">' + i.date + '</p>';
         }
         html += '</div><div class="item-actions"><span class="edit-link" onclick="openEdit(\'' + type + '\',' + i.id + ')">編輯</span><span class="delete-link" onclick="deleteData(\'' + type + '\',' + i.id + ')">移除</span></div></div>';
     });
@@ -1213,7 +1233,7 @@ function renderExerciseCal() {
         const ds=exCalYear+'-'+String(exCalMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
         const ex=exByDate[ds];
         const isPeriod=periodDays.has(ds);
-        const isActive=ex&&(ex.mins>=30||ex.steps>=6000);
+        const isActive=ex&&(ex.mins>=30||ex.steps>=10000);
         const isTodayDay=new Date(exCalYear,exCalMonth,d).getTime()===today.getTime();
         const periodDot='';
         let style='text-align:center;font-size:0.75rem;cursor:default;display:flex;flex-direction:column;align-items:center;justify-content:center;width:28px;height:28px;margin:0 auto;border-radius:50%;position:relative;';
@@ -1237,7 +1257,7 @@ function renderExerciseMonthStats(fromDate, toDate) {
     const totalMins=md.reduce((s,i)=>s+(i.mins||0),0);
     const totalKcal=md.reduce((s,i)=>s+(i.kcal||0),0);
     const totalSteps=md.reduce((s,i)=>s+(i.steps||0),0);
-    const activeDays=new Set(md.filter(i=>(i.mins||0)>=30||(i.steps||0)>=6000).map(i=>i.date)).size;
+    const activeDays=new Set(md.filter(i=>(i.mins||0)>=30||(i.steps||0)>=10000).map(i=>i.date)).size;
     const totalDays=new Set(md.map(i=>i.date)).size;
     // type breakdown
     const typeCats=['低強度有氧','高強度有氧','雕塑','重訓','瑜珈','其他'];  // 步數另計
@@ -1252,7 +1272,7 @@ function renderExerciseMonthStats(fromDate, toDate) {
         byDate[i.date].steps+=(i.steps||0);
     });
     const activeDateSet=new Set();
-    Object.entries(byDate).forEach(([d,v])=>{ if(v.mins>=30||v.steps>=6000) activeDateSet.add(d); });
+    Object.entries(byDate).forEach(([d,v])=>{ if(v.mins>=30||v.steps>=10000) activeDateSet.add(d); });
     const sortedActive=[...activeDateSet].sort();
     let curStreak=0,bestStreak=0,tempStreak=0;
     const todayStr=new Date().toISOString().split('T')[0];
@@ -1299,7 +1319,7 @@ function renderExerciseMonthStats(fromDate, toDate) {
         <div class="stats-year-row" style="margin-bottom:10px;">
             <div class="stats-count-chip"><div class="stats-count-num">${totalMins}</div><div class="stats-count-label">分鐘</div></div>
             ${totalKcal>0?'<div class="stats-count-chip"><div class="stats-count-num" style="font-size:1rem;">'+totalKcal+'</div><div class="stats-count-label">kcal</div></div>':''}
-            ${totalSteps>0?'<div class="stats-count-chip"><div class="stats-count-num" style="font-size:0.95rem;">'+(totalSteps>=6000?(totalSteps/1000).toFixed(1)+'k':totalSteps)+'</div><div class="stats-count-label">步數</div></div>':''}
+            ${totalSteps>0?'<div class="stats-count-chip"><div class="stats-count-num" style="font-size:0.95rem;">'+(totalSteps>=10000?(totalSteps/1000).toFixed(1)+'k':totalSteps)+'</div><div class="stats-count-label">步數</div></div>':''}
         </div>
         <div class="stats-bar-title" style="margin-bottom:8px;">類型分布</div>
         <div class="stats-year-row">${typeChips}</div>`;
@@ -1408,7 +1428,7 @@ function renderExerciseData() {
         const items=grouped[date];
         const totalMins=items.reduce((s,i)=>s+(i.mins||0),0);
         const totalSteps=items.reduce((s,i)=>s+(i.steps||0),0);
-        const isActive=totalMins>=30||totalSteps>=6000;
+        const isActive=totalMins>=30||totalSteps>=10000;
         const dateLabel=date+' · '+totalMins+' 分鐘'+(totalSteps>0?' · '+totalSteps.toLocaleString()+' 步':'')+(isActive?' ✓':'');
         html+='<div style="margin-bottom:18px;">';
         html+='<div style="font-size:0.72rem;color:'+(isActive?'var(--accent-color)':'var(--text-secondary)')+';letter-spacing:1px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border-color);font-weight:'+(isActive?'700':'400')+';">'+dateLabel+'</div>';
@@ -1448,6 +1468,11 @@ function openEdit(type, id) {
         document.getElementById('edit-notes-title').value = item.title || '';
         document.getElementById('edit-notes-content').value = item.content || '';
         document.getElementById('edit-notes-date').value = item.date || '';
+        window._editNotePhotoData = item.photo || null;
+        const ep = document.getElementById('edit-note-photo-preview');
+        const ei = document.getElementById('edit-note-photo-img');
+        if (item.photo) { ep.style.display = 'block'; ei.src = item.photo; document.getElementById('edit-note-photo-label').textContent = '更換照片'; }
+        else { ep.style.display = 'none'; ei.src = ''; document.getElementById('edit-note-photo-label').textContent = '附上照片'; }
         openModal('notes');
     } else if (type === 'media') {
         document.getElementById('edit-media-id').value = id;
@@ -1490,6 +1515,7 @@ function saveEditNotes() {
     data[idx].title = document.getElementById('edit-notes-title').value;
     data[idx].content = document.getElementById('edit-notes-content').value;
     data[idx].date = document.getElementById('edit-notes-date').value;
+    data[idx].photo = window._editNotePhotoData || null;
     localStorage.setItem('notes', JSON.stringify(data));
     closeModal('notes');
     renderData('notes');
@@ -1914,6 +1940,77 @@ function renderCycleAnalysis() {
     }
 
     el.innerHTML = html;
+}
+
+
+/* ══ 筆記照片 ══ */
+function compressImage(file, maxWidth, quality, callback) {
+    const reader = new FileReader();
+    reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let w = img.width, h = img.height;
+            if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            callback(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function previewNotePhoto(input) {
+    const file = input.files[0]; if (!file) return;
+    compressImage(file, 1200, 0.75, data => {
+        window._notePhotoData = data;
+        const wrap = document.getElementById('note-photo-preview');
+        const img = document.getElementById('note-photo-img');
+        img.src = data;
+        wrap.style.display = 'block';
+        document.getElementById('note-photo-label').textContent = '重新選擇照片';
+        input.value = '';
+    });
+}
+
+function removeNotePhoto() {
+    window._notePhotoData = null;
+    document.getElementById('note-photo-preview').style.display = 'none';
+    document.getElementById('note-photo-img').src = '';
+    document.getElementById('note-photo-label').textContent = '附上一張照片（非必填）';
+    document.getElementById('note-photo-input').value = '';
+}
+
+function previewEditNotePhoto(input) {
+    const file = input.files[0]; if (!file) return;
+    compressImage(file, 1200, 0.75, data => {
+        window._editNotePhotoData = data;
+        const wrap = document.getElementById('edit-note-photo-preview');
+        const img = document.getElementById('edit-note-photo-img');
+        img.src = data;
+        wrap.style.display = 'block';
+        document.getElementById('edit-note-photo-label').textContent = '重新選擇照片';
+        input.value = '';
+    });
+}
+
+function removeEditNotePhoto() {
+    window._editNotePhotoData = null;
+    document.getElementById('edit-note-photo-preview').style.display = 'none';
+    document.getElementById('edit-note-photo-img').src = '';
+    document.getElementById('edit-note-photo-label').textContent = '附上照片';
+    document.getElementById('edit-note-photo-input').value = '';
+}
+
+function openLightbox(src) {
+    document.getElementById('lightbox-img').src = src;
+    document.getElementById('lightbox').classList.add('open');
+}
+
+function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.getElementById('lightbox-img').src = '';
 }
 
 
