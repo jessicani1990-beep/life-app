@@ -851,7 +851,8 @@ function renderData(type) {
     const today = new Date();
     let html = '';
     data.forEach(i => {
-        html += '<div class="item-card"><div class="item-info">';
+        const isNotes = type === 'notes';
+        html += '<div class="item-card" style="' + (isNotes ? 'flex-direction:column;align-items:stretch;padding:15px 5px 0;' : '') + '"><div class="item-info">';
         if (type === 'media') {
             const ratingNum = parseInt(i.rating || '0');
             const hearts = ratingNum > 0 ? '♥'.repeat(ratingNum) : '';
@@ -872,9 +873,13 @@ function renderData(type) {
             html += '<h4><span class="tag">' + (i.category || '') + '</span>' + (i.title || '') + '</h4><p>' + i.date + '</p>';
         } else if (type === 'notes') {
             const photoHtml = i.photo ? '<img class="note-photo-thumb" src="' + i.photo + '" onclick="openLightbox(this.src)" loading="lazy">' : '';
-            html += '<h4>' + (i.title || '無標題') + '</h4><p>' + (i.content || '') + '</p>' + photoHtml + '<p style="font-size:0.7rem;color:var(--text-secondary)">' + i.date + '</p>';
+            html += '<h4>' + (i.title || '無標題') + '</h4><p>' + (i.content || '') + '</p><p style="font-size:0.7rem;color:var(--text-secondary)">' + i.date + '</p>' + photoHtml;
         }
-        html += '</div><div class="item-actions"><span class="edit-link" onclick="openEdit(\'' + type + '\',' + i.id + ')">編輯</span><span class="delete-link" onclick="deleteData(\'' + type + '\',' + i.id + ')">移除</span></div></div>';
+        if (isNotes) {
+            html += '</div><div style="display:flex;justify-content:flex-end;padding:8px 0 12px;"><span class="edit-link" onclick="openEdit(\'' + type + '\',' + i.id + ')">編輯</span><span class="delete-link" onclick="deleteData(\'' + type + '\',' + i.id + ')">移除</span></div></div>';
+        } else {
+            html += '</div><div class="item-actions"><span class="edit-link" onclick="openEdit(\'' + type + '\',' + i.id + ')">編輯</span><span class="delete-link" onclick="deleteData(\'' + type + '\',' + i.id + ')">移除</span></div></div>';
+        }
     });
     container.innerHTML = html;
 }
