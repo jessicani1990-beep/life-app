@@ -847,6 +847,13 @@ function renderData(type) {
         return matchYear && matchMonth && matchSearch && matchCategory && matchRating;
     });
 
+    // 按日期由新到舊排序
+    data.sort((a, b) => {
+        const da = type === 'selflove' ? (a.buyDate || '') : (a.date || '');
+        const db = type === 'selflove' ? (b.buyDate || '') : (b.date || '');
+        return db.localeCompare(da);
+    });
+
     if (data.length === 0) { container.innerHTML = '<div class="empty-state">尚未發現碎片。</div>'; return; }
     const today = new Date();
     let html = '';
